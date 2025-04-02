@@ -1,5 +1,6 @@
 
 import { Article } from './types';
+import { toast } from "sonner";
 
 // Default example articles that will be used until connected to a backend
 const DEFAULT_ARTICLES: Article[] = [
@@ -55,17 +56,39 @@ const DEFAULT_ARTICLES: Article[] = [
   }
 ];
 
+// SessionStorage key for articles
+const ARTICLES_STORAGE_KEY = 'myFriendsArticles';
+
+// Get initial articles from sessionStorage or use defaults
+const getInitialArticles = (): Article[] => {
+  try {
+    const savedArticles = sessionStorage.getItem(ARTICLES_STORAGE_KEY);
+    if (savedArticles) {
+      return JSON.parse(savedArticles);
+    }
+  } catch (error) {
+    console.error('Error loading articles from sessionStorage:', error);
+  }
+  return [...DEFAULT_ARTICLES];
+};
+
 // In-memory cache of articles
 let articlesCache: Article[] | null = null;
 
-// API base URL - in production this would point to your actual backend
-const API_BASE_URL = 'https://api.example.com/articles';
+// Function to save articles to sessionStorage
+const saveArticlesToStorage = (articles: Article[]) => {
+  try {
+    sessionStorage.setItem(ARTICLES_STORAGE_KEY, JSON.stringify(articles));
+  } catch (error) {
+    console.error('Error saving articles to sessionStorage:', error);
+  }
+};
 
 // Function to handle API errors
 const handleApiError = (error: unknown) => {
   console.error("API Error:", error);
   toast.error("Failed to connect to the articles backend. Using default data.");
-  return DEFAULT_ARTICLES;
+  return getInitialArticles();
 };
 
 // Function to fetch all articles from the backend
@@ -78,17 +101,9 @@ export const getAllArticles = async (): Promise<Article[]> => {
   }
 
   try {
-    // In a real implementation, this would be an actual API call
-    // For demo purposes, we're simulating a backend call that returns the default articles
-    // Replace this with an actual fetch call to your backend
-    // const response = await fetch(`${API_BASE_URL}`);
-    // if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    // const data = await response.json();
-    // articlesCache = data;
-    
-    // Simulated API response with default data
+    // Simulated API response with stored data
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-    articlesCache = [...DEFAULT_ARTICLES];
+    articlesCache = getInitialArticles();
     
     return [...articlesCache].sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -107,14 +122,9 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
       if (cachedArticle) return cachedArticle;
     }
 
-    // In a real implementation, this would be an actual API call to get a specific article
-    // const response = await fetch(`${API_BASE_URL}/${id}`);
-    // if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    // return await response.json();
-
-    // Simulated API call to get article by ID
-    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate network delay
-    return DEFAULT_ARTICLES.find(article => article.id === id);
+    // If not in cache, load all articles and try again
+    const allArticles = await getAllArticles();
+    return allArticles.find(article => article.id === id);
   } catch (error) {
     console.error(`Error fetching article ${id}:`, error);
     return undefined;
@@ -133,17 +143,6 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       createdAt: new Date().toISOString()
     };
     
-    // In a real implementation, this would be an actual API call
-    // const response = await fetch(`${API_BASE_URL}`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(newArticle),
-    // });
-    // if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    // const savedArticle = await response.json();
-    
     // Simulate API response
     await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
     
@@ -151,8 +150,12 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
     if (articlesCache) {
       articlesCache = [...articlesCache, newArticle];
     } else {
-      articlesCache = [...DEFAULT_ARTICLES, newArticle];
+      const allArticles = await getAllArticles();
+      articlesCache = [...allArticles, newArticle];
     }
+    
+    // Save to sessionStorage
+    saveArticlesToStorage(articlesCache);
     
     return newArticle;
   } catch (error) {
@@ -175,7 +178,3 @@ export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> 
     return handleApiError(error);
   }
 };
-
-// Import toast for error notifications
-import { toast } from "sonner";
-

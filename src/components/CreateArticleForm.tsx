@@ -1,5 +1,4 @@
-
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,42 +13,42 @@ const DRAFT_STORAGE_KEY = "article_draft";
 const CreateArticleForm = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    author: "",
-    keywords: "",
-    imageUrl: "",
-    sourceUrl: ""
+  const [formData, setFormData] = useState(() => {
+    try {
+      const savedDraft = sessionStorage.getItem(DRAFT_STORAGE_KEY);
+      if (savedDraft) {
+        const parsedDraft = JSON.parse(savedDraft);
+        toast.info("Your draft has been restored");
+        return parsedDraft;
+      }
+    } catch (error) {
+      console.error("Failed to parse saved draft", error);
+      sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+    }
+    
+    return {
+      title: "",
+      description: "",
+      author: "",
+      keywords: "",
+      imageUrl: "",
+      sourceUrl: ""
+    };
   });
 
-  // Load saved draft when component mounts
-  useEffect(() => {
-    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
-    if (savedDraft) {
-      try {
-        const parsedDraft = JSON.parse(savedDraft);
-        setFormData(parsedDraft);
-        toast.info("Your draft has been restored");
-      } catch (error) {
-        console.error("Failed to parse saved draft", error);
-        localStorage.removeItem(DRAFT_STORAGE_KEY);
-      }
+  const saveDraft = (data: typeof formData) => {
+    try {
+      sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error("Failed to save draft", error);
     }
-  }, []);
-
-  // Save draft to localStorage whenever formData changes
-  useEffect(() => {
-    const saveTimeout = setTimeout(() => {
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
-    }, 500); // Debounce saving to avoid excessive writes
-
-    return () => clearTimeout(saveTimeout);
-  }, [formData]);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const updatedData = { ...formData, [name]: value };
+    setFormData(updatedData);
+    saveDraft(updatedData);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -57,35 +56,30 @@ const CreateArticleForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Validate form
       if (!formData.title || !formData.description || !formData.author) {
         toast.error("Please fill out all required fields.");
         setIsSubmitting(false);
         return;
       }
 
-      // Process keywords into an array
       const keywordsArray = formData.keywords
         .split(",")
         .map(keyword => keyword.trim())
         .filter(keyword => keyword.length > 0);
 
-      // Add the new article to backend
       const newArticle = await addArticle({
         title: formData.title,
         description: formData.description,
         author: formData.author,
         keywords: keywordsArray,
-        imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b", // Default image
+        imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: formData.sourceUrl
       });
 
-      // Clear the saved draft after successful submission
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       
       toast.success("Article published successfully!");
       
-      // Redirect to the new article page
       navigate(`/article/${newArticle.id}`);
     } catch (error) {
       toast.error("Failed to publish article. Please try again.");
@@ -95,7 +89,7 @@ const CreateArticleForm = () => {
 
   const clearDraft = () => {
     if (confirm("Are you sure you want to clear your draft?")) {
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       setFormData({
         title: "",
         description: "",

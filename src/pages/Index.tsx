@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import ArticleList from "@/components/ArticleList";
 import { getAllArticles, getArticlesByKeyword } from "@/lib/data";
 import { Article } from "@/lib/types";
+import { toast } from "sonner";
 
 const Index = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -26,6 +27,7 @@ const Index = () => {
         }
       } catch (error) {
         console.error("Failed to fetch articles:", error);
+        toast.error("Failed to load articles");
       } finally {
         setLoading(false);
       }
