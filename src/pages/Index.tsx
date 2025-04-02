@@ -108,6 +108,7 @@ const Index = () => {
           )}
           <a 
             href="subtitle" 
+            id="subtitle"
             className="text-xl text-muted-foreground max-w-2xl mx-auto block"
           >
             A collaborative space for friends to share their thoughts, experiences and knowledge.
