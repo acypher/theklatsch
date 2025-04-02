@@ -6,12 +6,59 @@ import ArticleList from "@/components/ArticleList";
 import { getAllArticles, getArticlesByKeyword } from "@/lib/data";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const keywordFilter = searchParams.get("keyword");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Upload the logo to the Supabase storage
+    const uploadLogo = async () => {
+      try {
+        // Check if the logo already exists in storage
+        const { data: existingFiles } = await supabase
+          .storage
+          .from('logos')
+          .list();
+        
+        const logoExists = existingFiles?.some(file => file.name === 'klatsch-logo.png');
+        
+        if (!logoExists) {
+          // Get the logo file from the public directory
+          const response = await fetch('/klatsch-logo.png');
+          const blob = await response.blob();
+          
+          // Upload the logo to Supabase storage
+          const { error } = await supabase
+            .storage
+            .from('logos')
+            .upload('klatsch-logo.png', blob);
+            
+          if (error) {
+            console.error('Error uploading logo:', error);
+          }
+        }
+        
+        // Get the public URL for the logo
+        const { data } = supabase
+          .storage
+          .from('logos')
+          .getPublicUrl('klatsch-logo.png');
+        
+        if (data) {
+          setLogoUrl(data.publicUrl);
+        }
+      } catch (error) {
+        console.error('Error with logo:', error);
+      }
+    };
+    
+    uploadLogo();
+  }, []);
   
   useEffect(() => {
     const fetchArticles = async () => {
@@ -45,7 +92,17 @@ const Index = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">MyFriends Articles</h1>
+          {logoUrl ? (
+            <div className="flex justify-center mb-4">
+              <img 
+                src={logoUrl} 
+                alt="The Klatsch" 
+                className="h-20 md:h-24" 
+              />
+            </div>
+          ) : (
+            <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
+          )}
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             A collaborative space for friends to share their thoughts, experiences and knowledge.
           </p>
