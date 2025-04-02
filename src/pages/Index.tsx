@@ -8,16 +8,30 @@ import { Article } from "@/lib/types";
 
 const Index = () => {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const keywordFilter = searchParams.get("keyword");
   
   useEffect(() => {
-    // Filter articles by keyword if a filter is active
-    if (keywordFilter) {
-      setArticles(getArticlesByKeyword(keywordFilter));
-    } else {
-      setArticles(getAllArticles());
-    }
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        // Filter articles by keyword if a filter is active
+        if (keywordFilter) {
+          const filteredArticles = await getArticlesByKeyword(keywordFilter);
+          setArticles(filteredArticles);
+        } else {
+          const allArticles = await getAllArticles();
+          setArticles(allArticles);
+        }
+      } catch (error) {
+        console.error("Failed to fetch articles:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
   }, [keywordFilter]);
 
   const handleClearKeyword = () => {
@@ -39,6 +53,7 @@ const Index = () => {
           articles={articles} 
           selectedKeyword={keywordFilter} 
           onKeywordClear={handleClearKeyword}
+          loading={loading}
         />
       </main>
     </div>

@@ -1,7 +1,7 @@
 
 import { Article } from './types';
 
-// Default example articles
+// Default example articles that will be used until connected to a backend
 const DEFAULT_ARTICLES: Article[] = [
   {
     id: "1",
@@ -55,70 +55,127 @@ const DEFAULT_ARTICLES: Article[] = [
   }
 ];
 
-const STORAGE_KEY = 'myFriendsArticles';
+// In-memory cache of articles
+let articlesCache: Article[] | null = null;
 
-// Function to load articles from localStorage
-const loadArticles = (): Article[] => {
-  try {
-    const storedArticles = localStorage.getItem(STORAGE_KEY);
-    if (storedArticles) {
-      return JSON.parse(storedArticles);
-    }
-    // If no stored articles, save and return the default ones
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_ARTICLES));
-    return DEFAULT_ARTICLES;
-  } catch (error) {
-    console.error("Failed to load articles from localStorage:", error);
-    return DEFAULT_ARTICLES;
-  }
+// API base URL - in production this would point to your actual backend
+const API_BASE_URL = 'https://api.example.com/articles';
+
+// Function to handle API errors
+const handleApiError = (error: unknown) => {
+  console.error("API Error:", error);
+  toast.error("Failed to connect to the articles backend. Using default data.");
+  return DEFAULT_ARTICLES;
 };
 
-// Initialize articles from localStorage
-let articles: Article[] = loadArticles();
-
-// Function to save articles to localStorage
-const saveArticles = () => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(articles));
-  } catch (error) {
-    console.error("Failed to save articles to localStorage:", error);
+// Function to fetch all articles from the backend
+export const getAllArticles = async (): Promise<Article[]> => {
+  // If we have cached articles, return them
+  if (articlesCache) {
+    return [...articlesCache].sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
   }
-};
 
-// Function to get all articles
-export const getAllArticles = (): Article[] => {
-  return [...articles].sort((a, b) => {
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  try {
+    // In a real implementation, this would be an actual API call
+    // For demo purposes, we're simulating a backend call that returns the default articles
+    // Replace this with an actual fetch call to your backend
+    // const response = await fetch(`${API_BASE_URL}`);
+    // if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    // const data = await response.json();
+    // articlesCache = data;
+    
+    // Simulated API response with default data
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+    articlesCache = [...DEFAULT_ARTICLES];
+    
+    return [...articlesCache].sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
 
 // Function to get article by ID
-export const getArticleById = (id: string): Article | undefined => {
-  return articles.find(article => article.id === id);
+export const getArticleById = async (id: string): Promise<Article | undefined> => {
+  try {
+    // If we have cached articles, try to find it there first
+    if (articlesCache) {
+      const cachedArticle = articlesCache.find(article => article.id === id);
+      if (cachedArticle) return cachedArticle;
+    }
+
+    // In a real implementation, this would be an actual API call to get a specific article
+    // const response = await fetch(`${API_BASE_URL}/${id}`);
+    // if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    // return await response.json();
+
+    // Simulated API call to get article by ID
+    await new Promise(resolve => setTimeout(resolve, 300)); // Simulate network delay
+    return DEFAULT_ARTICLES.find(article => article.id === id);
+  } catch (error) {
+    console.error(`Error fetching article ${id}:`, error);
+    return undefined;
+  }
 };
 
-// Function to add a new article
-export const addArticle = (article: Omit<Article, 'id' | 'createdAt'>): Article => {
-  // Generate a unique ID (using timestamp + random to ensure uniqueness)
-  const newId = new Date().getTime() + '-' + Math.random().toString(36).substring(2, 9);
-  
-  const newArticle = {
-    ...article,
-    id: newId,
-    createdAt: new Date().toISOString()
-  };
-  
-  articles.push(newArticle);
-  
-  // Save to localStorage
-  saveArticles();
-  
-  return newArticle;
+// Function to add a new article to the backend
+export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
+  try {
+    // Generate a unique ID (using timestamp + random to ensure uniqueness)
+    const newId = new Date().getTime() + '-' + Math.random().toString(36).substring(2, 9);
+    
+    const newArticle = {
+      ...article,
+      id: newId,
+      createdAt: new Date().toISOString()
+    };
+    
+    // In a real implementation, this would be an actual API call
+    // const response = await fetch(`${API_BASE_URL}`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(newArticle),
+    // });
+    // if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    // const savedArticle = await response.json();
+    
+    // Simulate API response
+    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
+    
+    // Update our cache with the new article
+    if (articlesCache) {
+      articlesCache = [...articlesCache, newArticle];
+    } else {
+      articlesCache = [...DEFAULT_ARTICLES, newArticle];
+    }
+    
+    return newArticle;
+  } catch (error) {
+    console.error("Error adding article:", error);
+    throw new Error("Failed to add article to the backend");
+  }
 };
 
 // Function to get articles by keyword
-export const getArticlesByKeyword = (keyword: string): Article[] => {
-  return articles.filter(article => 
-    article.keywords.some(k => k.toLowerCase() === keyword.toLowerCase())
-  );
+export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> => {
+  try {
+    // Get all articles first (this will use the cache if available)
+    const allArticles = await getAllArticles();
+    
+    // Filter by keyword
+    return allArticles.filter(article => 
+      article.keywords.some(k => k.toLowerCase() === keyword.toLowerCase())
+    );
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
+
+// Import toast for error notifications
+import { toast } from "sonner";
+

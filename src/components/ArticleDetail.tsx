@@ -15,16 +15,27 @@ const ArticleDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      const fetchedArticle = getArticleById(id);
-      if (fetchedArticle) {
-        setArticle(fetchedArticle);
-      } else {
-        toast.error("Article not found");
-        navigate("/");
+    const fetchArticle = async () => {
+      if (id) {
+        try {
+          setLoading(true);
+          const fetchedArticle = await getArticleById(id);
+          if (fetchedArticle) {
+            setArticle(fetchedArticle);
+          } else {
+            toast.error("Article not found");
+            navigate("/");
+          }
+        } catch (error) {
+          toast.error("Failed to load article");
+          navigate("/");
+        } finally {
+          setLoading(false);
+        }
       }
-      setLoading(false);
-    }
+    };
+
+    fetchArticle();
   }, [id, navigate]);
 
   if (loading) {
@@ -77,54 +88,62 @@ const ArticleDetail = () => {
           Back to articles
         </Button>
         
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">{article.title}</h1>
-        
-        <div className="flex flex-wrap items-center text-muted-foreground mb-6">
-          <span className="font-medium text-foreground">{article.author}</span>
-          <span className="mx-2">•</span>
-          <span>{formatDate(article.createdAt)}</span>
-        </div>
-        
-        <div className="mb-6 flex flex-wrap gap-2">
-          {article.keywords.map((keyword, index) => (
-            <KeywordBadge 
-              key={index} 
-              keyword={keyword} 
-              onClick={() => navigate(`/?keyword=${encodeURIComponent(keyword)}`)} 
-            />
-          ))}
-        </div>
-      </div>
-      
-      <div className="mb-8">
-        <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden">
-          <img 
-            src={article.imageUrl} 
-            alt={article.title} 
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-      
-      <div className="prose prose-lg max-w-none mb-8">
-        <p className="text-xl leading-relaxed mb-8">{article.description}</p>
-        
-        {article.sourceUrl && (
-          <div className="mt-12 pt-6 border-t">
-            <Button asChild variant="outline">
-              <a 
-                href={article.sourceUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2"
-              >
-                <ExternalLink size={16} />
-                View Original Source
-              </a>
-            </Button>
-          </div>
+        {article && (
+          <>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">{article.title}</h1>
+            
+            <div className="flex flex-wrap items-center text-muted-foreground mb-6">
+              <span className="font-medium text-foreground">{article.author}</span>
+              <span className="mx-2">•</span>
+              <span>{formatDate(article.createdAt)}</span>
+            </div>
+            
+            <div className="mb-6 flex flex-wrap gap-2">
+              {article.keywords.map((keyword, index) => (
+                <KeywordBadge 
+                  key={index} 
+                  keyword={keyword} 
+                  onClick={() => navigate(`/?keyword=${encodeURIComponent(keyword)}`)} 
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
+      
+      {article && (
+        <>
+          <div className="mb-8">
+            <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden">
+              <img 
+                src={article.imageUrl} 
+                alt={article.title} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none mb-8">
+            <p className="text-xl leading-relaxed mb-8">{article.description}</p>
+            
+            {article.sourceUrl && (
+              <div className="mt-12 pt-6 border-t">
+                <Button asChild variant="outline">
+                  <a 
+                    href={article.sourceUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2"
+                  >
+                    <ExternalLink size={16} />
+                    View Original Source
+                  </a>
+                </Button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

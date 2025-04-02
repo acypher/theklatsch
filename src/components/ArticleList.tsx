@@ -1,15 +1,25 @@
 
-import { useState } from "react";
 import { Article } from "@/lib/types";
 import ArticleCard from "./ArticleCard";
+import { Loader2 } from "lucide-react";
 
 interface ArticleListProps {
   articles: Article[];
   selectedKeyword?: string | null;
   onKeywordClear?: () => void;
+  loading?: boolean;
 }
 
-const ArticleList = ({ articles, selectedKeyword, onKeywordClear }: ArticleListProps) => {
+const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = false }: ArticleListProps) => {
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-lg">Loading articles...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {selectedKeyword && (

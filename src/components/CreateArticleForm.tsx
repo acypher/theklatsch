@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addArticle } from "@/lib/data";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const DRAFT_STORAGE_KEY = "article_draft";
 
@@ -51,7 +52,7 @@ const CreateArticleForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -69,8 +70,8 @@ const CreateArticleForm = () => {
         .map(keyword => keyword.trim())
         .filter(keyword => keyword.length > 0);
 
-      // Add the new article
-      const newArticle = addArticle({
+      // Add the new article to backend
+      const newArticle = await addArticle({
         title: formData.title,
         description: formData.description,
         author: formData.author,
@@ -194,7 +195,12 @@ const CreateArticleForm = () => {
       
       <div className="pt-4">
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Publishing..." : "Publish Article"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+              Publishing...
+            </>
+          ) : "Publish Article"}
         </Button>
       </div>
     </form>
