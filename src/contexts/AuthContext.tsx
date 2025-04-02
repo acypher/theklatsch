@@ -17,6 +17,7 @@ type AuthContextType = {
   }>;
   signOut: () => Promise<void>;
   loading: boolean;
+  isAuthenticated: boolean; // Added this property
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -84,8 +85,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     navigate("/auth");
   };
 
+  // Calculate isAuthenticated based on user presence
+  const isAuthenticated = !!user;
+
   return (
-    <AuthContext.Provider value={{ user, session, signIn, signUp, signOut, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      signIn, 
+      signUp, 
+      signOut, 
+      loading,
+      isAuthenticated 
+    }}>
       {children}
     </AuthContext.Provider>
   );
