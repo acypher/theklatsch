@@ -1,42 +1,55 @@
-import { useState, FormEvent } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addArticle } from "@/lib/data";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-
-const DRAFT_STORAGE_KEY = "article_draft";
+import FormField from "@/components/article/FormField";
+import DraftManager from "@/components/article/DraftManager";
+import { 
+  ArticleFormValues, 
+  DRAFT_STORAGE_KEY, 
+  articleFormSchema, 
+  defaultFormValues 
+} from "@/components/article/ArticleFormSchema";
+import {
+  Form,
+  FormControl,
+  FormField as HookFormField,
+  FormItem,
+} from "@/components/ui/form";
 
 const CreateArticleForm = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState(() => {
+  
+  const form = useForm<ArticleFormValues>({
+    resolver: zodResolver(articleFormSchema),
+    defaultValues: defaultFormValues,
+  });
+  
+  // Load saved draft from session storage
+  useEffect(() => {
     try {
       const savedDraft = sessionStorage.getItem(DRAFT_STORAGE_KEY);
       if (savedDraft) {
         const parsedDraft = JSON.parse(savedDraft);
+        form.reset(parsedDraft);
         toast.info("Your draft has been restored");
-        return parsedDraft;
       }
     } catch (error) {
       console.error("Failed to parse saved draft", error);
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
     }
-    
-    return {
-      title: "",
-      description: "",
-      author: "",
-      keywords: "",
-      imageUrl: "",
-      sourceUrl: ""
-    };
-  });
+  }, [form]);
 
-  const saveDraft = (data: typeof formData) => {
+  // Save draft to session storage
+  const saveDraft = (data: ArticleFormValues) => {
     try {
       sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
@@ -44,35 +57,36 @@ const CreateArticleForm = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    const updatedData = { ...formData, [name]: value };
-    setFormData(updatedData);
-    saveDraft(updatedData);
+  // Handle form changes
+  const handleFormChange = () => {
+    const values = form.getValues();
+    saveDraft(values);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  // Clear draft
+  const clearDraft = () => {
+    sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+    form.reset(defaultFormValues);
+  };
+
+  // Handle form submission
+  const onSubmit = async (data: ArticleFormValues) => {
     setIsSubmitting(true);
 
     try {
-      if (!formData.title || !formData.description || !formData.author) {
-        toast.error("Please fill out all required fields.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      const keywordsArray = formData.keywords
-        .split(/\s+/)
-        .filter(keyword => keyword.trim().length > 0);
+      const keywordsArray = data.keywords
+        ? data.keywords
+            .split(/\s+/)
+            .filter(keyword => keyword.trim().length > 0)
+        : [];
 
       const newArticle = await addArticle({
-        title: formData.title,
-        description: formData.description,
-        author: formData.author,
+        title: data.title,
+        description: data.description,
+        author: data.author,
         keywords: keywordsArray,
-        imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-        sourceUrl: formData.sourceUrl
+        imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+        sourceUrl: data.sourceUrl
       });
 
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
@@ -86,117 +100,147 @@ const CreateArticleForm = () => {
     }
   };
 
-  const clearDraft = () => {
-    if (confirm("Are you sure you want to clear your draft?")) {
-      sessionStorage.removeItem(DRAFT_STORAGE_KEY);
-      setFormData({
-        title: "",
-        description: "",
-        author: "",
-        keywords: "",
-        imageUrl: "",
-        sourceUrl: ""
-      });
-      toast.success("Draft cleared successfully");
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex justify-end">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={clearDraft} 
-          className="text-sm"
-        >
-          Clear Draft
-        </Button>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="title">Title *</Label>
-        <Input
-          id="title"
+    <Form {...form}>
+      <form 
+        onSubmit={form.handleSubmit(onSubmit)} 
+        onChange={handleFormChange} 
+        className="space-y-6"
+      >
+        <DraftManager storageKey={DRAFT_STORAGE_KEY} clearDraft={clearDraft} />
+        
+        <HookFormField
+          control={form.control}
           name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Enter article title"
-          required
+          render={({ field }) => (
+            <FormItem>
+              <FormField id="title" label="Title" required>
+                <FormControl>
+                  <Input 
+                    id="title"
+                    placeholder="Enter article title"
+                    {...field} 
+                  />
+                </FormControl>
+              </FormField>
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
+        
+        <HookFormField
+          control={form.control}
           name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Write a short description of your article"
-          rows={4}
-          required
+          render={({ field }) => (
+            <FormItem>
+              <FormField id="description" label="Description" required>
+                <FormControl>
+                  <Textarea
+                    id="description" 
+                    placeholder="Write a short description of your article"
+                    rows={4}
+                    {...field} 
+                  />
+                </FormControl>
+              </FormField>
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="author">Author *</Label>
-        <Input
-          id="author"
+        
+        <HookFormField
+          control={form.control}
           name="author"
-          value={formData.author}
-          onChange={handleChange}
-          placeholder="Your name"
-          required
+          render={({ field }) => (
+            <FormItem>
+              <FormField id="author" label="Author" required>
+                <FormControl>
+                  <Input
+                    id="author"
+                    placeholder="Your name"
+                    {...field} 
+                  />
+                </FormControl>
+              </FormField>
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="keywords">Keywords (space separated)</Label>
-        <Input
-          id="keywords"
+        
+        <HookFormField
+          control={form.control}
           name="keywords"
-          value={formData.keywords}
-          onChange={handleChange}
-          placeholder="Web Development JavaScript Design"
+          render={({ field }) => (
+            <FormItem>
+              <FormField 
+                id="keywords" 
+                label="Keywords (space separated)"
+                description="Separate keywords with spaces"
+              >
+                <FormControl>
+                  <Input
+                    id="keywords"
+                    placeholder="Web Development JavaScript Design"
+                    {...field} 
+                  />
+                </FormControl>
+              </FormField>
+            </FormItem>
+          )}
         />
-        <p className="text-xs text-muted-foreground">Separate keywords with spaces</p>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="imageUrl">Image URL</Label>
-        <Input
-          id="imageUrl"
+        
+        <HookFormField
+          control={form.control}
           name="imageUrl"
-          value={formData.imageUrl}
-          onChange={handleChange}
-          placeholder="https://example.com/image.jpg"
+          render={({ field }) => (
+            <FormItem>
+              <FormField 
+                id="imageUrl" 
+                label="Image URL"
+                description="Leave empty to use a default image"
+              >
+                <FormControl>
+                  <Input
+                    id="imageUrl"
+                    placeholder="https://example.com/image.jpg"
+                    {...field} 
+                  />
+                </FormControl>
+              </FormField>
+            </FormItem>
+          )}
         />
-        <p className="text-xs text-muted-foreground">Leave empty to use a default image</p>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="sourceUrl">Source URL</Label>
-        <Input
-          id="sourceUrl"
+        
+        <HookFormField
+          control={form.control}
           name="sourceUrl"
-          value={formData.sourceUrl}
-          onChange={handleChange}
-          placeholder="https://example.com/your-article"
+          render={({ field }) => (
+            <FormItem>
+              <FormField 
+                id="sourceUrl" 
+                label="Source URL"
+              >
+                <FormControl>
+                  <Input
+                    id="sourceUrl"
+                    placeholder="https://example.com/your-article"
+                    {...field} 
+                  />
+                </FormControl>
+              </FormField>
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div className="pt-4">
-        <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-              Publishing...
-            </>
-          ) : "Publish Article"}
-        </Button>
-      </div>
-    </form>
+        
+        <div className="pt-4">
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                Publishing...
+              </>
+            ) : "Publish Article"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 
