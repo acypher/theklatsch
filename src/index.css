@@ -99,8 +99,10 @@
   }
 }
 
-.article-content {
-  @apply prose prose-purple max-w-none;
+@layer components {
+  .article-content {
+    @apply max-w-none;
+  }
 }
 
 @layer utilities {
