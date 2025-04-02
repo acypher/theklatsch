@@ -14,6 +14,7 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const keywordFilter = searchParams.get("keyword");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
   
   useEffect(() => {
     // Upload the logo to the Supabase storage
@@ -44,13 +45,23 @@ const Index = () => {
         }
         
         // Get the public URL for the logo
-        const { data } = supabase
+        const { data: logoData } = supabase
           .storage
           .from('logos')
           .getPublicUrl('klatsch-logo.png');
         
-        if (data) {
-          setLogoUrl(data.publicUrl);
+        if (logoData) {
+          setLogoUrl(logoData.publicUrl);
+        }
+
+        // Get the door image URL
+        const { data: doorData } = supabase
+          .storage
+          .from('logos')
+          .getPublicUrl('klatsch-door.png');
+        
+        if (doorData) {
+          setDoorImageUrl(doorData.publicUrl);
         }
       } catch (error) {
         console.error('Error with logo:', error);
@@ -114,6 +125,16 @@ const Index = () => {
           onKeywordClear={handleClearKeyword}
           loading={loading}
         />
+
+        {doorImageUrl && (
+          <div className="flex justify-center mt-16 mb-8">
+            <img 
+              src={doorImageUrl} 
+              alt="Klatsch Door" 
+              className="max-h-48 md:max-h-64" 
+            />
+          </div>
+        )}
       </main>
     </div>
   );
