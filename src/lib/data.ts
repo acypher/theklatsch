@@ -1,8 +1,8 @@
-
 import { Article } from './types';
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-// Default example articles that will be used until connected to a backend
+// Default example articles that will be used as fallback
 const DEFAULT_ARTICLES: Article[] = [
   {
     id: "1",
@@ -56,58 +56,32 @@ const DEFAULT_ARTICLES: Article[] = [
   }
 ];
 
-// SessionStorage key for articles
-const ARTICLES_STORAGE_KEY = 'myFriendsArticles';
-
-// Get initial articles from sessionStorage or use defaults
-const getInitialArticles = (): Article[] => {
-  try {
-    const savedArticles = sessionStorage.getItem(ARTICLES_STORAGE_KEY);
-    if (savedArticles) {
-      return JSON.parse(savedArticles);
-    }
-  } catch (error) {
-    console.error('Error loading articles from sessionStorage:', error);
-  }
-  return [...DEFAULT_ARTICLES];
-};
-
-// In-memory cache of articles
-let articlesCache: Article[] | null = null;
-
-// Function to save articles to sessionStorage
-const saveArticlesToStorage = (articles: Article[]) => {
-  try {
-    sessionStorage.setItem(ARTICLES_STORAGE_KEY, JSON.stringify(articles));
-  } catch (error) {
-    console.error('Error saving articles to sessionStorage:', error);
-  }
-};
-
 // Function to handle API errors
 const handleApiError = (error: unknown) => {
   console.error("API Error:", error);
-  toast.error("Failed to connect to the articles backend. Using default data.");
-  return getInitialArticles();
+  toast.error("Failed to connect to the articles database. Using default data.");
+  return DEFAULT_ARTICLES;
 };
 
-// Function to fetch all articles from the backend
+// Function to fetch all articles from Supabase
 export const getAllArticles = async (): Promise<Article[]> => {
-  // If we have cached articles, return them
-  if (articlesCache) {
-    return [...articlesCache].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  }
-
   try {
-    // Simulated API response with stored data
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-    articlesCache = getInitialArticles();
-    
-    return [...articlesCache].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    // Try to fetch from Supabase
+    const { data: articles, error } = await supabase
+      .from('articles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (articles && articles.length > 0) {
+      return articles;
+    } else {
+      console.log("No articles found in database, using default articles");
+      return DEFAULT_ARTICLES;
+    }
   } catch (error) {
     return handleApiError(error);
   }
@@ -116,64 +90,64 @@ export const getAllArticles = async (): Promise<Article[]> => {
 // Function to get article by ID
 export const getArticleById = async (id: string): Promise<Article | undefined> => {
   try {
-    // If we have cached articles, try to find it there first
-    if (articlesCache) {
-      const cachedArticle = articlesCache.find(article => article.id === id);
-      if (cachedArticle) return cachedArticle;
+    // Try to fetch from Supabase
+    const { data: article, error } = await supabase
+      .from('articles')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
     }
 
-    // If not in cache, load all articles and try again
-    const allArticles = await getAllArticles();
-    return allArticles.find(article => article.id === id);
+    return article;
   } catch (error) {
     console.error(`Error fetching article ${id}:`, error);
-    return undefined;
+    // Try to find in default articles as fallback
+    return DEFAULT_ARTICLES.find(article => article.id === id);
   }
 };
 
-// Function to add a new article to the backend
+// Function to add a new article to Supabase
 export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
   try {
-    // Generate a unique ID (using timestamp + random to ensure uniqueness)
-    const newId = new Date().getTime() + '-' + Math.random().toString(36).substring(2, 9);
-    
     const newArticle = {
       ...article,
-      id: newId,
-      createdAt: new Date().toISOString()
+      created_at: new Date().toISOString()
     };
     
-    // Simulate API response
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
-    
-    // Update our cache with the new article
-    if (articlesCache) {
-      articlesCache = [...articlesCache, newArticle];
-    } else {
-      const allArticles = await getAllArticles();
-      articlesCache = [...allArticles, newArticle];
+    const { data, error } = await supabase
+      .from('articles')
+      .insert(newArticle)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
     }
-    
-    // Save to sessionStorage
-    saveArticlesToStorage(articlesCache);
-    
-    return newArticle;
+
+    return data;
   } catch (error) {
     console.error("Error adding article:", error);
-    throw new Error("Failed to add article to the backend");
+    throw new Error("Failed to add article to the database");
   }
 };
 
 // Function to get articles by keyword
 export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> => {
   try {
-    // Get all articles first (this will use the cache if available)
-    const allArticles = await getAllArticles();
-    
-    // Filter by keyword
-    return allArticles.filter(article => 
-      article.keywords.some(k => k.toLowerCase() === keyword.toLowerCase())
-    );
+    const { data: articles, error } = await supabase
+      .from('articles')
+      .select('*')
+      .contains('keywords', [keyword])
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return articles;
   } catch (error) {
     return handleApiError(error);
   }
