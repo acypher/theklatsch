@@ -114,7 +114,10 @@ const Index = () => {
           ) : (
             <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
           )}
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p 
+            href="subtitle" 
+            className="text-xl text-muted-foreground max-w-2xl mx-auto"
+          >
             A collaborative space for friends to share their thoughts, experiences and knowledge.
           </p>
         </header>
