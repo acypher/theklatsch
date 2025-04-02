@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -33,7 +32,6 @@ const CreateArticleForm = () => {
     defaultValues: defaultFormValues,
   });
   
-  // Load saved draft from session storage
   useEffect(() => {
     try {
       const savedDraft = sessionStorage.getItem(DRAFT_STORAGE_KEY);
@@ -48,7 +46,6 @@ const CreateArticleForm = () => {
     }
   }, [form]);
 
-  // Save draft to session storage
   const saveDraft = (data: ArticleFormValues) => {
     try {
       sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
@@ -57,19 +54,16 @@ const CreateArticleForm = () => {
     }
   };
 
-  // Handle form changes
   const handleFormChange = () => {
     const values = form.getValues();
     saveDraft(values);
   };
 
-  // Clear draft
   const clearDraft = () => {
     sessionStorage.removeItem(DRAFT_STORAGE_KEY);
     form.reset(defaultFormValues);
   };
 
-  // Handle form submission
   const onSubmit = async (data: ArticleFormValues) => {
     setIsSubmitting(true);
 
