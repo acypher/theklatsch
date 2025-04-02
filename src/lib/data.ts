@@ -1,8 +1,8 @@
 
 import { Article } from './types';
 
-// Sample articles data
-export const articles: Article[] = [
+// Default example articles
+const DEFAULT_ARTICLES: Article[] = [
   {
     id: "1",
     title: "The Future of Web Development",
@@ -55,6 +55,36 @@ export const articles: Article[] = [
   }
 ];
 
+const STORAGE_KEY = 'myFriendsArticles';
+
+// Function to load articles from localStorage
+const loadArticles = (): Article[] => {
+  try {
+    const storedArticles = localStorage.getItem(STORAGE_KEY);
+    if (storedArticles) {
+      return JSON.parse(storedArticles);
+    }
+    // If no stored articles, save and return the default ones
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_ARTICLES));
+    return DEFAULT_ARTICLES;
+  } catch (error) {
+    console.error("Failed to load articles from localStorage:", error);
+    return DEFAULT_ARTICLES;
+  }
+};
+
+// Initialize articles from localStorage
+let articles: Article[] = loadArticles();
+
+// Function to save articles to localStorage
+const saveArticles = () => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(articles));
+  } catch (error) {
+    console.error("Failed to save articles to localStorage:", error);
+  }
+};
+
 // Function to get all articles
 export const getAllArticles = (): Article[] => {
   return [...articles].sort((a, b) => {
@@ -69,13 +99,20 @@ export const getArticleById = (id: string): Article | undefined => {
 
 // Function to add a new article
 export const addArticle = (article: Omit<Article, 'id' | 'createdAt'>): Article => {
+  // Generate a unique ID (using timestamp + random to ensure uniqueness)
+  const newId = new Date().getTime() + '-' + Math.random().toString(36).substring(2, 9);
+  
   const newArticle = {
     ...article,
-    id: (articles.length + 1).toString(),
+    id: newId,
     createdAt: new Date().toISOString()
   };
   
   articles.push(newArticle);
+  
+  // Save to localStorage
+  saveArticles();
+  
   return newArticle;
 };
 
