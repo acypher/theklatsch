@@ -1,3 +1,4 @@
+
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,6 +64,20 @@ const handleApiError = (error: unknown) => {
   return DEFAULT_ARTICLES;
 };
 
+// Function to map database fields to our Article type
+const mapArticleFromDb = (dbArticle: any): Article => {
+  return {
+    id: dbArticle.id,
+    title: dbArticle.title,
+    description: dbArticle.description,
+    author: dbArticle.author,
+    keywords: dbArticle.keywords || [],
+    imageUrl: dbArticle.imageurl,
+    sourceUrl: dbArticle.sourceurl,
+    createdAt: dbArticle.created_at
+  };
+};
+
 // Function to fetch all articles from Supabase
 export const getAllArticles = async (): Promise<Article[]> => {
   try {
@@ -77,7 +92,7 @@ export const getAllArticles = async (): Promise<Article[]> => {
     }
 
     if (articles && articles.length > 0) {
-      return articles;
+      return articles.map(mapArticleFromDb);
     } else {
       console.log("No articles found in database, using default articles");
       return DEFAULT_ARTICLES;
@@ -101,7 +116,7 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
       throw new Error(error.message);
     }
 
-    return article;
+    return mapArticleFromDb(article);
   } catch (error) {
     console.error(`Error fetching article ${id}:`, error);
     // Try to find in default articles as fallback
@@ -113,8 +128,13 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
 export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
   try {
     const newArticle = {
-      ...article,
-      created_at: new Date().toISOString()
+      title: article.title,
+      description: article.description,
+      author: article.author,
+      keywords: article.keywords,
+      imageurl: article.imageUrl,
+      sourceurl: article.sourceUrl,
+      user_id: (await supabase.auth.getUser()).data.user?.id
     };
     
     const { data, error } = await supabase
@@ -127,7 +147,7 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       throw new Error(error.message);
     }
 
-    return data;
+    return mapArticleFromDb(data);
   } catch (error) {
     console.error("Error adding article:", error);
     throw new Error("Failed to add article to the database");
@@ -147,7 +167,7 @@ export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> 
       throw new Error(error.message);
     }
 
-    return articles;
+    return articles.map(mapArticleFromDb);
   } catch (error) {
     return handleApiError(error);
   }
