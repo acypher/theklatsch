@@ -4,7 +4,7 @@ import { z } from "zod";
 export const articleFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  author: z.string().min(1, "Author is required"),
+  author: z.string().optional(),
   keywords: z.string().optional().describe("Space-separated keywords"),
   imageUrl: z.string().optional(),
   sourceUrl: z.string().optional(),

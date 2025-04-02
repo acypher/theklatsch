@@ -77,7 +77,7 @@ const CreateArticleForm = () => {
       const newArticle = await addArticle({
         title: data.title,
         description: data.description,
-        author: data.author,
+        author: data.author || "Anonymous",
         keywords: keywordsArray,
         imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl
@@ -145,11 +145,11 @@ const CreateArticleForm = () => {
           name="author"
           render={({ field }) => (
             <FormItem>
-              <FormField id="author" label="Author" required>
+              <FormField id="author" label="Author">
                 <FormControl>
                   <Input
                     id="author"
-                    placeholder="Your name"
+                    placeholder="Your name (optional)"
                     {...field} 
                   />
                 </FormControl>
