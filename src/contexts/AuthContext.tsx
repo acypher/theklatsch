@@ -60,6 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, username: string) => {
+    // Use emailRedirectTo: undefined to disable email confirmation
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -67,6 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         data: {
           username,
         },
+        emailRedirectTo: undefined,
       },
     });
     
