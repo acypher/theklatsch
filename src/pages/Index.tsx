@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -17,10 +16,8 @@ const Index = () => {
   const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
   
   useEffect(() => {
-    // Upload the logo to the Supabase storage
     const uploadLogo = async () => {
       try {
-        // Check if the logo already exists in storage
         const { data: existingFiles } = await supabase
           .storage
           .from('logos')
@@ -29,11 +26,9 @@ const Index = () => {
         const logoExists = existingFiles?.some(file => file.name === 'klatsch-logo.png');
         
         if (!logoExists) {
-          // Get the logo file from the public directory
           const response = await fetch('/klatsch-logo.png');
           const blob = await response.blob();
           
-          // Upload the logo to Supabase storage
           const { error } = await supabase
             .storage
             .from('logos')
@@ -44,7 +39,6 @@ const Index = () => {
           }
         }
         
-        // Get the public URL for the logo
         const { data: logoData } = supabase
           .storage
           .from('logos')
@@ -54,7 +48,6 @@ const Index = () => {
           setLogoUrl(logoData.publicUrl);
         }
 
-        // Get the door image URL
         const { data: doorData } = supabase
           .storage
           .from('logos')
@@ -75,7 +68,6 @@ const Index = () => {
     const fetchArticles = async () => {
       try {
         setLoading(true);
-        // Filter articles by keyword if a filter is active
         if (keywordFilter) {
           const filteredArticles = await getArticlesByKeyword(keywordFilter);
           setArticles(filteredArticles);
@@ -114,12 +106,12 @@ const Index = () => {
           ) : (
             <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
           )}
-          <p 
+          <a 
             href="subtitle" 
-            className="text-xl text-muted-foreground max-w-2xl mx-auto"
+            className="text-xl text-muted-foreground max-w-2xl mx-auto block"
           >
             A collaborative space for friends to share their thoughts, experiences and knowledge.
-          </p>
+          </a>
         </header>
         
         <ArticleList 
