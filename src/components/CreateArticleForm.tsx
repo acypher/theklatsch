@@ -1,5 +1,5 @@
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addArticle } from "@/lib/data";
 import { toast } from "sonner";
+
+const DRAFT_STORAGE_KEY = "article_draft";
 
 const CreateArticleForm = () => {
   const navigate = useNavigate();
@@ -19,6 +21,30 @@ const CreateArticleForm = () => {
     imageUrl: "",
     sourceUrl: ""
   });
+
+  // Load saved draft when component mounts
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (savedDraft) {
+      try {
+        const parsedDraft = JSON.parse(savedDraft);
+        setFormData(parsedDraft);
+        toast.info("Your draft has been restored");
+      } catch (error) {
+        console.error("Failed to parse saved draft", error);
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  // Save draft to localStorage whenever formData changes
+  useEffect(() => {
+    const saveTimeout = setTimeout(() => {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
+    }, 500); // Debounce saving to avoid excessive writes
+
+    return () => clearTimeout(saveTimeout);
+  }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -53,6 +79,9 @@ const CreateArticleForm = () => {
         sourceUrl: formData.sourceUrl
       });
 
+      // Clear the saved draft after successful submission
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      
       toast.success("Article published successfully!");
       
       // Redirect to the new article page
@@ -63,8 +92,34 @@ const CreateArticleForm = () => {
     }
   };
 
+  const clearDraft = () => {
+    if (confirm("Are you sure you want to clear your draft?")) {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setFormData({
+        title: "",
+        description: "",
+        author: "",
+        keywords: "",
+        imageUrl: "",
+        sourceUrl: ""
+      });
+      toast.success("Draft cleared successfully");
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex justify-end">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={clearDraft} 
+          className="text-sm"
+        >
+          Clear Draft
+        </Button>
+      </div>
+      
       <div className="space-y-2">
         <Label htmlFor="title">Title *</Label>
         <Input
