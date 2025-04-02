@@ -1,4 +1,3 @@
-
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -152,6 +151,36 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
   } catch (error) {
     console.error("Error adding article:", error);
     throw new Error("Failed to add article to the database");
+  }
+};
+
+// Function to update an existing article in Supabase
+export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
+  try {
+    const updatedArticle = {
+      title: article.title,
+      description: article.description,
+      author: article.author,
+      keywords: article.keywords,
+      imageurl: article.imageUrl,
+      sourceurl: article.sourceUrl,
+    };
+    
+    const { data, error } = await (supabase
+      .from('articles' as any)
+      .update(updatedArticle as any)
+      .eq('id', id)
+      .select()
+      .single());
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return mapArticleFromDb(data);
+  } catch (error) {
+    console.error("Error updating article:", error);
+    throw new Error("Failed to update article in the database");
   }
 };
 

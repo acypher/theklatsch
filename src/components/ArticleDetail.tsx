@@ -2,17 +2,19 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ArrowLeft } from "lucide-react";
+import { ExternalLink, ArrowLeft, Pencil } from "lucide-react";
 import { getArticleById } from "@/lib/data";
 import { Article } from "@/lib/types";
 import KeywordBadge from "./KeywordBadge";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -90,7 +92,21 @@ const ArticleDetail = () => {
         
         {article && (
           <>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">{article.title}</h1>
+            <div className="flex justify-between items-start mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold">{article.title}</h1>
+              
+              {isAuthenticated && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate(`/article/${article.id}/edit`)}
+                  className="ml-4"
+                >
+                  <Pencil size={16} className="mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
             
             <div className="flex flex-wrap items-center text-muted-foreground mb-6">
               <span className="font-medium text-foreground">{article.author}</span>

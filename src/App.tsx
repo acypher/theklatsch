@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import CreateArticle from "./pages/CreateArticle";
 import ArticleView from "./pages/ArticleView";
+import EditArticle from "./pages/EditArticle";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -33,6 +34,14 @@ const App = () => (
               }
             />
             <Route path="/article/:id" element={<ArticleView />} />
+            <Route
+              path="/article/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <EditArticle />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
