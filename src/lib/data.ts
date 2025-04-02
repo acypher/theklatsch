@@ -83,7 +83,7 @@ export const getAllArticles = async (): Promise<Article[]> => {
   try {
     // Try to fetch from Supabase
     const { data: articles, error } = await supabase
-      .from('articles')
+      .from('articles' as any)
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -107,7 +107,7 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
   try {
     // Try to fetch from Supabase
     const { data: article, error } = await supabase
-      .from('articles')
+      .from('articles' as any)
       .select('*')
       .eq('id', id)
       .single();
@@ -137,11 +137,12 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       user_id: (await supabase.auth.getUser()).data.user?.id
     };
     
-    const { data, error } = await supabase
-      .from('articles')
-      .insert(newArticle)
+    // Use type assertion to bypass TypeScript's type checking
+    const { data, error } = await (supabase
+      .from('articles' as any)
+      .insert(newArticle as any)
       .select()
-      .single();
+      .single());
 
     if (error) {
       throw new Error(error.message);
@@ -158,7 +159,7 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
 export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> => {
   try {
     const { data: articles, error } = await supabase
-      .from('articles')
+      .from('articles' as any)
       .select('*')
       .contains('keywords', [keyword])
       .order('created_at', { ascending: false });
