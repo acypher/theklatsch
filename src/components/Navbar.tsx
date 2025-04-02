@@ -18,7 +18,7 @@ const Navbar = () => {
   return (
     <nav className="border-b shadow-sm py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-primary">MyFriends</Link>
+        <Link to="/" className="text-2xl font-bold text-primary">The Klatsch</Link>
         
         <div className="flex items-center gap-4">
           {user ? (
