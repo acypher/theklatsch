@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +15,6 @@ const Auth = () => {
   const [username, setUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // If user is already logged in, redirect to homepage
   if (user && !loading) {
     return <Navigate to="/" replace />;
   }
@@ -71,7 +69,6 @@ const Auth = () => {
     }
   };
 
-  // Show loading state
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -83,7 +80,7 @@ const Auth = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md">
-        <h1 className="text-4xl font-bold mb-8 text-center">MyFriends Articles</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center">The Klatsch</h1>
         
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
