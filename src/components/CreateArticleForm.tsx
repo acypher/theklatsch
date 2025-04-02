@@ -63,9 +63,8 @@ const CreateArticleForm = () => {
       }
 
       const keywordsArray = formData.keywords
-        .split(",")
-        .map(keyword => keyword.trim())
-        .filter(keyword => keyword.length > 0);
+        .split(/\s+/)
+        .filter(keyword => keyword.trim().length > 0);
 
       const newArticle = await addArticle({
         title: formData.title,
@@ -153,15 +152,15 @@ const CreateArticleForm = () => {
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="keywords">Keywords (comma separated)</Label>
+        <Label htmlFor="keywords">Keywords (space separated)</Label>
         <Input
           id="keywords"
           name="keywords"
           value={formData.keywords}
           onChange={handleChange}
-          placeholder="Web Development, JavaScript, Design"
+          placeholder="Web Development JavaScript Design"
         />
-        <p className="text-xs text-muted-foreground">Separate keywords with commas</p>
+        <p className="text-xs text-muted-foreground">Separate keywords with spaces</p>
       </div>
       
       <div className="space-y-2">
