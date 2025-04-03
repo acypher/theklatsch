@@ -14,6 +14,7 @@ export type Database = {
           author: string
           created_at: string
           description: string
+          display_position: number | null
           id: string
           imageurl: string
           keywords: string[]
@@ -25,6 +26,7 @@ export type Database = {
           author: string
           created_at?: string
           description: string
+          display_position?: number | null
           id?: string
           imageurl: string
           keywords?: string[]
@@ -36,6 +38,7 @@ export type Database = {
           author?: string
           created_at?: string
           description?: string
+          display_position?: number | null
           id?: string
           imageurl?: string
           keywords?: string[]
