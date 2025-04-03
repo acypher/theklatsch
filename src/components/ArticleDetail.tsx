@@ -1,19 +1,31 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ArrowLeft, Pencil } from "lucide-react";
-import { getArticleById } from "@/lib/data";
+import { ExternalLink, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { getArticleById, deleteArticle } from "@/lib/data";
 import { Article } from "@/lib/types";
 import KeywordBadge from "./KeywordBadge";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -39,6 +51,23 @@ const ArticleDetail = () => {
 
     fetchArticle();
   }, [id, navigate]);
+
+  const handleDelete = async () => {
+    if (!id) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteArticle(id);
+      toast.success("Article deleted successfully");
+      navigate("/");
+    } catch (error) {
+      toast.error("Failed to delete article");
+      console.error("Delete error:", error);
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -96,15 +125,48 @@ const ArticleDetail = () => {
               <h1 className="text-3xl md:text-4xl font-bold">{article.title}</h1>
               
               {isAuthenticated && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate(`/article/${article.id}/edit`)}
-                  className="ml-4"
-                >
-                  <Pencil size={16} className="mr-2" />
-                  Edit
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/article/${article.id}/edit`)}
+                  >
+                    <Pencil size={16} className="mr-2" />
+                    Edit
+                  </Button>
+                  
+                  <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-destructive border-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the article
+                          "{article.title}" from the database.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          {isDeleting ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               )}
             </div>
             

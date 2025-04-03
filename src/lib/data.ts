@@ -1,4 +1,3 @@
-
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -163,7 +162,7 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
       description: article.description,
       author: article.author,
       keywords: article.keywords,
-      imageurl: article.imageUrl, // Fixed: changed imageUrl to imageurl to match database column name
+      imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
     };
     
@@ -201,5 +200,24 @@ export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> 
     return articles.map(mapArticleFromDb);
   } catch (error) {
     return handleApiError(error);
+  }
+};
+
+// Function to delete an article from Supabase
+export const deleteArticle = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('articles' as any)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error deleting article:", error);
+    throw new Error("Failed to delete article from the database");
   }
 };
