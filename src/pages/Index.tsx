@@ -1,19 +1,25 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ArticleList from "@/components/ArticleList";
-import { getAllArticles, getArticlesByKeyword } from "@/lib/data";
+import { getAllArticles, getArticlesByKeyword, updateArticlesOrder } from "@/lib/data";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import ArticleArrangeList from "@/components/ArticleArrangeList";
 
 const Index = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const keywordFilter = searchParams.get("keyword");
+  const arrangeMode = searchParams.get("mode") === "arrange";
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
   
   useEffect(() => {
     const uploadLogo = async () => {
@@ -90,6 +96,30 @@ const Index = () => {
     setSearchParams({});
   };
 
+  const handleExitArrangeMode = () => {
+    setSearchParams({});
+  };
+
+  const handleSaveOrder = async (reorderedArticles: Article[]) => {
+    const articlesWithPositions = reorderedArticles.map((article, index) => ({
+      id: article.id,
+      position: index
+    }));
+    
+    const success = await updateArticlesOrder(articlesWithPositions);
+    if (success) {
+      setArticles(reorderedArticles);
+      handleExitArrangeMode();
+    }
+  };
+
+  // Redirect to home page if not authenticated and in arrange mode
+  useEffect(() => {
+    if (arrangeMode && !isAuthenticated) {
+      setSearchParams({});
+    }
+  }, [arrangeMode, isAuthenticated, setSearchParams]);
+
   return (
     <div>
       <Navbar />
@@ -115,14 +145,34 @@ const Index = () => {
           </a>
         </header>
         
-        <ArticleList 
-          articles={articles} 
-          selectedKeyword={keywordFilter} 
-          onKeywordClear={handleClearKeyword}
-          loading={loading}
-        />
+        {arrangeMode && isAuthenticated ? (
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold">Arrange Articles</h2>
+              <div className="flex gap-4">
+                <Button variant="outline" onClick={handleExitArrangeMode}>
+                  Cancel
+                </Button>
+                <Button onClick={() => handleSaveOrder(articles)}>
+                  Save Order
+                </Button>
+              </div>
+            </div>
+            <ArticleArrangeList 
+              articles={articles} 
+              setArticles={setArticles}
+            />
+          </div>
+        ) : (
+          <ArticleList 
+            articles={articles} 
+            selectedKeyword={keywordFilter} 
+            onKeywordClear={handleClearKeyword}
+            loading={loading}
+          />
+        )}
 
-        {doorImageUrl && (
+        {doorImageUrl && !arrangeMode && (
           <div className="flex justify-center mt-16 mb-8">
             <img 
               src={doorImageUrl} 

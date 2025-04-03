@@ -80,7 +80,6 @@ const mapArticleFromDb = (dbArticle: any): Article => {
 // Function to fetch all articles from Supabase
 export const getAllArticles = async (): Promise<Article[]> => {
   try {
-    // Try to fetch from Supabase
     const { data: articles, error } = await supabase
       .from('articles' as any)
       .select('*')
@@ -104,7 +103,6 @@ export const getAllArticles = async (): Promise<Article[]> => {
 // Function to get article by ID
 export const getArticleById = async (id: string): Promise<Article | undefined> => {
   try {
-    // Try to fetch from Supabase
     const { data: article, error } = await supabase
       .from('articles' as any)
       .select('*')
@@ -118,7 +116,6 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
     return mapArticleFromDb(article);
   } catch (error) {
     console.error(`Error fetching article ${id}:`, error);
-    // Try to find in default articles as fallback
     return DEFAULT_ARTICLES.find(article => article.id === id);
   }
 };
@@ -136,7 +133,6 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       user_id: (await supabase.auth.getUser()).data.user?.id
     };
     
-    // Use type assertion to bypass TypeScript's type checking
     const { data, error } = await (supabase
       .from('articles' as any)
       .insert(newArticle as any)
@@ -219,5 +215,25 @@ export const deleteArticle = async (id: string): Promise<boolean> => {
   } catch (error) {
     console.error("Error deleting article:", error);
     throw new Error("Failed to delete article from the database");
+  }
+};
+
+// Function to update article display order
+export const updateArticlesOrder = async (articlesOrder: { id: string, position: number }[]): Promise<boolean> => {
+  try {
+    const promises = articlesOrder.map(item => {
+      return supabase
+        .from('articles' as any)
+        .update({ display_position: item.position })
+        .eq('id', item.id);
+    });
+    
+    await Promise.all(promises);
+    toast.success("Articles order updated successfully");
+    return true;
+  } catch (error) {
+    console.error("Error updating articles order:", error);
+    toast.error("Failed to update article order");
+    return false;
   }
 };
