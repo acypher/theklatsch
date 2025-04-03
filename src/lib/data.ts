@@ -1,3 +1,4 @@
+
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,7 +75,9 @@ const mapArticleFromDb = (dbArticle: any): Article => {
     imageUrl: dbArticle.imageurl,
     sourceUrl: dbArticle.sourceurl,
     createdAt: dbArticle.created_at,
-    more_content: dbArticle.more_content
+    more_content: dbArticle.more_content,
+    deleted: dbArticle.deleted,
+    deletedAt: dbArticle.deleted_at
   };
 };
 
@@ -210,11 +213,11 @@ export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> 
 export const deleteArticle = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('articles')
+      .from('articles' as any)
       .update({ 
         deleted: true, 
         deleted_at: new Date().toISOString() 
-      })
+      } as any)
       .eq('id', id);
 
     if (error) {

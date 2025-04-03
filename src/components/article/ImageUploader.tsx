@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -12,8 +12,8 @@ interface ImageUploaderProps {
 const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
   const [uploading, setUploading] = useState(false);
   
-  // Create a reference to the file input element
-  const fileInputRef = useState<HTMLInputElement | null>(null);
+  // Use useRef instead of useState for DOM references
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -57,7 +57,7 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
   return (
     <div className="flex items-center space-x-4">
       <input
-        ref={(el) => fileInputRef.current = el}
+        ref={fileInputRef}
         type="file"
         id="imageUpload"
         accept="image/*"
