@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import FormField from "@/components/article/FormField";
 import DraftManager from "@/components/article/DraftManager";
 import MarkdownEditor from "@/components/article/MarkdownEditor";
+import ImageUploader from "@/components/article/ImageUploader";
 import { 
   ArticleFormValues, 
   DRAFT_STORAGE_KEY, 
@@ -63,6 +64,10 @@ const CreateArticleForm = () => {
   const clearDraft = () => {
     sessionStorage.removeItem(DRAFT_STORAGE_KEY);
     form.reset(defaultFormValues);
+  };
+
+  const handleImageUpload = (imageUrl: string) => {
+    form.setValue('imageUrl', imageUrl);
   };
 
   const onSubmit = async (data: ArticleFormValues) => {
@@ -189,16 +194,19 @@ const CreateArticleForm = () => {
             <FormItem>
               <FormField 
                 id="imageUrl" 
-                label="Image URL"
-                description="Leave empty to use a default image"
+                label="Article Image"
+                description="Upload an image or provide an image URL"
               >
-                <FormControl>
-                  <Input
-                    id="imageUrl"
-                    placeholder="https://example.com/image.jpg"
-                    {...field} 
-                  />
-                </FormControl>
+                <div className="flex space-x-4 items-center">
+                  <FormControl>
+                    <Input
+                      id="imageUrl"
+                      placeholder="https://example.com/image.jpg"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <ImageUploader onImageUpload={handleImageUpload} />
+                </div>
               </FormField>
             </FormItem>
           )}

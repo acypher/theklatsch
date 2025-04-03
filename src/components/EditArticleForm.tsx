@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import FormField from "@/components/article/FormField";
 import MarkdownEditor from "@/components/article/MarkdownEditor";
+import ImageUploader from "@/components/article/ImageUploader";
 import { 
   ArticleFormValues, 
   articleFormSchema, 
@@ -48,7 +49,6 @@ const EditArticleForm = () => {
           return;
         }
         
-        // Format keywords back to string
         const keywordsString = article.keywords.join(' ');
         
         form.reset({
@@ -70,6 +70,10 @@ const EditArticleForm = () => {
     
     fetchArticle();
   }, [id, navigate, form]);
+
+  const handleImageUpload = (imageUrl: string) => {
+    form.setValue('imageUrl', imageUrl);
+  };
 
   const onSubmit = async (data: ArticleFormValues) => {
     if (!id) return;
@@ -200,16 +204,19 @@ const EditArticleForm = () => {
             <FormItem>
               <FormField 
                 id="imageUrl" 
-                label="Image URL"
-                description="Leave empty to use a default image"
+                label="Article Image"
+                description="Upload an image or provide an image URL"
               >
-                <FormControl>
-                  <Input
-                    id="imageUrl"
-                    placeholder="https://example.com/image.jpg"
-                    {...field} 
-                  />
-                </FormControl>
+                <div className="flex space-x-4 items-center">
+                  <FormControl>
+                    <Input
+                      id="imageUrl"
+                      placeholder="https://example.com/image.jpg"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <ImageUploader onImageUpload={handleImageUpload} />
+                </div>
               </FormField>
             </FormItem>
           )}
