@@ -1,9 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Article } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ArticleArrangeListProps {
@@ -12,41 +12,60 @@ interface ArticleArrangeListProps {
 }
 
 const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) => {
-  const moveArticle = (index: number, direction: 'up' | 'down') => {
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= articles.length) return;
-    
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+
+  // Handle drag start
+  const handleDragStart = (index: number) => {
+    setDraggedItemIndex(index);
+  };
+
+  // Handle drag over another item
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // Allow drop
+  };
+
+  // Handle drop of an item
+  const handleDrop = (targetIndex: number) => {
+    if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
+
     const newArticles = [...articles];
-    const temp = newArticles[index];
-    newArticles[index] = newArticles[newIndex];
-    newArticles[newIndex] = temp;
+    const draggedItem = newArticles[draggedItemIndex];
+    
+    // Remove the dragged item
+    newArticles.splice(draggedItemIndex, 1);
+    
+    // Insert at the target position
+    newArticles.splice(targetIndex, 0, draggedItem);
+    
+    // Update the state
     setArticles(newArticles);
+    setDraggedItemIndex(null);
+  };
+
+  // Handle drag end (cleanup)
+  const handleDragEnd = () => {
+    setDraggedItemIndex(null);
   };
 
   return (
     <div className="space-y-4">
       {articles.map((article, index) => (
-        <Card key={article.id} className="flex items-center border border-gray-200">
-          <div className="flex flex-col items-center p-2 border-r">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => moveArticle(index, 'up')} 
-              disabled={index === 0}
-              className="h-8 w-8"
-            >
-              <ArrowUp size={16} />
-            </Button>
-            <span className="text-sm font-mono my-1">{index + 1}</span>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => moveArticle(index, 'down')} 
-              disabled={index === articles.length - 1}
-              className="h-8 w-8"
-            >
-              <ArrowDown size={16} />
-            </Button>
+        <Card 
+          key={article.id} 
+          className={`flex items-center border ${
+            draggedItemIndex === index ? 'border-primary bg-primary/5' : 'border-gray-200'
+          }`}
+          draggable
+          onDragStart={() => handleDragStart(index)}
+          onDragOver={handleDragOver}
+          onDrop={() => handleDrop(index)}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex justify-center items-center p-4 cursor-grab">
+            <GripVertical 
+              size={24} 
+              className="text-muted-foreground hover:text-primary transition-colors"
+            />
           </div>
           <div className="flex flex-1 items-center p-2">
             <CardHeader className="p-0 w-32 flex-shrink-0 mr-4">
@@ -60,7 +79,12 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
               </AspectRatio>
             </CardHeader>
             <CardContent className="p-0 flex-1">
-              <h3 className="font-semibold line-clamp-2">{article.title}</h3>
+              <div className="flex items-center">
+                <span className="inline-flex justify-center items-center w-6 h-6 rounded-full bg-muted text-muted-foreground text-xs font-medium mr-2">
+                  {index + 1}
+                </span>
+                <h3 className="font-semibold line-clamp-2">{article.title}</h3>
+              </div>
               <p className="text-sm text-muted-foreground line-clamp-1">{article.author}</p>
             </CardContent>
           </div>

@@ -110,6 +110,7 @@ const Index = () => {
     if (success) {
       setArticles(reorderedArticles);
       handleExitArrangeMode();
+      toast.success("Article order saved successfully");
     }
   };
 
@@ -158,6 +159,7 @@ const Index = () => {
                 </Button>
               </div>
             </div>
+            <p className="text-muted-foreground mb-6">Drag and drop articles to rearrange them in your preferred order.</p>
             <ArticleArrangeList 
               articles={articles} 
               setArticles={setArticles}
