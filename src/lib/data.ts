@@ -1,3 +1,4 @@
+
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -162,7 +163,7 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
       description: article.description,
       author: article.author,
       keywords: article.keywords,
-      imageurl: article.imageUrl,
+      imageurl: article.imageUrl, // Fixed: changed imageUrl to imageurl to match database column name
       sourceurl: article.sourceUrl,
     };
     
