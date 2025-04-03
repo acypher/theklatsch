@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -100,21 +99,23 @@ const Index = () => {
     setSearchParams({});
   };
 
-  const handleSaveOrder = async (reorderedArticles: Article[]) => {
-    const articlesWithPositions = reorderedArticles.map((article, index) => ({
+  const handleSaveOrder = async () => {
+    const articlesWithPositions = articles.map((article, index) => ({
       id: article.id,
-      position: index
+      position: index + 1
     }));
+    
+    console.log("Saving article order:", articlesWithPositions);
     
     const success = await updateArticlesOrder(articlesWithPositions);
     if (success) {
-      setArticles(reorderedArticles);
-      handleExitArrangeMode();
       toast.success("Article order saved successfully");
+      handleExitArrangeMode();
+    } else {
+      toast.error("Failed to save article order");
     }
   };
 
-  // Redirect to home page if not authenticated and in arrange mode
   useEffect(() => {
     if (arrangeMode && !isAuthenticated) {
       setSearchParams({});
@@ -154,7 +155,7 @@ const Index = () => {
                 <Button variant="outline" onClick={handleExitArrangeMode}>
                   Cancel
                 </Button>
-                <Button onClick={() => handleSaveOrder(articles)}>
+                <Button onClick={handleSaveOrder}>
                   Save Order
                 </Button>
               </div>

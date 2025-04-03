@@ -4,7 +4,6 @@ import { Article } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { GripVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface ArticleArrangeListProps {
   articles: Article[];

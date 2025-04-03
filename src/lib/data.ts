@@ -85,6 +85,7 @@ export const getAllArticles = async (): Promise<Article[]> => {
     const { data: articles, error } = await supabase
       .from('articles' as any)
       .select('*')
+      .order('display_position', { ascending: true })
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -225,14 +226,20 @@ export const deleteArticle = async (id: string): Promise<boolean> => {
 // Function to update article display order
 export const updateArticlesOrder = async (articlesOrder: { id: string, position: number }[]): Promise<boolean> => {
   try {
-    const promises = articlesOrder.map(item => {
-      return supabase
+    // Use a more robust approach with a transaction-like pattern
+    for (const item of articlesOrder) {
+      const { error } = await supabase
         .from('articles' as any)
         .update({ display_position: item.position })
         .eq('id', item.id);
-    });
+      
+      if (error) {
+        console.error(`Error updating article ${item.id}:`, error);
+        throw error;
+      }
+    }
     
-    await Promise.all(promises);
+    console.log("Articles order updated successfully", articlesOrder);
     toast.success("Articles order updated successfully");
     return true;
   } catch (error) {
