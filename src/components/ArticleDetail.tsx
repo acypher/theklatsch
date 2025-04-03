@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+// Helper function to convert Google Drive URLs to direct image URLs
+const getImageUrl = (url: string) => {
+  // Check if it's a Google Drive URL
+  if (url.includes('drive.google.com/file/d/')) {
+    // Extract the file ID from the URL
+    const fileIdMatch = url.match(/\/d\/([^/]+)/);
+    if (fileIdMatch && fileIdMatch[1]) {
+      const fileId = fileIdMatch[1];
+      // Return the direct image URL format for Google Drive
+      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    }
+  }
+  // Return the original URL for non-Google Drive images
+  return url;
+};
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -194,7 +211,7 @@ const ArticleDetail = () => {
           <div className="mb-8">
             <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden">
               <img 
-                src={article.imageUrl} 
+                src={getImageUrl(article.imageUrl)} 
                 alt={article.title} 
                 className="w-full h-full object-cover"
               />

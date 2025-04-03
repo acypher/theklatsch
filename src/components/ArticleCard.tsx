@@ -15,13 +15,28 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const getImageUrl = (url: string) => {
+    // Check if it's a Google Drive URL
+    if (url.includes('drive.google.com/file/d/')) {
+      // Extract the file ID from the URL
+      const fileIdMatch = url.match(/\/d\/([^/]+)/);
+      if (fileIdMatch && fileIdMatch[1]) {
+        const fileId = fileIdMatch[1];
+        // Return the direct image URL format for Google Drive
+        return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      }
+    }
+    // Return the original URL for non-Google Drive images
+    return url;
+  };
+
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
       <CardHeader className="p-0">
         <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">
           <AspectRatio ratio={16 / 9} className="overflow-hidden">
             <img 
-              src={article.imageUrl} 
+              src={getImageUrl(article.imageUrl)} 
               alt={article.title} 
               className="w-full h-full object-cover transition-transform hover:scale-105"
               loading="lazy"
