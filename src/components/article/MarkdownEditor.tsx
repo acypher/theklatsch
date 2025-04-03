@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import MDEditor from '@uiw/react-md-editor';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MarkdownEditorProps {
   value: string | undefined;
@@ -35,6 +37,18 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
           placeholder: placeholder || 'Write your content here...'
         }}
       />
+      {value && (
+        <div className="mt-4 prose prose-lg max-w-none">
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]} 
+            components={{
+              p: ({node, ...props}) => <p {...props} />,
+            }}
+          >
+            {value}
+          </ReactMarkdown>
+        </div>
+      )}
       <style>{`
         .w-md-editor {
           --md-editor-box-shadow: none !important;

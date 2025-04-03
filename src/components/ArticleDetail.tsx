@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import KeywordBadge from "./KeywordBadge";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,19 +21,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Helper function to convert Google Drive URLs to direct image URLs
 const getImageUrl = (url: string) => {
-  // Check if it's a Google Drive URL
   if (url.includes('drive.google.com/file/d/')) {
-    // Extract the file ID from the URL
     const fileIdMatch = url.match(/\/d\/([^/]+)/);
     if (fileIdMatch && fileIdMatch[1]) {
       const fileId = fileIdMatch[1];
-      // Return the direct image URL format for Google Drive
       return `https://drive.google.com/uc?export=view&id=${fileId}`;
     }
   }
-  // Return the original URL for non-Google Drive images
   return url;
 };
 
@@ -245,7 +240,14 @@ const ArticleDetail = () => {
               <div className="mt-8 pt-8 border-t">
                 <h2 className="text-2xl font-bold mb-4">More Information</h2>
                 <div className="prose prose-lg max-w-none">
-                  <ReactMarkdown>{article.more_content}</ReactMarkdown>
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]} 
+                    components={{
+                      p: ({node, ...props}) => <p {...props} />,
+                    }}
+                  >
+                    {article.more_content}
+                  </ReactMarkdown>
                 </div>
               </div>
             )}
