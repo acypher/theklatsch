@@ -252,6 +252,17 @@ const ArticleDetail = () => {
               </div>
             )}
           </div>
+          
+          <div className="mt-12">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft size={16} className="mr-2" />
+              Back to articles
+            </Button>
+          </div>
         </>
       )}
     </div>
