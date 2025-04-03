@@ -8,4 +8,5 @@ export interface Article {
   imageUrl: string;
   sourceUrl: string;
   createdAt: string;
+  more_content?: string | null;
 }

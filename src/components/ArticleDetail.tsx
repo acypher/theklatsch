@@ -8,6 +8,7 @@ import { Article } from "@/lib/types";
 import KeywordBadge from "./KeywordBadge";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import ReactMarkdown from 'react-markdown';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -220,6 +221,15 @@ const ArticleDetail = () => {
           
           <div className="prose prose-lg max-w-none mb-8">
             <p className="text-xl leading-relaxed mb-8">{article.description}</p>
+            
+            {article.more_content && (
+              <div className="mt-8 pt-8 border-t">
+                <h2 className="text-2xl font-bold mb-4">More Information</h2>
+                <div className="prose prose-lg max-w-none">
+                  <ReactMarkdown>{article.more_content}</ReactMarkdown>
+                </div>
+              </div>
+            )}
             
             {article.sourceUrl && (
               <div className="mt-12 pt-6 border-t">

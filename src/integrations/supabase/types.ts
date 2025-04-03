@@ -18,6 +18,7 @@ export type Database = {
           id: string
           imageurl: string
           keywords: string[]
+          more_content: string | null
           sourceurl: string | null
           title: string
           user_id: string | null
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           imageurl: string
           keywords?: string[]
+          more_content?: string | null
           sourceurl?: string | null
           title: string
           user_id?: string | null
@@ -42,6 +44,7 @@ export type Database = {
           id?: string
           imageurl?: string
           keywords?: string[]
+          more_content?: string | null
           sourceurl?: string | null
           title?: string
           user_id?: string | null

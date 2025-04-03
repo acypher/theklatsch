@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -10,6 +9,7 @@ import { getArticleById } from "@/lib/data";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import FormField from "@/components/article/FormField";
+import MarkdownEditor from "@/components/article/MarkdownEditor";
 import { 
   ArticleFormValues, 
   articleFormSchema, 
@@ -57,7 +57,8 @@ const EditArticleForm = () => {
           author: article.author,
           keywords: keywordsString,
           imageUrl: article.imageUrl,
-          sourceUrl: article.sourceUrl || ""
+          sourceUrl: article.sourceUrl || "",
+          more_content: article.more_content || ""
         });
       } catch (error) {
         toast.error("Failed to load article");
@@ -88,7 +89,8 @@ const EditArticleForm = () => {
         author: data.author || "Anonymous",
         keywords: keywordsArray,
         imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-        sourceUrl: data.sourceUrl
+        sourceUrl: data.sourceUrl,
+        more_content: data.more_content
       });
       
       toast.success("Article updated successfully!");
@@ -227,6 +229,28 @@ const EditArticleForm = () => {
                     id="sourceUrl"
                     placeholder="https://example.com/your-article"
                     {...field} 
+                  />
+                </FormControl>
+              </FormField>
+            </FormItem>
+          )}
+        />
+        
+        <HookFormField
+          control={form.control}
+          name="more_content"
+          render={({ field }) => (
+            <FormItem>
+              <FormField 
+                id="more_content" 
+                label="More Content (Markdown)"
+                description="Use Markdown to format additional content"
+              >
+                <FormControl>
+                  <MarkdownEditor
+                    value={field.value}
+                    onChange={(value) => field.onChange(value || "")}
+                    placeholder="Write additional content using Markdown..."
                   />
                 </FormControl>
               </FormField>
