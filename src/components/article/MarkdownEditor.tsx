@@ -31,7 +31,9 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
         onChange={onChange}
         height={400}
         preview="edit"
-        // Remove the placeholder prop as it's not supported by the MDEditor component
+        textareaProps={{
+          placeholder: placeholder || 'Write your content here...'
+        }}
       />
       <style>{`
         .w-md-editor {

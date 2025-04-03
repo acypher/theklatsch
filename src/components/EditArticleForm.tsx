@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { getArticleById } from "@/lib/data";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -143,13 +142,12 @@ const EditArticleForm = () => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormField id="description" label="Description" required>
+              <FormField id="description" label="Description" required description="Use Markdown to format your description">
                 <FormControl>
-                  <Textarea
-                    id="description" 
+                  <MarkdownEditor
+                    value={field.value}
+                    onChange={(value) => field.onChange(value || "")}
                     placeholder="Write a short description of your article"
-                    rows={4}
-                    {...field} 
                   />
                 </FormControl>
               </FormField>
