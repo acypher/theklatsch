@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { getArticleById, deleteArticle } from "@/lib/data";
 import { Article } from "@/lib/types";
 import KeywordBadge from "./KeywordBadge";
@@ -210,13 +210,32 @@ const ArticleDetail = () => {
       {article && (
         <>
           <div className="mb-8">
-            <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden">
-              <img 
-                src={getImageUrl(article.imageUrl)} 
-                alt={article.title} 
-                className="w-full h-full object-cover"
-              />
-            </div>
+            {article.sourceUrl ? (
+              <a 
+                href={article.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden block cursor-pointer hover:opacity-90 transition-opacity"
+                aria-label={`View original source for ${article.title}`}
+              >
+                <img 
+                  src={getImageUrl(article.imageUrl)} 
+                  alt={article.title} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all flex items-center justify-center">
+                  <div className="p-3 rounded-full bg-white bg-opacity-0 hover:bg-opacity-70 transition-all"></div>
+                </div>
+              </a>
+            ) : (
+              <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden">
+                <img 
+                  src={getImageUrl(article.imageUrl)} 
+                  alt={article.title} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
           </div>
           
           <div className="prose prose-lg max-w-none mb-8">
@@ -228,22 +247,6 @@ const ArticleDetail = () => {
                 <div className="prose prose-lg max-w-none">
                   <ReactMarkdown>{article.more_content}</ReactMarkdown>
                 </div>
-              </div>
-            )}
-            
-            {article.sourceUrl && (
-              <div className="mt-12 pt-6 border-t">
-                <Button asChild variant="outline">
-                  <a 
-                    href={article.sourceUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    <ExternalLink size={16} />
-                    View Original Source
-                  </a>
-                </Button>
               </div>
             )}
           </div>

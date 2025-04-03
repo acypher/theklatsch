@@ -6,7 +6,7 @@ const ArticleView = () => {
   return (
     <div>
       <Navbar />
-      <main className="prose prose-lg max-w-none">
+      <main className="prose prose-lg max-w-none pb-12">
         <ArticleDetail />
       </main>
     </div>
