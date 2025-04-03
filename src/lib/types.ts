@@ -9,4 +9,6 @@ export interface Article {
   sourceUrl: string;
   createdAt: string;
   more_content?: string | null;
+  deleted?: boolean;
+  deletedAt?: string | null;
 }

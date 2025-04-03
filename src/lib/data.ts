@@ -1,4 +1,3 @@
-
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,6 +84,7 @@ export const getAllArticles = async (): Promise<Article[]> => {
     const { data: articles, error } = await supabase
       .from('articles' as any)
       .select('*')
+      .eq('deleted', false)
       .order('display_position', { ascending: true })
       .order('created_at', { ascending: false });
 
@@ -110,6 +110,7 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
       .from('articles' as any)
       .select('*')
       .eq('id', id)
+      .eq('deleted', false)
       .single();
 
     if (error) {
@@ -192,6 +193,7 @@ export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> 
       .from('articles' as any)
       .select('*')
       .contains('keywords', [keyword])
+      .eq('deleted', false)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -208,18 +210,23 @@ export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> 
 export const deleteArticle = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('articles' as any)
-      .delete()
+      .from('articles')
+      .update({ 
+        deleted: true, 
+        deleted_at: new Date().toISOString() 
+      })
       .eq('id', id);
 
     if (error) {
       throw new Error(error.message);
     }
     
+    toast.success("Article marked as deleted");
     return true;
   } catch (error) {
     console.error("Error deleting article:", error);
-    throw new Error("Failed to delete article from the database");
+    toast.error("Failed to delete article");
+    return false;
   }
 };
 

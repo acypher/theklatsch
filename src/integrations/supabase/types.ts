@@ -13,6 +13,8 @@ export type Database = {
         Row: {
           author: string
           created_at: string
+          deleted: boolean
+          deleted_at: string | null
           description: string
           display_position: number | null
           id: string
@@ -26,6 +28,8 @@ export type Database = {
         Insert: {
           author: string
           created_at?: string
+          deleted?: boolean
+          deleted_at?: string | null
           description: string
           display_position?: number | null
           id?: string
@@ -39,6 +43,8 @@ export type Database = {
         Update: {
           author?: string
           created_at?: string
+          deleted?: boolean
+          deleted_at?: string | null
           description?: string
           display_position?: number | null
           id?: string
