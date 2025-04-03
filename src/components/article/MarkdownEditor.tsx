@@ -31,9 +31,9 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
         onChange={onChange}
         height={400}
         preview="edit"
-        placeholder={placeholder}
+        // Remove the placeholder prop as it's not supported by the MDEditor component
       />
-      <style jsx global>{`
+      <style>{`
         .w-md-editor {
           --md-editor-box-shadow: none !important;
           border: 1px solid var(--md-border-color) !important;
