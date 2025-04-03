@@ -11,6 +11,9 @@ interface ImageUploaderProps {
 
 const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
   const [uploading, setUploading] = useState(false);
+  
+  // Create a reference to the file input element
+  const fileInputRef = useState<HTMLInputElement | null>(null);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -44,25 +47,32 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
     }
   };
 
+  // Function to trigger file input click
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="flex items-center space-x-4">
       <input
+        ref={(el) => fileInputRef.current = el}
         type="file"
         id="imageUpload"
         accept="image/*"
         onChange={handleImageUpload}
         className="hidden"
       />
-      <label htmlFor="imageUpload">
-        <Button 
-          type="button" 
-          variant="outline" 
-          disabled={uploading}
-        >
-          <Upload size={16} className="mr-2" />
-          {uploading ? 'Uploading...' : 'Upload Image'}
-        </Button>
-      </label>
+      <Button 
+        type="button" 
+        variant="outline" 
+        disabled={uploading}
+        onClick={triggerFileInput}
+      >
+        <Upload size={16} className="mr-2" />
+        {uploading ? 'Uploading...' : 'Upload Image'}
+      </Button>
     </div>
   );
 };
