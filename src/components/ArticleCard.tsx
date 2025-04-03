@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
 import KeywordBadge from "./KeywordBadge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -41,14 +41,6 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           ))}
         </div>
       </CardContent>
-      <CardFooter className="pt-0">
-        <Link 
-          to={`/article/${article.id}`}
-          className="text-primary hover:text-primary/80 font-medium text-sm"
-        >
-          Read more →
-        </Link>
-      </CardFooter>
     </Card>
   );
 };
