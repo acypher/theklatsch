@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
 import KeywordBadge from "./KeywordBadge";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface ArticleCardProps {
   article: Article;
@@ -18,13 +19,14 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
       <CardHeader className="p-0">
         <Link to={`/article/${article.id}`}>
-          <div className="h-48 overflow-hidden">
+          <AspectRatio ratio={16 / 9} className="overflow-hidden">
             <img 
               src={article.imageUrl} 
               alt={article.title} 
               className="w-full h-full object-cover transition-transform hover:scale-105"
+              loading="lazy"
             />
-          </div>
+          </AspectRatio>
         </Link>
       </CardHeader>
       <CardContent className="flex-grow pt-6">
