@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ArticleList from "@/components/ArticleList";
-import { getAllArticles, getArticlesByKeyword, updateArticlesOrder } from "@/lib/data";
+import { getAllArticles, getArticlesByKeyword, updateArticlesOrder, getArticlesByIssue } from "@/lib/data";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ArticleArrangeList from "@/components/ArticleArrangeList";
+import IssueSelector from "@/components/IssueSelector";
 
 const Index = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -16,6 +17,8 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const keywordFilter = searchParams.get("keyword");
   const arrangeMode = searchParams.get("mode") === "arrange";
+  const monthParam = searchParams.get("month");
+  const yearParam = searchParams.get("year");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
@@ -73,9 +76,16 @@ const Index = () => {
     const fetchArticles = async () => {
       try {
         setLoading(true);
+        
+        const month = monthParam ? parseInt(monthParam) : undefined;
+        const year = yearParam ? parseInt(yearParam) : undefined;
+        
         if (keywordFilter) {
-          const filteredArticles = await getArticlesByKeyword(keywordFilter);
+          const filteredArticles = await getArticlesByKeyword(keywordFilter, month, year);
           setArticles(filteredArticles);
+        } else if (month !== undefined && year !== undefined) {
+          const issueArticles = await getArticlesByIssue(month, year);
+          setArticles(issueArticles);
         } else {
           const allArticles = await getAllArticles();
           setArticles(allArticles);
@@ -89,14 +99,20 @@ const Index = () => {
     };
 
     fetchArticles();
-  }, [keywordFilter]);
+  }, [keywordFilter, monthParam, yearParam]);
 
   const handleClearKeyword = () => {
-    setSearchParams({});
+    const newParams: { [key: string]: string } = {};
+    if (monthParam) newParams.month = monthParam;
+    if (yearParam) newParams.year = yearParam;
+    setSearchParams(newParams);
   };
 
   const handleExitArrangeMode = () => {
-    setSearchParams({});
+    const newParams: { [key: string]: string } = {};
+    if (monthParam) newParams.month = monthParam;
+    if (yearParam) newParams.year = yearParam;
+    setSearchParams(newParams);
   };
 
   const handleSaveOrder = async () => {
@@ -116,6 +132,20 @@ const Index = () => {
     }
   };
 
+  const handleIssueChange = async (month: number, year: number) => {
+    console.log(`Issue changed to ${month}/${year}`);
+    setLoading(true);
+    try {
+      const issueArticles = await getArticlesByIssue(month, year);
+      setArticles(issueArticles);
+    } catch (error) {
+      console.error(`Failed to fetch articles for issue ${month}/${year}:`, error);
+      toast.error("Failed to load articles for selected issue");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (arrangeMode && !isAuthenticated) {
       setSearchParams({});
@@ -127,17 +157,27 @@ const Index = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
-          {logoUrl ? (
-            <div className="flex justify-center mb-4">
-              <img 
-                src={logoUrl} 
-                alt="The Klatsch" 
-                className="h-20 md:h-24" 
-              />
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex-1">
             </div>
-          ) : (
-            <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
-          )}
+            
+            <div className="flex-1 flex justify-center">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt="The Klatsch" 
+                  className="h-20 md:h-24" 
+                />
+              ) : (
+                <h1 className="text-4xl font-bold">The Klatsch</h1>
+              )}
+            </div>
+            
+            <div className="flex-1 flex justify-end">
+              <IssueSelector onIssueChange={handleIssueChange} />
+            </div>
+          </div>
+          
           <a 
             href="subtitle" 
             id="subtitle"

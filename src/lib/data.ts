@@ -1,4 +1,3 @@
-
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +12,9 @@ const DEFAULT_ARTICLES: Article[] = [
     keywords: ["Web Development", "JavaScript", "Future Tech"],
     imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
     sourceUrl: "https://example.com/web-dev-future",
-    createdAt: "2023-06-15T10:30:00Z"
+    createdAt: "2023-06-15T10:30:00Z",
+    month: 4,
+    year: 2025
   },
   {
     id: "2",
@@ -23,7 +24,9 @@ const DEFAULT_ARTICLES: Article[] = [
     keywords: ["Machine Learning", "AI", "Data Science"],
     imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475",
     sourceUrl: "https://example.com/ml-basics",
-    createdAt: "2023-05-22T14:20:00Z"
+    createdAt: "2023-05-22T14:20:00Z",
+    month: 4,
+    year: 2025
   },
   {
     id: "3",
@@ -77,17 +80,61 @@ const mapArticleFromDb = (dbArticle: any): Article => {
     createdAt: dbArticle.created_at,
     more_content: dbArticle.more_content,
     deleted: dbArticle.deleted,
-    deletedAt: dbArticle.deleted_at
+    deletedAt: dbArticle.deleted_at,
+    month: dbArticle.month,
+    year: dbArticle.year
   };
 };
 
-// Function to fetch all articles from Supabase
-export const getAllArticles = async (): Promise<Article[]> => {
+// Function to get current issue settings
+export const getCurrentIssue = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'current_issue')
+      .single();
+    
+    if (error) {
+      console.error("Error fetching current issue:", error);
+      return { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
+    }
+    
+    return data.value as { month: number; year: number };
+  } catch (error) {
+    console.error("Error fetching current issue:", error);
+    return { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
+  }
+};
+
+// Function to update current issue settings
+export const updateCurrentIssue = async (month: number, year: number) => {
+  try {
+    const { error } = await supabase
+      .from('settings')
+      .update({ value: { month, year } })
+      .eq('key', 'current_issue');
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating current issue:", error);
+    return false;
+  }
+};
+
+// Function to fetch all articles for a specific month and year
+export const getArticlesByIssue = async (month: number, year: number): Promise<Article[]> => {
   try {
     const { data: articles, error } = await supabase
-      .from('articles' as any)
+      .from('articles')
       .select('*')
       .eq('deleted', false)
+      .eq('month', month)
+      .eq('year', year)
       .order('display_position', { ascending: true })
       .order('created_at', { ascending: false });
 
@@ -98,9 +145,22 @@ export const getAllArticles = async (): Promise<Article[]> => {
     if (articles && articles.length > 0) {
       return articles.map(mapArticleFromDb);
     } else {
-      console.log("No articles found in database, using default articles");
-      return DEFAULT_ARTICLES;
+      console.log(`No articles found for issue ${month}/${year}, using default articles`);
+      return DEFAULT_ARTICLES.filter(article => article.month === month && article.year === year);
     }
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+// Function to fetch all articles from Supabase
+export const getAllArticles = async (): Promise<Article[]> => {
+  try {
+    // First get the current issue
+    const currentIssue = await getCurrentIssue();
+    
+    // Then get articles for that issue
+    return await getArticlesByIssue(currentIssue.month, currentIssue.year);
   } catch (error) {
     return handleApiError(error);
   }
@@ -130,6 +190,9 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
 // Function to add a new article to Supabase
 export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
   try {
+    // Get current issue settings for new article
+    const currentIssue = await getCurrentIssue();
+    
     const newArticle = {
       title: article.title,
       description: article.description,
@@ -138,7 +201,9 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
       more_content: article.more_content,
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      user_id: (await supabase.auth.getUser()).data.user?.id,
+      month: currentIssue.month,
+      year: currentIssue.year
     };
     
     const { data, error } = await (supabase
@@ -190,14 +255,20 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
 };
 
 // Function to get articles by keyword
-export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> => {
+export const getArticlesByKeyword = async (keyword: string, month?: number, year?: number): Promise<Article[]> => {
   try {
-    const { data: articles, error } = await supabase
+    let query = supabase
       .from('articles' as any)
       .select('*')
       .contains('keywords', [keyword])
-      .eq('deleted', false)
-      .order('created_at', { ascending: false });
+      .eq('deleted', false);
+    
+    // Add month and year filters if provided
+    if (month !== undefined && year !== undefined) {
+      query = query.eq('month', month).eq('year', year);
+    }
+    
+    const { data: articles, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       throw new Error(error.message);
@@ -206,6 +277,32 @@ export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> 
     return articles.map(mapArticleFromDb);
   } catch (error) {
     return handleApiError(error);
+  }
+};
+
+// Function to get all available issue dates
+export const getAvailableIssues = async (): Promise<{ month: number; year: number }[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('month, year')
+      .eq('deleted', false)
+      .order('year', { ascending: false })
+      .order('month', { ascending: false });
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Remove duplicates
+    return Array.from(new Set(data.map(a => `${a.month}-${a.year}`)))
+      .map(dateStr => {
+        const [month, year] = dateStr.split('-').map(Number);
+        return { month, year };
+      });
+  } catch (error) {
+    console.error("Error fetching available issues:", error);
+    return [{ month: 4, year: 2025 }];
   }
 };
 
