@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -210,24 +211,23 @@ const ArticleDetail = () => {
                 href={article.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden block cursor-pointer hover:opacity-90 transition-opacity"
+                className="block rounded-lg overflow-hidden"
                 aria-label={`View original source for ${article.title}`}
               >
-                <img 
-                  src={getImageUrl(article.imageUrl)} 
-                  alt={article.title} 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all flex items-center justify-center">
-                  <div className="p-3 rounded-full bg-white bg-opacity-0 hover:bg-opacity-70 transition-all"></div>
+                <div className="relative h-[300px] md:h-[400px] lg:h-[500px]">
+                  <img 
+                    src={getImageUrl(article.imageUrl)} 
+                    alt={article.title} 
+                    className="w-full h-full object-contain"
+                  />
                 </div>
               </a>
             ) : (
-              <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden">
+              <div className="relative rounded-lg overflow-hidden h-[300px] md:h-[400px] lg:h-[500px]">
                 <img 
                   src={getImageUrl(article.imageUrl)} 
                   alt={article.title} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             )}
