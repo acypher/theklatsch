@@ -1,17 +1,10 @@
 
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PenLine, LogOut, LogIn, MoveHorizontal, ChevronDown } from "lucide-react";
+import { PenLine, LogOut, LogIn, MoveHorizontal } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 import IssueSelector from "@/components/IssueSelector";
 import { useState, useEffect } from "react";
 import { getCurrentIssue } from "@/lib/data";
@@ -41,14 +34,6 @@ const Navbar = () => {
     setCurrentIssue({ month, year });
   };
 
-  const getMonthName = (month: number): string => {
-    const months = [
-      "January", "February", "March", "April", "May", "June", 
-      "July", "August", "September", "October", "November", "December"
-    ];
-    return months[month - 1];
-  };
-
   return (
     <nav className="border-b shadow-sm py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
@@ -56,21 +41,9 @@ const Navbar = () => {
           <Link to="/" className="text-2xl font-bold text-primary">The Klatsch</Link>
           
           {currentIssue && (
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="bg-background hover:bg-accent/50">
-                    {getMonthName(currentIssue.month)} {currentIssue.year}
-                    <ChevronDown className="h-4 w-4 ml-1" />
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent className="bg-popover p-4 shadow-md">
-                    <div className="w-[200px]">
-                      <IssueSelector onIssueChange={handleIssueChange} />
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
+            <div className="w-[200px]">
+              <IssueSelector onIssueChange={handleIssueChange} />
+            </div>
           )}
         </div>
         

@@ -67,23 +67,21 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
   }
 
   return (
-    <div className="w-full">
-      <Select value={selectedIssue} onValueChange={handleIssueChange}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select Issue" />
-        </SelectTrigger>
-        <SelectContent>
-          {availableIssues.map((issue) => (
-            <SelectItem 
-              key={`${issue.month}-${issue.year}`} 
-              value={`${issue.month}-${issue.year}`}
-            >
-              {formatIssue(issue.month, issue.year)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select value={selectedIssue} onValueChange={handleIssueChange}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Select Issue" />
+      </SelectTrigger>
+      <SelectContent className="bg-background">
+        {availableIssues.map((issue) => (
+          <SelectItem 
+            key={`${issue.month}-${issue.year}`} 
+            value={`${issue.month}-${issue.year}`}
+          >
+            {formatIssue(issue.month, issue.year)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
 
