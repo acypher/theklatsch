@@ -41,7 +41,7 @@ const Navbar = () => {
           <Link to="/" className="text-2xl font-bold text-primary">The Klatsch</Link>
           
           {currentIssue && (
-            <div className="w-[200px]">
+            <div className="w-auto">
               <IssueSelector onIssueChange={handleIssueChange} />
             </div>
           )}
