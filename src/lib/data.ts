@@ -1,5 +1,5 @@
 
-import { Article, CurrentIssue } from './types';
+import { Article, CurrentIssue, Setting } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -101,7 +101,17 @@ export const getCurrentIssue = async (): Promise<CurrentIssue> => {
       return { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
     }
     
-    return data.value as CurrentIssue;
+    // Safely convert the value to CurrentIssue type with proper type checking
+    const value = data.value as Record<string, any>;
+    if (typeof value === 'object' && value !== null && 
+        'month' in value && 'year' in value && 
+        typeof value.month === 'number' && typeof value.year === 'number') {
+      return { month: value.month, year: value.year };
+    }
+    
+    // If the data doesn't match expected structure, return default
+    console.error("Current issue data is not in expected format:", data.value);
+    return { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
   } catch (error) {
     console.error("Error fetching current issue:", error);
     return { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
