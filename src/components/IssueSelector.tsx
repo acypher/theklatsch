@@ -77,7 +77,7 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
           <SelectItem 
             key={`${issue.month}-${issue.year}`} 
             value={`${issue.month}-${issue.year}`}
-            className="!px-2 !py-1"
+            className="!pl-2 !pr-2 !py-1"
           >
             {formatIssue(issue.month, issue.year)}
           </SelectItem>
