@@ -64,7 +64,7 @@ const Navbar = () => {
                     <ChevronDown className="h-4 w-4 ml-1" />
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="bg-popover p-4 shadow-md">
-                    <div className="w-[300px]">
+                    <div className="w-[200px]">
                       <IssueSelector onIssueChange={handleIssueChange} />
                     </div>
                   </NavigationMenuContent>
