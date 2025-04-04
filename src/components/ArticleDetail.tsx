@@ -234,17 +234,18 @@ const ArticleDetail = () => {
           </div>
           
           <div className="prose prose-lg max-w-none mb-8">
-            <p className="text-xl leading-relaxed mb-8">{article.description}</p>
+            <div className="prose prose-lg max-w-none mb-8">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {article.description}
+              </ReactMarkdown>
+            </div>
             
             {article.more_content && (
               <div className="mt-8 pt-8 border-t">
                 <h2 className="text-2xl font-bold mb-4">More Information</h2>
                 <div className="prose prose-lg max-w-none">
                   <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]} 
-                    components={{
-                      p: ({node, ...props}) => <p {...props} />,
-                    }}
+                    remarkPlugins={[remarkGfm]}
                   >
                     {article.more_content}
                   </ReactMarkdown>
