@@ -27,11 +27,9 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
   useEffect(() => {
     const loadIssues = async () => {
       try {
-        // Get all available issues
         const issues = await getAvailableIssues();
         setAvailableIssues(issues);
         
-        // Set default selected issue either from URL or from current settings
         const monthParam = searchParams.get("month");
         const yearParam = searchParams.get("year");
         
@@ -49,7 +47,6 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
     loadIssues();
   }, [searchParams]);
 
-  // When issue selection changes
   const handleIssueChange = (value: string) => {
     const [month, year] = value.split("-").map(Number);
     setSelectedIssue(value);
@@ -57,7 +54,6 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
     onIssueChange(month, year);
   };
 
-  // Format issue as "Month Year"
   const formatIssue = (month: number, year: number): string => {
     return `${MONTHS[month - 1]} ${year}`;
   };
@@ -68,14 +64,15 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
 
   return (
     <Select value={selectedIssue} onValueChange={handleIssueChange}>
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-full !py-1 !h-8">
         <SelectValue placeholder="Select Issue" />
       </SelectTrigger>
-      <SelectContent className="bg-background">
+      <SelectContent className="bg-background min-w-[120px] w-auto">
         {availableIssues.map((issue) => (
           <SelectItem 
             key={`${issue.month}-${issue.year}`} 
             value={`${issue.month}-${issue.year}`}
+            className="!px-2 !py-1"
           >
             {formatIssue(issue.month, issue.year)}
           </SelectItem>
@@ -86,3 +83,4 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
 };
 
 export default IssueSelector;
+
