@@ -1,4 +1,5 @@
-import { Article } from './types';
+
+import { Article, CurrentIssue } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -87,11 +88,11 @@ const mapArticleFromDb = (dbArticle: any): Article => {
 };
 
 // Function to get current issue settings
-export const getCurrentIssue = async () => {
+export const getCurrentIssue = async (): Promise<CurrentIssue> => {
   try {
     const { data, error } = await supabase
       .from('settings')
-      .select('value')
+      .select('*')
       .eq('key', 'current_issue')
       .single();
     
@@ -100,7 +101,7 @@ export const getCurrentIssue = async () => {
       return { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
     }
     
-    return data.value as { month: number; year: number };
+    return data.value as CurrentIssue;
   } catch (error) {
     console.error("Error fetching current issue:", error);
     return { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
@@ -108,7 +109,7 @@ export const getCurrentIssue = async () => {
 };
 
 // Function to update current issue settings
-export const updateCurrentIssue = async (month: number, year: number) => {
+export const updateCurrentIssue = async (month: number, year: number): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('settings')
@@ -207,8 +208,8 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
     };
     
     const { data, error } = await (supabase
-      .from('articles' as any)
-      .insert(newArticle as any)
+      .from('articles')
+      .insert(newArticle)
       .select()
       .single());
 
@@ -258,7 +259,7 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
 export const getArticlesByKeyword = async (keyword: string, month?: number, year?: number): Promise<Article[]> => {
   try {
     let query = supabase
-      .from('articles' as any)
+      .from('articles')
       .select('*')
       .contains('keywords', [keyword])
       .eq('deleted', false);
