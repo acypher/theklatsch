@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -9,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ArticleArrangeList from "@/components/ArticleArrangeList";
-import IssueSelector from "@/components/IssueSelector";
 
 const Index = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -132,20 +132,6 @@ const Index = () => {
     }
   };
 
-  const handleIssueChange = async (month: number, year: number) => {
-    console.log(`Issue changed to ${month}/${year}`);
-    setLoading(true);
-    try {
-      const issueArticles = await getArticlesByIssue(month, year);
-      setArticles(issueArticles);
-    } catch (error) {
-      console.error(`Failed to fetch articles for issue ${month}/${year}:`, error);
-      toast.error("Failed to load articles for selected issue");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (arrangeMode && !isAuthenticated) {
       setSearchParams({});
@@ -157,25 +143,16 @@ const Index = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex-1">
-            </div>
-            
-            <div className="flex-1 flex justify-center">
-              {logoUrl ? (
-                <img 
-                  src={logoUrl} 
-                  alt="The Klatsch" 
-                  className="h-20 md:h-24" 
-                />
-              ) : (
-                <h1 className="text-4xl font-bold">The Klatsch</h1>
-              )}
-            </div>
-            
-            <div className="flex-1 flex justify-end">
-              <IssueSelector onIssueChange={handleIssueChange} />
-            </div>
+          <div className="flex justify-center mb-6">
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt="The Klatsch" 
+                className="h-20 md:h-24" 
+              />
+            ) : (
+              <h1 className="text-4xl font-bold">The Klatsch</h1>
+            )}
           </div>
           
           <a 

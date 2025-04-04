@@ -1,13 +1,34 @@
 
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PenLine, LogOut, LogIn, MoveHorizontal } from "lucide-react";
+import { PenLine, LogOut, LogIn, MoveHorizontal, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import IssueSelector from "@/components/IssueSelector";
+import { useState, useEffect } from "react";
+import { getCurrentIssue } from "@/lib/data";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
+  const [searchParams] = useSearchParams();
+  const [currentIssue, setCurrentIssue] = useState<{ month: number; year: number } | null>(null);
+  
+  useEffect(() => {
+    const fetchCurrentIssue = async () => {
+      const issue = await getCurrentIssue();
+      setCurrentIssue(issue);
+    };
+    
+    fetchCurrentIssue();
+  }, []);
   
   const getUserInitials = () => {
     if (!user) return "?";
@@ -15,10 +36,43 @@ const Navbar = () => {
     return email.substring(0, 2).toUpperCase();
   };
 
+  const handleIssueChange = (month: number, year: number) => {
+    // This will be called when the issue is changed in the dropdown
+    setCurrentIssue({ month, year });
+  };
+
+  const getMonthName = (month: number): string => {
+    const months = [
+      "January", "February", "March", "April", "May", "June", 
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return months[month - 1];
+  };
+
   return (
     <nav className="border-b shadow-sm py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-primary">The Klatsch</Link>
+        <div className="flex items-center gap-4">
+          <Link to="/" className="text-2xl font-bold text-primary">The Klatsch</Link>
+          
+          {currentIssue && (
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="bg-background hover:bg-accent/50">
+                    {getMonthName(currentIssue.month)} {currentIssue.year}
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent className="bg-popover p-4 shadow-md">
+                    <div className="w-[300px]">
+                      <IssueSelector onIssueChange={handleIssueChange} />
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          )}
+        </div>
         
         <div className="flex items-center gap-4">
           {user ? (
