@@ -15,14 +15,20 @@ export const getAvailableIssues = async (): Promise<{ month: number; year: numbe
       throw new Error(error.message);
     }
 
-    // Remove duplicates and ensure we return unique month-year combinations
-    const uniqueIssues = Array.from(new Set(data.map(a => `${a.month}-${a.year}`)))
-      .map(dateStr => {
-        const [month, year] = dateStr.split('-').map(Number);
-        return { month, year };
-      });
-
-    return uniqueIssues;
+    // Remove duplicates and ensure values are numbers
+    const uniqueIssues = new Map<string, { month: number; year: number }>();
+    
+    data?.forEach(item => {
+      if (item.month && item.year) {
+        const key = `${item.month}-${item.year}`;
+        uniqueIssues.set(key, { 
+          month: Number(item.month), 
+          year: Number(item.year) 
+        });
+      }
+    });
+    
+    return Array.from(uniqueIssues.values());
   } catch (error) {
     console.error("Error fetching available issues:", error);
     return [{ month: 4, year: 2025 }, { month: 5, year: 2025 }];
@@ -41,11 +47,12 @@ export const getCurrentIssue = async (): Promise<CurrentIssue> => {
       throw new Error(error.message);
     }
     
-    // Ensure we have both month and year properties
-    const issue = data.value as CurrentIssue;
+    // Fix: Properly cast the value to CurrentIssue with type safety
+    const value = data?.value as Record<string, any>;
+    
     return {
-      month: issue.month || 5,
-      year: issue.year || 2025
+      month: typeof value?.month === 'number' ? value.month : 5,
+      year: typeof value?.year === 'number' ? value.year : 2025
     };
   } catch (error) {
     console.error("Error fetching current issue:", error);
@@ -229,15 +236,17 @@ export const deleteArticle = async (id: string): Promise<boolean> => {
 
 export const updateArticlesOrder = async (articlesOrder: { id: string; position: number }[]): Promise<boolean> => {
   try {
-    const updates = articlesOrder.map(({ id, position }) => ({
-      id,
-      display_position: position
-    }));
-    
-    const { error } = await supabase.from('articles').upsert(updates);
-    
-    if (error) {
-      throw new Error(error.message);
+    // Fix: Use a transaction to update multiple records
+    // We need to update each article individually as upsert doesn't support array of partial updates
+    for (const item of articlesOrder) {
+      const { error } = await supabase
+        .from('articles')
+        .update({ display_position: item.position })
+        .eq('id', item.id);
+      
+      if (error) {
+        throw new Error(error.message);
+      }
     }
     
     return true;
