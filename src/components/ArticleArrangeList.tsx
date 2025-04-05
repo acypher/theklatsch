@@ -12,12 +12,13 @@ interface ArticleArrangeListProps {
 
 const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) => {
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
 
   // Handle drag start
   const handleDragStart = (index: number, e: React.DragEvent) => {
     setDraggedItemIndex(index);
     
-    // Set the drag image (optional)
+    // Set the drag image
     if (e.dataTransfer.setDragImage) {
       const element = e.currentTarget as HTMLElement;
       e.dataTransfer.setDragImage(element, 20, 20);
@@ -29,9 +30,10 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
   };
 
   // Handle drag over another item
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (index: number, e: React.DragEvent) => {
     e.preventDefault(); // Allow drop
     e.dataTransfer.dropEffect = 'move';
+    setDragOverItemIndex(index);
   };
 
   // Handle drop of an item
@@ -52,11 +54,25 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
     // Update the state
     setArticles(newArticles);
     setDraggedItemIndex(null);
+    setDragOverItemIndex(null);
+    
+    // Log for debugging
+    console.log("Articles rearranged:", newArticles.map((article, idx) => ({
+      id: article.id,
+      title: article.title,
+      position: idx + 1
+    })));
   };
 
   // Handle drag end (cleanup)
   const handleDragEnd = () => {
     setDraggedItemIndex(null);
+    setDragOverItemIndex(null);
+  };
+  
+  // Handle drag leave
+  const handleDragLeave = () => {
+    setDragOverItemIndex(null);
   };
 
   return (
@@ -64,12 +80,17 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
       {articles.map((article, index) => (
         <Card 
           key={article.id} 
-          className={`flex items-center border ${
-            draggedItemIndex === index ? 'border-primary bg-primary/5' : 'border-gray-200'
+          className={`flex items-center border transition-colors ${
+            draggedItemIndex === index 
+              ? 'border-primary bg-primary/5' 
+              : dragOverItemIndex === index
+                ? 'border-primary/70 bg-primary/10'
+                : 'border-gray-200'
           }`}
           draggable
           onDragStart={(e) => handleDragStart(index, e)}
-          onDragOver={handleDragOver}
+          onDragOver={(e) => handleDragOver(index, e)}
+          onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(index, e)}
           onDragEnd={handleDragEnd}
         >

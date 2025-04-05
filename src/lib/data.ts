@@ -1,4 +1,3 @@
-
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -233,23 +232,29 @@ export const deleteArticle = async (id: string): Promise<boolean> => {
   }
 };
 
-// Function to update article display order - FIXED
+// Function to update article display order
 export const updateArticlesOrder = async (articlesOrder: { id: string, position: number }[]): Promise<boolean> => {
   try {
     // Log what we're updating for debugging
     console.log("Updating article order with:", articlesOrder);
     
-    // Perform updates one by one
-    for (const item of articlesOrder) {
-      const { error } = await supabase
-        .from('articles')
-        .update({ display_position: item.position })
-        .eq('id', item.id);
-      
-      if (error) {
-        console.error(`Error updating article ${item.id} position:`, error);
-        throw error;
-      }
+    // Create an array of updates to perform
+    const updates = articlesOrder.map(item => ({
+      id: item.id,
+      display_position: item.position
+    }));
+    
+    // Perform all updates in a single batch operation
+    const { error } = await supabase
+      .from('articles')
+      .upsert(updates, { 
+        onConflict: 'id',
+        ignoreDuplicates: false
+      });
+    
+    if (error) {
+      console.error("Error updating articles order:", error);
+      throw error;
     }
     
     console.log("All articles positions updated successfully");
