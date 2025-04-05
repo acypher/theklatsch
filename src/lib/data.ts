@@ -1,4 +1,3 @@
-
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -258,5 +257,54 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
     console.error("Error updating articles order:", error);
     toast.error("Failed to update article order");
     return false;
+  }
+};
+
+// Function to get all available issues
+export const getAllIssues = async () => {
+  try {
+    const { data: issues, error } = await supabase
+      .from('issues')
+      .select('*')
+      .order('year', { ascending: false })
+      .order('month', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return issues || [];
+  } catch (error) {
+    console.error("Error fetching issues:", error);
+    toast.error("Failed to load issues");
+    return [];
+  }
+};
+
+// Function to get articles by issue (month and year)
+export const getArticlesByIssue = async (month: number, year: number): Promise<Article[]> => {
+  try {
+    const { data: articles, error } = await supabase
+      .from('articles' as any)
+      .select('*')
+      .eq('month', month)
+      .eq('year', year)
+      .eq('deleted', false)
+      .order('display_position', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (articles && articles.length > 0) {
+      return articles.map(mapArticleFromDb);
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error(`Error fetching articles for issue ${month}/${year}:`, error);
+    toast.error("Failed to load articles for this issue");
+    return [];
   }
 };

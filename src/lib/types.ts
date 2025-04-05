@@ -14,3 +14,10 @@ export interface Article {
   year?: number | null;
   month?: number | null;
 }
+
+export interface Issue {
+  id: string;
+  month: number;
+  year: number;
+  created_at: string;
+}
