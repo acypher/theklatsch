@@ -1,15 +1,18 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { getCurrentIssue } from "@/lib/data";
+import { getCurrentIssue, getAllArticles } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
+import { Article } from "@/lib/types";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [currentIssue, setCurrentIssue] = useState<string | null>(null);
   const [showMaintenancePage, setShowMaintenancePage] = useState(true);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     const loadCurrentIssue = async () => {
@@ -20,6 +23,22 @@ const Index = () => {
     };
     
     loadCurrentIssue();
+  }, []);
+  
+  useEffect(() => {
+    const fetchArticles = async () => {
+      setLoading(true);
+      try {
+        const articlesData = await getAllArticles();
+        setArticles(articlesData);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
   }, []);
   
   useEffect(() => {
@@ -88,7 +107,10 @@ const Index = () => {
   );
 
   const RegularHomePage = () => (
-    <ArticleList />
+    <ArticleList 
+      articles={articles} 
+      loading={loading}
+    />
   );
 
   return (
