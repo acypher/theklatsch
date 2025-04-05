@@ -1,3 +1,4 @@
+
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -238,27 +239,31 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
     // Log what we're updating for debugging
     console.log("Updating article order with:", articlesOrder);
     
-    // Create an array of updates to perform
-    const updates = articlesOrder.map(item => ({
-      id: item.id,
-      display_position: item.position
-    }));
+    // Track if all updates are successful
+    let allSuccessful = true;
     
-    // Perform all updates in a single batch operation
-    const { error } = await supabase
-      .from('articles')
-      .upsert(updates, { 
-        onConflict: 'id',
-        ignoreDuplicates: false
-      });
-    
-    if (error) {
-      console.error("Error updating articles order:", error);
-      throw error;
+    // Perform updates one by one
+    for (const item of articlesOrder) {
+      console.log(`Updating article ${item.id} to position ${item.position}`);
+      
+      const { error } = await supabase
+        .from('articles')
+        .update({ display_position: item.position })
+        .eq('id', item.id);
+      
+      if (error) {
+        console.error(`Error updating article ${item.id} position:`, error);
+        allSuccessful = false;
+      }
     }
     
-    console.log("All articles positions updated successfully");
-    return true;
+    if (allSuccessful) {
+      console.log("All articles positions updated successfully");
+      return true;
+    } else {
+      console.error("Some article position updates failed");
+      return false;
+    }
   } catch (error) {
     console.error("Error updating articles order:", error);
     toast.error("Failed to update article order");
