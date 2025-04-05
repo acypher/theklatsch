@@ -37,6 +37,36 @@ export const getAvailableIssues = async (): Promise<{ month: number; year: numbe
 
 export const getCurrentIssue = async (): Promise<CurrentIssue> => {
   try {
+    // First check if the setting exists
+    const { data: settingExists, error: checkError } = await supabase
+      .from('settings')
+      .select('id')
+      .eq('key', 'current_issue')
+      .maybeSingle();
+    
+    if (checkError) {
+      throw new Error(checkError.message);
+    }
+    
+    // If setting doesn't exist, create it with default values
+    if (!settingExists) {
+      const defaultIssue = { month: 5, year: 2025 };
+      
+      const { error: insertError } = await supabase
+        .from('settings')
+        .insert({
+          key: 'current_issue',
+          value: defaultIssue
+        });
+      
+      if (insertError) {
+        throw new Error(insertError.message);
+      }
+      
+      return defaultIssue;
+    }
+    
+    // Now we can safely get the setting
     const { data, error } = await supabase
       .from('settings')
       .select('value')
