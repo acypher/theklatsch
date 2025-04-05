@@ -1,3 +1,4 @@
+
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -273,16 +274,18 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
 // Function to get current issue data - updated to use "issue" table
 export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
   try {
-    // Using raw SQL query to work around type issues with the renamed table
     const { data, error } = await supabase
-      .rpc('get_current_issue');
+      .from('issue')
+      .select('value')
+      .eq('key', 'latest_issue')
+      .single();
     
     if (error) {
       console.error("Error fetching current issue:", error);
       return null;
     }
     
-    return data as { text: string } | null;
+    return data?.value as { text: string } | null;
   } catch (error) {
     console.error("Error in getCurrentIssue:", error);
     return null;
@@ -292,17 +295,22 @@ export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
 // Function to update the current month and year in the issue table
 export const updateCurrentMonthYear = async (month: number, year: number): Promise<boolean> => {
   try {
-    // Using raw SQL query to work around type issues with the renamed table
+    // Update latest_month
     const { error: monthError } = await supabase
-      .rpc('update_month', { month_value: month });
+      .from('issue')
+      .update({ value: month })
+      .eq('key', 'latest_month');
     
     if (monthError) {
       console.error("Error updating current month:", monthError);
       return false;
     }
     
+    // Update latest_year
     const { error: yearError } = await supabase
-      .rpc('update_year', { year_value: year });
+      .from('issue')
+      .update({ value: year })
+      .eq('key', 'latest_year');
     
     if (yearError) {
       console.error("Error updating current year:", yearError);
