@@ -4,10 +4,12 @@ import Navbar from "@/components/Navbar";
 import { getCurrentIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle } from "lucide-react";
+import ArticleList from "@/components/ArticleList";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [currentIssue, setCurrentIssue] = useState<string | null>(null);
+  const [showMaintenancePage, setShowMaintenancePage] = useState(true);
   
   useEffect(() => {
     const loadCurrentIssue = async () => {
@@ -60,9 +62,38 @@ const Index = () => {
     uploadLogo();
   }, []);
 
+  const MaintenancePage = () => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="max-w-3xl mx-auto text-center">
+        <div className="mb-6 flex justify-center">
+          <AlertTriangle className="h-16 w-16 text-amber-500" />
+        </div>
+        
+        <h2 className="text-3xl font-bold mb-6">Lovable Trouble</h2>
+        
+        <div className="flex justify-center mb-8">
+          <img 
+            src="/lovable-uploads/a99bdae2-b16b-477b-87c2-37edc603881f.png" 
+            alt="Person confused looking at computer with errors" 
+            className="max-w-full h-auto rounded-lg shadow-lg"
+          />
+        </div>
+        
+        <p className="text-lg text-muted-foreground mt-6">
+          We're currently experiencing some technical difficulties. 
+          Our team is working hard to resolve the issue.
+        </p>
+      </div>
+    </div>
+  );
+
+  const RegularHomePage = () => (
+    <ArticleList />
+  );
+
   return (
     <div>
-      <Navbar />
+      <Navbar onLogoClick={() => setShowMaintenancePage(false)} />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
           {logoUrl ? (
@@ -85,28 +116,7 @@ const Index = () => {
           </a>
         </header>
         
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="mb-6 flex justify-center">
-              <AlertTriangle className="h-16 w-16 text-amber-500" />
-            </div>
-            
-            <h2 className="text-3xl font-bold mb-6">Lovable Trouble</h2>
-            
-            <div className="flex justify-center mb-8">
-              <img 
-                src="/lovable-uploads/a99bdae2-b16b-477b-87c2-37edc603881f.png" 
-                alt="Person confused looking at computer with errors" 
-                className="max-w-full h-auto rounded-lg shadow-lg"
-              />
-            </div>
-            
-            <p className="text-lg text-muted-foreground mt-6">
-              We're currently experiencing some technical difficulties. 
-              Our team is working hard to resolve the issue.
-            </p>
-          </div>
-        </div>
+        {showMaintenancePage ? <MaintenancePage /> : <RegularHomePage />}
       </main>
     </div>
   );

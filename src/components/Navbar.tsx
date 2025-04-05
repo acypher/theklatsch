@@ -6,7 +6,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const Navbar = () => {
+interface NavbarProps {
+  onLogoClick?: () => void;
+}
+
+const Navbar = ({ onLogoClick }: NavbarProps) => {
   const { user, signOut } = useAuth();
   
   const getUserInitials = () => {
@@ -15,10 +19,23 @@ const Navbar = () => {
     return email.substring(0, 2).toUpperCase();
   };
 
+  const handleLogoClick = (event: React.MouseEvent) => {
+    if (onLogoClick) {
+      event.preventDefault();
+      onLogoClick();
+    }
+  };
+
   return (
     <nav className="border-b shadow-sm py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-primary">The Klatsch</Link>
+        <Link 
+          to="/" 
+          className="text-2xl font-bold text-primary"
+          onClick={handleLogoClick}
+        >
+          The Klatsch
+        </Link>
         
         <div className="flex items-center gap-4">
           {user ? (
