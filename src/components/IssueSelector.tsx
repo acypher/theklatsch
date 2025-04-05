@@ -23,10 +23,12 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [availableIssues, setAvailableIssues] = useState<{ month: number; year: number }[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadIssues = async () => {
       try {
+        setIsLoading(true);
         const issues = await getAvailableIssues();
         setAvailableIssues(issues);
         
@@ -38,14 +40,25 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
         } else {
           const currentIssue = await getCurrentIssue();
           setSelectedIssue(`${currentIssue.month}-${currentIssue.year}`);
+          
+          // If no URL parameters are set, update the URL with the current issue
+          if (!monthParam && !yearParam) {
+            setSearchParams({ 
+              month: currentIssue.month.toString(), 
+              year: currentIssue.year.toString() 
+            });
+            onIssueChange(currentIssue.month, currentIssue.year);
+          }
         }
       } catch (error) {
         console.error("Error loading issues:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
     loadIssues();
-  }, [searchParams]);
+  }, [searchParams, onIssueChange, setSearchParams]);
 
   const handleIssueChange = (value: string) => {
     const [month, year] = value.split("-").map(Number);
@@ -58,7 +71,7 @@ const IssueSelector = ({ onIssueChange }: IssueSelectorProps) => {
     return `${MONTHS[month - 1]} ${year}`;
   };
 
-  if (!selectedIssue) {
+  if (isLoading) {
     return <div className="text-muted-foreground text-sm">Loading issues...</div>;
   }
 
