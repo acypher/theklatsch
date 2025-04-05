@@ -1,6 +1,5 @@
 
-"use client"
-
+import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, MoveHorizontal, ChevronDown } from "lucide-react";
@@ -8,7 +7,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,7 +109,11 @@ const Navbar = () => {
           
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="ghost" className="text-2xl font-bold text-primary p-0 h-auto flex items-center gap-1">
+              <Button 
+                id="issue-selector"
+                variant="ghost" 
+                className="text-2xl font-bold text-primary p-0 h-auto flex items-center gap-1"
+              >
                 <ChevronDown size={20} />
               </Button>
             </PopoverTrigger>
