@@ -264,7 +264,7 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
 export const getAllIssues = async () => {
   try {
     const { data: issues, error } = await supabase
-      .from('issues')
+      .from('issues' as any)
       .select('*')
       .order('year', { ascending: false })
       .order('month', { ascending: false });
