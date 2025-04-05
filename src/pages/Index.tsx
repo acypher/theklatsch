@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ArticleList from "@/components/ArticleList";
-import { getAllArticles, getArticlesByKeyword, updateArticlesOrder, getArticlesByIssue, getCurrentIssue } from "@/lib/data";
+import { getAllArticles, getArticlesByKeyword, updateArticlesOrder } from "@/lib/data";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,8 +16,6 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const keywordFilter = searchParams.get("keyword");
   const arrangeMode = searchParams.get("mode") === "arrange";
-  const monthParam = searchParams.get("month");
-  const yearParam = searchParams.get("year");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
@@ -76,19 +73,12 @@ const Index = () => {
     const fetchArticles = async () => {
       try {
         setLoading(true);
-        
-        // If no month/year params, get the current issue
-        const currentIssue = await getCurrentIssue();
-        const month = monthParam ? parseInt(monthParam) : currentIssue.month;
-        const year = yearParam ? parseInt(yearParam) : currentIssue.year;
-        
         if (keywordFilter) {
-          const filteredArticles = await getArticlesByKeyword(keywordFilter, month, year);
+          const filteredArticles = await getArticlesByKeyword(keywordFilter);
           setArticles(filteredArticles);
         } else {
-          // Always filter by current issue if no specific params
-          const issueArticles = await getArticlesByIssue(month, year);
-          setArticles(issueArticles);
+          const allArticles = await getAllArticles();
+          setArticles(allArticles);
         }
       } catch (error) {
         console.error("Failed to fetch articles:", error);
@@ -99,20 +89,14 @@ const Index = () => {
     };
 
     fetchArticles();
-  }, [keywordFilter, monthParam, yearParam]);
+  }, [keywordFilter]);
 
   const handleClearKeyword = () => {
-    const newParams: { [key: string]: string } = {};
-    if (monthParam) newParams.month = monthParam;
-    if (yearParam) newParams.year = yearParam;
-    setSearchParams(newParams);
+    setSearchParams({});
   };
 
   const handleExitArrangeMode = () => {
-    const newParams: { [key: string]: string } = {};
-    if (monthParam) newParams.month = monthParam;
-    if (yearParam) newParams.year = yearParam;
-    setSearchParams(newParams);
+    setSearchParams({});
   };
 
   const handleSaveOrder = async () => {
@@ -143,18 +127,17 @@ const Index = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
-          <div className="flex justify-center mb-6">
-            {logoUrl ? (
+          {logoUrl ? (
+            <div className="flex justify-center mb-4">
               <img 
                 src={logoUrl} 
                 alt="The Klatsch" 
                 className="h-20 md:h-24" 
               />
-            ) : (
-              <h1 className="text-4xl font-bold">The Klatsch</h1>
-            )}
-          </div>
-          
+            </div>
+          ) : (
+            <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
+          )}
           <a 
             href="subtitle" 
             id="subtitle"

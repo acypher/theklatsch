@@ -40,7 +40,10 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
       {value && (
         <div className="mt-4 prose prose-lg max-w-none">
           <ReactMarkdown 
-            remarkPlugins={[remarkGfm]}
+            remarkPlugins={[remarkGfm]} 
+            components={{
+              p: ({node, ...props}) => <p {...props} />,
+            }}
           >
             {value}
           </ReactMarkdown>

@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
 import KeywordBadge from "./KeywordBadge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import ReactMarkdown from 'react-markdown';
 
 interface ArticleCardProps {
   article: Article;
@@ -50,11 +49,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           <h3 className="text-xl font-semibold line-clamp-2 hover:text-primary transition-colors mb-2">{article.title}</h3>
         </Link>
         <p className="text-muted-foreground text-sm mb-2">By {article.author} • {formatDate(article.createdAt)}</p>
-        <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none">
-          <ReactMarkdown>
-            {article.description}
-          </ReactMarkdown>
-        </div>
+        <p className="text-muted-foreground mb-4 line-clamp-3">{article.description}</p>
         <div className="flex flex-wrap gap-2">
           {article.keywords.map((keyword, index) => (
             <KeywordBadge key={index} keyword={keyword} />
