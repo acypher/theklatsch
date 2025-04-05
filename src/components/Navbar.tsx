@@ -5,9 +5,37 @@ import { PenLine, LogOut, LogIn, MoveHorizontal } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
+  const [currentIssue, setCurrentIssue] = useState<string>("");
+  
+  useEffect(() => {
+    const fetchCurrentIssue = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('settings')
+          .select('*')
+          .eq('key', 'current_issue')
+          .single();
+        
+        if (error) {
+          console.error("Error fetching current issue:", error);
+          return;
+        }
+        
+        if (data && data.value && data.value.text) {
+          setCurrentIssue(data.value.text);
+        }
+      } catch (error) {
+        console.error("Failed to fetch current issue:", error);
+      }
+    };
+    
+    fetchCurrentIssue();
+  }, []);
   
   const getUserInitials = () => {
     if (!user) return "?";
@@ -23,7 +51,12 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <Button asChild variant="outline">
+              <Button 
+                id="issue-button" 
+                value={currentIssue}
+                asChild 
+                variant="outline"
+              >
                 <Link to="/?mode=arrange" className="flex items-center gap-2">
                   <MoveHorizontal size={18} />
                   Arrange
