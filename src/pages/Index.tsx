@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ArticleList from "@/components/ArticleList";
-import { getAllArticles, getArticlesByKeyword, updateArticlesOrder, getArticlesByIssue } from "@/lib/data";
+import { getAllArticles, getArticlesByKeyword, updateArticlesOrder, getArticlesByIssue, getCurrentIssue } from "@/lib/data";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,18 +77,18 @@ const Index = () => {
       try {
         setLoading(true);
         
-        const month = monthParam ? parseInt(monthParam) : undefined;
-        const year = yearParam ? parseInt(yearParam) : undefined;
+        // If no month/year params, get the current issue
+        const currentIssue = await getCurrentIssue();
+        const month = monthParam ? parseInt(monthParam) : currentIssue.month;
+        const year = yearParam ? parseInt(yearParam) : currentIssue.year;
         
         if (keywordFilter) {
           const filteredArticles = await getArticlesByKeyword(keywordFilter, month, year);
           setArticles(filteredArticles);
-        } else if (month !== undefined && year !== undefined) {
+        } else {
+          // Always filter by current issue if no specific params
           const issueArticles = await getArticlesByIssue(month, year);
           setArticles(issueArticles);
-        } else {
-          const allArticles = await getAllArticles();
-          setArticles(allArticles);
         }
       } catch (error) {
         console.error("Failed to fetch articles:", error);
