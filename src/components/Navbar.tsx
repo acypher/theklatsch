@@ -1,4 +1,6 @@
 
+"use client"
+
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, MoveHorizontal, ChevronDown } from "lucide-react";
