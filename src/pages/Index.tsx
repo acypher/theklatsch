@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -19,8 +20,7 @@ const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState<number | null>(null);
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [currentIssue, setCurrentIssue] = useState<string | null>(null);
   
   useEffect(() => {
     const uploadLogo = async () => {
@@ -93,6 +93,31 @@ const Index = () => {
     fetchArticles();
   }, [keywordFilter]);
 
+  useEffect(() => {
+    const fetchCurrentSettings = async () => {
+      try {
+        const { data: issueData, error: issueError } = await supabase
+          .from('settings')
+          .select('value')
+          .eq('key', 'current_issue')
+          .single();
+
+        if (issueError) {
+          console.error('Error fetching current issue:', issueError);
+          return;
+        }
+
+        if (issueData && issueData.value && typeof issueData.value === 'object' && 'text' in issueData.value) {
+          setCurrentIssue(issueData.value.text as string);
+        }
+      } catch (error) {
+        console.error('Error fetching current issue:', error);
+      }
+    };
+
+    fetchCurrentSettings();
+  }, []);
+
   const handleClearKeyword = () => {
     setSearchParams({});
   };
@@ -124,38 +149,6 @@ const Index = () => {
     }
   }, [arrangeMode, isAuthenticated, setSearchParams]);
 
-  useEffect(() => {
-    const fetchCurrentSettings = async () => {
-      try {
-        const { data: yearData, error: yearError } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'current_year')
-          .single();
-
-        const { data: monthData, error: monthError } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'current_month')
-          .single();
-
-        if (yearError || monthError) {
-          console.error('Error fetching settings:', yearError || monthError);
-          return;
-        }
-
-        if (yearData && monthData) {
-          setCurrentYear(Number(yearData.value));
-          setCurrentMonth(Number(monthData.value));
-        }
-      } catch (error) {
-        console.error('Error fetching current settings:', error);
-      }
-    };
-
-    fetchCurrentSettings();
-  }, []);
-
   return (
     <div>
       <Navbar />
@@ -177,7 +170,7 @@ const Index = () => {
             id="subtitle"
             className="text-xl text-muted-foreground max-w-2xl mx-auto block"
           >
-            {currentMonth && currentYear ? `${new Date(currentYear, currentMonth - 1).toLocaleString('default', { month: 'long' })} ${currentYear}` : " "}
+            {currentIssue || " "}
           </a>
         </header>
         

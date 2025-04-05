@@ -23,6 +23,7 @@ const Navbar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentMonth, setCurrentMonth] = useState<number | null>(null);
   const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [currentIssue, setCurrentIssue] = useState<string | null>(null);
   const [yearOptions, setYearOptions] = useState<number[]>([]);
   const [monthOptions] = useState<{ value: number; label: string }[]>([
     { value: 1, label: "January" },
@@ -53,6 +54,12 @@ const Navbar = () => {
           .select('value')
           .eq('key', 'current_month')
           .single();
+          
+        const { data: issueData, error: issueError } = await supabase
+          .from('settings')
+          .select('value')
+          .eq('key', 'current_issue')
+          .single();
 
         if (yearError || monthError) {
           console.error('Error fetching settings:', yearError || monthError);
@@ -72,6 +79,10 @@ const Navbar = () => {
             currentYearValue + 1,
             currentYearValue + 2
           ]);
+        }
+        
+        if (issueData && issueData.value && typeof issueData.value === 'object' && 'text' in issueData.value) {
+          setCurrentIssue(issueData.value.text as string);
         }
       } catch (error) {
         console.error('Error fetching current settings:', error);
@@ -106,9 +117,9 @@ const Navbar = () => {
             </PopoverTrigger>
             <PopoverContent className="w-56 p-3" align="start">
               <div className="space-y-3">
-                {currentMonth && currentYear && (
+                {currentIssue && (
                   <div className="text-sm text-muted-foreground mb-2">
-                    Current Issue: {getFormattedMonth()} {currentYear}
+                    Current Issue: {currentIssue}
                   </div>
                 )}
                 
