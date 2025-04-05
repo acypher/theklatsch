@@ -269,3 +269,56 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
     return false;
   }
 };
+
+// Function to get current issue data - updated to use "issue" table instead of "settings"
+export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('issue')
+      .select('value')
+      .eq('key', 'current_issue')
+      .single();
+    
+    if (error) {
+      console.error("Error fetching current issue:", error);
+      return null;
+    }
+    
+    return data?.value as { text: string } | null;
+  } catch (error) {
+    console.error("Error in getCurrentIssue:", error);
+    return null;
+  }
+};
+
+// Function to update the current month and year in the issue table
+export const updateCurrentMonthYear = async (month: number, year: number): Promise<boolean> => {
+  try {
+    // Update current_month
+    const { error: monthError } = await supabase
+      .from('issue')
+      .update({ value: month })
+      .eq('key', 'current_month');
+    
+    if (monthError) {
+      console.error("Error updating current month:", monthError);
+      return false;
+    }
+    
+    // Update current_year
+    const { error: yearError } = await supabase
+      .from('issue')
+      .update({ value: year })
+      .eq('key', 'current_year');
+    
+    if (yearError) {
+      console.error("Error updating current year:", yearError);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating current month/year:", error);
+    return false;
+  }
+};

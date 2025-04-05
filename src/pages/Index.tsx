@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ArticleList from "@/components/ArticleList";
-import { getAllArticles, getArticlesByKeyword, updateArticlesOrder } from "@/lib/data";
+import { getAllArticles, getArticlesByKeyword, updateArticlesOrder, getCurrentIssue } from "@/lib/data";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,18 @@ const Index = () => {
   const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
   const [savingOrder, setSavingOrder] = useState(false);
+  const [currentIssue, setCurrentIssue] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const loadCurrentIssue = async () => {
+      const issueData = await getCurrentIssue();
+      if (issueData?.text) {
+        setCurrentIssue(issueData.text);
+      }
+    };
+    
+    loadCurrentIssue();
+  }, []);
   
   useEffect(() => {
     const uploadLogo = async () => {
@@ -154,7 +167,7 @@ const Index = () => {
             id="subtitle"
             className="text-xl text-muted-foreground max-w-2xl mx-auto block"
           >
-            {" "}
+            {currentIssue || ""}
           </a>
         </header>
         
