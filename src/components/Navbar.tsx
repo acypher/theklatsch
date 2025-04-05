@@ -1,11 +1,11 @@
 
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, MoveHorizontal } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
@@ -26,8 +26,8 @@ const Navbar = () => {
           return;
         }
         
-        if (data && data.value && data.value.text) {
-          setCurrentIssue(data.value.text);
+        if (data && typeof data.value === 'object' && data.value !== null) {
+          setCurrentIssue((data.value as { text: string }).text);
         }
       } catch (error) {
         console.error("Failed to fetch current issue:", error);
