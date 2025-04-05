@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -103,6 +104,8 @@ const Index = () => {
   const handleSaveOrder = async () => {
     setSavingOrder(true);
     try {
+      console.log("About to save article order...");
+      
       const articlesWithPositions = articles.map((article, index) => ({
         id: article.id,
         position: index + 1
