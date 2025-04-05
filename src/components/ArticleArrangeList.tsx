@@ -14,17 +14,30 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
 
   // Handle drag start
-  const handleDragStart = (index: number) => {
+  const handleDragStart = (index: number, e: React.DragEvent) => {
     setDraggedItemIndex(index);
+    
+    // Set the drag image (optional)
+    if (e.dataTransfer.setDragImage) {
+      const element = e.currentTarget as HTMLElement;
+      e.dataTransfer.setDragImage(element, 20, 20);
+    }
+    
+    // Add data to the drag operation
+    e.dataTransfer.setData('text/plain', index.toString());
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   // Handle drag over another item
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault(); // Allow drop
+    e.dataTransfer.dropEffect = 'move';
   };
 
   // Handle drop of an item
-  const handleDrop = (targetIndex: number) => {
+  const handleDrop = (targetIndex: number, e: React.DragEvent) => {
+    e.preventDefault();
+    
     if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
 
     const newArticles = [...articles];
@@ -55,9 +68,9 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
             draggedItemIndex === index ? 'border-primary bg-primary/5' : 'border-gray-200'
           }`}
           draggable
-          onDragStart={() => handleDragStart(index)}
+          onDragStart={(e) => handleDragStart(index, e)}
           onDragOver={handleDragOver}
-          onDrop={() => handleDrop(index)}
+          onDrop={(e) => handleDrop(index, e)}
           onDragEnd={handleDragEnd}
         >
           <div className="flex justify-center items-center p-4 cursor-grab">

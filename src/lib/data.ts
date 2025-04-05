@@ -85,7 +85,7 @@ const mapArticleFromDb = (dbArticle: any): Article => {
 export const getAllArticles = async (): Promise<Article[]> => {
   try {
     const { data: articles, error } = await supabase
-      .from('articles' as any)
+      .from('articles')
       .select('*')
       .eq('deleted', false)
       .order('display_position', { ascending: true })
@@ -110,7 +110,7 @@ export const getAllArticles = async (): Promise<Article[]> => {
 export const getArticleById = async (id: string): Promise<Article | undefined> => {
   try {
     const { data: article, error } = await supabase
-      .from('articles' as any)
+      .from('articles')
       .select('*')
       .eq('id', id)
       .eq('deleted', false)
@@ -141,11 +141,11 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       user_id: (await supabase.auth.getUser()).data.user?.id
     };
     
-    const { data, error } = await (supabase
-      .from('articles' as any)
-      .insert(newArticle as any)
+    const { data, error } = await supabase
+      .from('articles')
+      .insert(newArticle)
       .select()
-      .single());
+      .single();
 
     if (error) {
       throw new Error(error.message);
@@ -171,12 +171,12 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
       more_content: article.more_content
     };
     
-    const { data, error } = await (supabase
-      .from('articles' as any)
-      .update(updatedArticle as any)
+    const { data, error } = await supabase
+      .from('articles')
+      .update(updatedArticle)
       .eq('id', id)
       .select()
-      .single());
+      .single();
 
     if (error) {
       throw new Error(error.message);
@@ -193,7 +193,7 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
 export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> => {
   try {
     const { data: articles, error } = await supabase
-      .from('articles' as any)
+      .from('articles')
       .select('*')
       .contains('keywords', [keyword])
       .eq('deleted', false)
@@ -213,11 +213,11 @@ export const getArticlesByKeyword = async (keyword: string): Promise<Article[]> 
 export const deleteArticle = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('articles' as any)
+      .from('articles')
       .update({ 
         deleted: true, 
         deleted_at: new Date().toISOString() 
-      } as any)
+      })
       .eq('id', id);
 
     if (error) {
@@ -233,24 +233,26 @@ export const deleteArticle = async (id: string): Promise<boolean> => {
   }
 };
 
-// Function to update article display order
+// Function to update article display order - FIXED
 export const updateArticlesOrder = async (articlesOrder: { id: string, position: number }[]): Promise<boolean> => {
   try {
-    // Use a more robust approach with a transaction-like pattern
+    // Log what we're updating for debugging
+    console.log("Updating article order with:", articlesOrder);
+    
+    // Perform updates one by one
     for (const item of articlesOrder) {
       const { error } = await supabase
-        .from('articles' as any)
+        .from('articles')
         .update({ display_position: item.position })
         .eq('id', item.id);
       
       if (error) {
-        console.error(`Error updating article ${item.id}:`, error);
+        console.error(`Error updating article ${item.id} position:`, error);
         throw error;
       }
     }
     
-    console.log("Articles order updated successfully", articlesOrder);
-    toast.success("Articles order updated successfully");
+    console.log("All articles positions updated successfully");
     return true;
   } catch (error) {
     console.error("Error updating articles order:", error);

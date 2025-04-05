@@ -20,6 +20,7 @@ const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
+  const [savingOrder, setSavingOrder] = useState(false);
   
   useEffect(() => {
     const uploadLogo = async () => {
@@ -101,19 +102,27 @@ const Index = () => {
   };
 
   const handleSaveOrder = async () => {
-    const articlesWithPositions = articles.map((article, index) => ({
-      id: article.id,
-      position: index + 1
-    }));
-    
-    console.log("Saving article order:", articlesWithPositions);
-    
-    const success = await updateArticlesOrder(articlesWithPositions);
-    if (success) {
-      toast.success("Article order saved successfully");
-      handleExitArrangeMode();
-    } else {
-      toast.error("Failed to save article order");
+    setSavingOrder(true);
+    try {
+      const articlesWithPositions = articles.map((article, index) => ({
+        id: article.id,
+        position: index + 1
+      }));
+      
+      console.log("Saving article order:", articlesWithPositions);
+      
+      const success = await updateArticlesOrder(articlesWithPositions);
+      if (success) {
+        toast.success("Article order saved successfully");
+        handleExitArrangeMode();
+      } else {
+        toast.error("Failed to save article order");
+      }
+    } catch (error) {
+      console.error("Error saving article order:", error);
+      toast.error("Error occurred while saving article order");
+    } finally {
+      setSavingOrder(false);
     }
   };
 
@@ -153,11 +162,11 @@ const Index = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold">Arrange Articles</h2>
               <div className="flex gap-4">
-                <Button variant="outline" onClick={handleExitArrangeMode}>
+                <Button variant="outline" onClick={handleExitArrangeMode} disabled={savingOrder}>
                   Cancel
                 </Button>
-                <Button onClick={handleSaveOrder}>
-                  Save Order
+                <Button onClick={handleSaveOrder} disabled={savingOrder}>
+                  {savingOrder ? "Saving..." : "Save Order"}
                 </Button>
               </div>
             </div>
