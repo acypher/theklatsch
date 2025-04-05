@@ -1,41 +1,13 @@
 
-import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, MoveHorizontal } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
-  const [currentIssue, setCurrentIssue] = useState<string>("");
-  
-  useEffect(() => {
-    const fetchCurrentIssue = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('settings')
-          .select('*')
-          .eq('key', 'current_issue')
-          .single();
-        
-        if (error) {
-          console.error("Error fetching current issue:", error);
-          return;
-        }
-        
-        if (data && typeof data.value === 'object' && data.value !== null) {
-          setCurrentIssue((data.value as { text: string }).text);
-        }
-      } catch (error) {
-        console.error("Failed to fetch current issue:", error);
-      }
-    };
-    
-    fetchCurrentIssue();
-  }, []);
   
   const getUserInitials = () => {
     if (!user) return "?";
@@ -51,12 +23,7 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <Button 
-                id="issue-button" 
-                value={currentIssue}
-                asChild 
-                variant="outline"
-              >
+              <Button asChild variant="outline">
                 <Link to="/?mode=arrange" className="flex items-center gap-2">
                   <MoveHorizontal size={18} />
                   Arrange
