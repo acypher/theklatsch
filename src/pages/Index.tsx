@@ -1,26 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import ArticleList from "@/components/ArticleList";
-import { getAllArticles, getArticlesByKeyword, updateArticlesOrder, getCurrentIssue } from "@/lib/data";
-import { Article } from "@/lib/types";
-import { toast } from "sonner";
+import { getCurrentIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import ArticleArrangeList from "@/components/ArticleArrangeList";
+import { AlertTriangle } from "lucide-react";
 
 const Index = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const keywordFilter = searchParams.get("keyword");
-  const arrangeMode = searchParams.get("mode") === "arrange";
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
-  const { isAuthenticated } = useAuth();
-  const [savingOrder, setSavingOrder] = useState(false);
   const [currentIssue, setCurrentIssue] = useState<string | null>(null);
   
   useEffect(() => {
@@ -66,15 +52,6 @@ const Index = () => {
         if (logoData) {
           setLogoUrl(logoData.publicUrl);
         }
-
-        const { data: doorData } = supabase
-          .storage
-          .from('logos')
-          .getPublicUrl('klatsch-door.png');
-        
-        if (doorData) {
-          setDoorImageUrl(doorData.publicUrl);
-        }
       } catch (error) {
         console.error('Error with logo:', error);
       }
@@ -82,69 +59,6 @@ const Index = () => {
     
     uploadLogo();
   }, []);
-  
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        if (keywordFilter) {
-          const filteredArticles = await getArticlesByKeyword(keywordFilter);
-          setArticles(filteredArticles);
-        } else {
-          const allArticles = await getAllArticles();
-          setArticles(allArticles);
-        }
-      } catch (error) {
-        console.error("Failed to fetch articles:", error);
-        toast.error("Failed to load articles");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, [keywordFilter]);
-
-  const handleClearKeyword = () => {
-    setSearchParams({});
-  };
-
-  const handleExitArrangeMode = () => {
-    setSearchParams({});
-  };
-
-  const handleSaveOrder = async () => {
-    setSavingOrder(true);
-    try {
-      console.log("About to save article order...");
-      
-      const articlesWithPositions = articles.map((article, index) => ({
-        id: article.id,
-        position: index + 1
-      }));
-      
-      console.log("Saving article order:", articlesWithPositions);
-      
-      const success = await updateArticlesOrder(articlesWithPositions);
-      if (success) {
-        toast.success("Article order saved successfully");
-        handleExitArrangeMode();
-      } else {
-        toast.error("Failed to save article order");
-      }
-    } catch (error) {
-      console.error("Error saving article order:", error);
-      toast.error("Error occurred while saving article order");
-    } finally {
-      setSavingOrder(false);
-    }
-  };
-
-  useEffect(() => {
-    if (arrangeMode && !isAuthenticated) {
-      setSearchParams({});
-    }
-  }, [arrangeMode, isAuthenticated, setSearchParams]);
 
   return (
     <div>
@@ -171,43 +85,28 @@ const Index = () => {
           </a>
         </header>
         
-        {arrangeMode && isAuthenticated ? (
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold">Arrange Articles</h2>
-              <div className="flex gap-4">
-                <Button variant="outline" onClick={handleExitArrangeMode} disabled={savingOrder}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveOrder} disabled={savingOrder}>
-                  {savingOrder ? "Saving..." : "Save Order"}
-                </Button>
-              </div>
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="mb-6 flex justify-center">
+              <AlertTriangle className="h-16 w-16 text-amber-500" />
             </div>
-            <p className="text-muted-foreground mb-6">Drag and drop articles to rearrange them in your preferred order.</p>
-            <ArticleArrangeList 
-              articles={articles} 
-              setArticles={setArticles}
-            />
+            
+            <h2 className="text-3xl font-bold mb-6">Lovable Trouble</h2>
+            
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/lovable-uploads/a99bdae2-b16b-477b-87c2-37edc603881f.png" 
+                alt="Person confused looking at computer with errors" 
+                className="max-w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+            
+            <p className="text-lg text-muted-foreground mt-6">
+              We're currently experiencing some technical difficulties. 
+              Our team is working hard to resolve the issue.
+            </p>
           </div>
-        ) : (
-          <ArticleList 
-            articles={articles} 
-            selectedKeyword={keywordFilter} 
-            onKeywordClear={handleClearKeyword}
-            loading={loading}
-          />
-        )}
-
-        {doorImageUrl && !arrangeMode && (
-          <div className="flex justify-center mt-16 mb-8">
-            <img 
-              src={doorImageUrl} 
-              alt="Klatsch Door" 
-              className="max-h-48 md:max-h-64" 
-            />
-          </div>
-        )}
+        </div>
       </main>
     </div>
   );
