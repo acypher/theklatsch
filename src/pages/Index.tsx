@@ -128,13 +128,13 @@ const Index = () => {
     const fetchCurrentSettings = async () => {
       try {
         const { data: yearData, error: yearError } = await supabase
-          .from('settings')
+          .from('settings' as any)
           .select('value')
           .eq('key', 'current_year')
           .single();
 
         const { data: monthData, error: monthError } = await supabase
-          .from('settings')
+          .from('settings' as any)
           .select('value')
           .eq('key', 'current_month')
           .single();
@@ -144,8 +144,10 @@ const Index = () => {
           return;
         }
 
-        setCurrentYear(Number(yearData?.value));
-        setCurrentMonth(Number(monthData?.value));
+        if (yearData && monthData) {
+          setCurrentYear(Number(yearData.value));
+          setCurrentMonth(Number(monthData.value));
+        }
       } catch (error) {
         console.error('Error fetching current settings:', error);
       }

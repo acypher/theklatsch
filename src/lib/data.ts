@@ -128,7 +128,7 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
 };
 
 // Function to add a new article to Supabase
-export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
+export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'> & { year?: number | null, month?: number | null }): Promise<Article> => {
   try {
     const newArticle = {
       title: article.title,
@@ -138,11 +138,13 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
       more_content: article.more_content,
+      year: article.year,
+      month: article.month,
       user_id: (await supabase.auth.getUser()).data.user?.id
     };
     
     const { data, error } = await (supabase
-      .from('articles' as any)
+      .from('articles')
       .insert(newArticle as any)
       .select()
       .single());

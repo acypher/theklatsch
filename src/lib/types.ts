@@ -11,4 +11,6 @@ export interface Article {
   more_content?: string | null;
   deleted?: boolean;
   deletedAt?: string | null;
+  year?: number | null;
+  month?: number | null;
 }
