@@ -20,12 +20,10 @@ export type Database = {
           id: string
           imageurl: string
           keywords: string[]
-          month: number | null
           more_content: string | null
           sourceurl: string | null
           title: string
           user_id: string | null
-          year: number | null
         }
         Insert: {
           author: string
@@ -37,12 +35,10 @@ export type Database = {
           id?: string
           imageurl: string
           keywords?: string[]
-          month?: number | null
           more_content?: string | null
           sourceurl?: string | null
           title: string
           user_id?: string | null
-          year?: number | null
         }
         Update: {
           author?: string
@@ -54,33 +50,10 @@ export type Database = {
           id?: string
           imageurl?: string
           keywords?: string[]
-          month?: number | null
           more_content?: string | null
           sourceurl?: string | null
           title?: string
           user_id?: string | null
-          year?: number | null
-        }
-        Relationships: []
-      }
-      issues: {
-        Row: {
-          created_at: string
-          id: string
-          month: number
-          year: number
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          month: number
-          year: number
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          month?: number
-          year?: number
         }
         Relationships: []
       }
@@ -105,30 +78,6 @@ export type Database = {
           id?: string
           updated_at?: string
           username?: string | null
-        }
-        Relationships: []
-      }
-      settings: {
-        Row: {
-          created_at: string
-          id: string
-          key: string
-          updated_at: string
-          value: Json
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          key: string
-          updated_at?: string
-          value: Json
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          key?: string
-          updated_at?: string
-          value?: Json
         }
         Relationships: []
       }

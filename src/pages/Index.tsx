@@ -19,7 +19,6 @@ const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [doorImageUrl, setDoorImageUrl] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
-  const [currentIssue, setCurrentIssue] = useState<string | null>(null);
   
   useEffect(() => {
     const uploadLogo = async () => {
@@ -92,31 +91,6 @@ const Index = () => {
     fetchArticles();
   }, [keywordFilter]);
 
-  useEffect(() => {
-    const fetchCurrentSettings = async () => {
-      try {
-        const { data: issueData, error: issueError } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'current_issue')
-          .single();
-
-        if (issueError) {
-          console.error('Error fetching current issue:', issueError);
-          return;
-        }
-
-        if (issueData && issueData.value && typeof issueData.value === 'object' && 'text' in issueData.value) {
-          setCurrentIssue(issueData.value.text as string);
-        }
-      } catch (error) {
-        console.error('Error fetching current issue:', error);
-      }
-    };
-
-    fetchCurrentSettings();
-  }, []);
-
   const handleClearKeyword = () => {
     setSearchParams({});
   };
@@ -164,6 +138,13 @@ const Index = () => {
           ) : (
             <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
           )}
+          <a 
+            href="subtitle" 
+            id="subtitle"
+            className="text-xl text-muted-foreground max-w-2xl mx-auto block"
+          >
+            {" "}
+          </a>
         </header>
         
         {arrangeMode && isAuthenticated ? (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -24,13 +23,10 @@ import {
   FormField as HookFormField,
   FormItem,
 } from "@/components/ui/form";
-import { supabase } from "@/integrations/supabase/client";
 
 const CreateArticleForm = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState<number | null>(null);
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
   
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -50,38 +46,6 @@ const CreateArticleForm = () => {
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
     }
   }, [form]);
-
-  useEffect(() => {
-    const fetchCurrentSettings = async () => {
-      try {
-        const { data: yearData, error: yearError } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'current_year')
-          .single();
-
-        const { data: monthData, error: monthError } = await supabase
-          .from('settings')
-          .select('value')
-          .eq('key', 'current_month')
-          .single();
-
-        if (yearError || monthError) {
-          console.error('Error fetching settings:', yearError || monthError);
-          return;
-        }
-
-        if (yearData && monthData) {
-          setCurrentYear(Number(yearData.value));
-          setCurrentMonth(Number(monthData.value));
-        }
-      } catch (error) {
-        console.error('Error fetching current settings:', error);
-      }
-    };
-
-    fetchCurrentSettings();
-  }, []);
 
   const saveDraft = (data: ArticleFormValues) => {
     try {
@@ -122,9 +86,7 @@ const CreateArticleForm = () => {
         keywords: keywordsArray,
         imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl,
-        more_content: data.more_content,
-        year: currentYear,
-        month: currentMonth
+        more_content: data.more_content
       });
 
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);

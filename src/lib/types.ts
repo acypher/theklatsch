@@ -11,13 +11,4 @@ export interface Article {
   more_content?: string | null;
   deleted?: boolean;
   deletedAt?: string | null;
-  year?: number | null;
-  month?: number | null;
-}
-
-export interface Issue {
-  id: string;
-  month: number;
-  year: number;
-  created_at: string;
 }

@@ -1,3 +1,4 @@
+
 import { Article } from './types';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -127,7 +128,7 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
 };
 
 // Function to add a new article to Supabase
-export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'> & { year?: number | null, month?: number | null }): Promise<Article> => {
+export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
   try {
     const newArticle = {
       title: article.title,
@@ -137,13 +138,11 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'> & { 
       imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
       more_content: article.more_content,
-      year: article.year,
-      month: article.month,
       user_id: (await supabase.auth.getUser()).data.user?.id
     };
     
     const { data, error } = await (supabase
-      .from('articles')
+      .from('articles' as any)
       .insert(newArticle as any)
       .select()
       .single());
@@ -257,54 +256,5 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
     console.error("Error updating articles order:", error);
     toast.error("Failed to update article order");
     return false;
-  }
-};
-
-// Function to get all available issues
-export const getAllIssues = async () => {
-  try {
-    const { data: issues, error } = await supabase
-      .from('issues' as any)
-      .select('*')
-      .order('year', { ascending: false })
-      .order('month', { ascending: false });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return issues || [];
-  } catch (error) {
-    console.error("Error fetching issues:", error);
-    toast.error("Failed to load issues");
-    return [];
-  }
-};
-
-// Function to get articles by issue (month and year)
-export const getArticlesByIssue = async (month: number, year: number): Promise<Article[]> => {
-  try {
-    const { data: articles, error } = await supabase
-      .from('articles' as any)
-      .select('*')
-      .eq('month', month)
-      .eq('year', year)
-      .eq('deleted', false)
-      .order('display_position', { ascending: true })
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    if (articles && articles.length > 0) {
-      return articles.map(mapArticleFromDb);
-    } else {
-      return [];
-    }
-  } catch (error) {
-    console.error(`Error fetching articles for issue ${month}/${year}:`, error);
-    toast.error("Failed to load articles for this issue");
-    return [];
   }
 };
