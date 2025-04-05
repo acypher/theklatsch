@@ -128,13 +128,13 @@ const Index = () => {
     const fetchCurrentSettings = async () => {
       try {
         const { data: yearData, error: yearError } = await supabase
-          .from('settings' as any)
+          .from('settings')
           .select('value')
           .eq('key', 'current_year')
           .single();
 
         const { data: monthData, error: monthError } = await supabase
-          .from('settings' as any)
+          .from('settings')
           .select('value')
           .eq('key', 'current_month')
           .single();
