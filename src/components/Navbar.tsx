@@ -13,11 +13,19 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const [searchParams] = useSearchParams();
   const [currentIssue, setCurrentIssue] = useState<{ month: number; year: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const fetchCurrentIssue = async () => {
-      const issue = await getCurrentIssue();
-      setCurrentIssue(issue);
+      try {
+        setIsLoading(true);
+        const issue = await getCurrentIssue();
+        setCurrentIssue(issue);
+      } catch (error) {
+        console.error("Error fetching current issue:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     fetchCurrentIssue();
@@ -40,7 +48,7 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           <Link to="/" className="text-2xl font-bold text-primary">The Klatsch</Link>
           
-          {currentIssue && (
+          {!isLoading && (
             <div className="w-auto">
               <IssueSelector onIssueChange={handleIssueChange} />
             </div>
