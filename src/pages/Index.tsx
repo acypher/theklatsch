@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -165,13 +164,6 @@ const Index = () => {
           ) : (
             <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
           )}
-          <a 
-            href="subtitle" 
-            id="subtitle"
-            className="text-xl text-muted-foreground max-w-2xl mx-auto block"
-          >
-            {currentIssue || " "}
-          </a>
         </header>
         
         {arrangeMode && isAuthenticated ? (
