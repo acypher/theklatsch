@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Article } from "@/lib/types";
 import { toast } from "sonner";
 
 // Default example articles that will be used as fallback
@@ -385,5 +386,29 @@ export const updateMaintenanceMode = async (mode: string): Promise<boolean> => {
     console.error("Error in updateMaintenanceMode:", error);
     toast.error("Failed to update maintenance mode");
     return false;
+  }
+};
+
+// Function to check the current display issue value
+export const checkDisplayIssueValue = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('issue')
+      .select('value')
+      .eq('key', 'display_issue')
+      .single();
+    
+    if (error) {
+      console.error("Error fetching display issue:", error);
+      toast.error("Failed to fetch display issue");
+      return null;
+    }
+    
+    console.log("Current display issue value:", data?.value);
+    return data?.value;
+  } catch (error) {
+    console.error("Unexpected error checking display issue:", error);
+    toast.error("Unexpected error checking display issue");
+    return null;
   }
 };
