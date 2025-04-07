@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, getMaintenanceMode, updateMaintenanceMode } from "@/lib/data";
@@ -19,7 +18,6 @@ const Index = () => {
   const [maintenanceMode, setMaintenanceMode] = useState("normal");
   const [checkingAuth, setCheckingAuth] = useState(true);
   
-  // Check if user is authenticated
   useEffect(() => {
     const checkAuth = async () => {
       setCheckingAuth(true);
@@ -30,7 +28,6 @@ const Index = () => {
     
     checkAuth();
     
-    // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAdmin(!!session);
     });
@@ -40,7 +37,6 @@ const Index = () => {
     };
   }, []);
   
-  // Load current issue
   useEffect(() => {
     const loadCurrentIssue = async () => {
       const issueData = await getCurrentIssue();
@@ -52,7 +48,6 @@ const Index = () => {
     loadCurrentIssue();
   }, []);
   
-  // Load maintenance mode
   useEffect(() => {
     const loadMaintenanceMode = async () => {
       const mode = await getMaintenanceMode();
@@ -63,7 +58,6 @@ const Index = () => {
     loadMaintenanceMode();
   }, []);
   
-  // Fetch articles
   useEffect(() => {
     const fetchArticles = async () => {
       setLoading(true);
@@ -80,7 +74,6 @@ const Index = () => {
     fetchArticles();
   }, []);
   
-  // Handle logo upload/display
   useEffect(() => {
     const uploadLogo = async () => {
       try {
@@ -180,13 +173,12 @@ const Index = () => {
           ) : (
             <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
           )}
-          <a 
-            href="subtitle" 
+          <p 
             id="subtitle"
             className="text-xl text-muted-foreground max-w-2xl mx-auto block"
           >
             {currentIssue || ""}
-          </a>
+          </p>
           
           {isAdmin && !checkingAuth && (
             <div className="mt-4 flex items-center justify-center">
