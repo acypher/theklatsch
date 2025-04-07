@@ -138,7 +138,10 @@ const Index = () => {
 
   return (
     <div>
-      <Navbar onLogoClick={() => setShowMaintenancePage(false)} />
+      <Navbar 
+        onLogoClick={() => setShowMaintenancePage(false)} 
+        currentIssue={currentIssue}
+      />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
           {logoUrl ? (
@@ -152,15 +155,6 @@ const Index = () => {
           ) : (
             <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
           )}
-          <p 
-            id="subtitle"
-            className="text-xl text-muted-foreground max-w-2xl mx-auto block"
-          >
-            {currentIssue}
-            {issueWasFixed && isAdmin && (
-              <span className="text-sm text-green-500 ml-2">(Fixed)</span>
-            )}
-          </p>
         </header>
         
         {showMaintenancePage ? <MaintenancePage /> : (

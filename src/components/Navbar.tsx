@@ -8,9 +8,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface NavbarProps {
   onLogoClick?: () => void;
+  currentIssue?: string;
 }
 
-const Navbar = ({ onLogoClick }: NavbarProps) => {
+const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
   const { user, signOut } = useAuth();
   
   const getUserInitials = () => {
@@ -29,13 +30,20 @@ const Navbar = ({ onLogoClick }: NavbarProps) => {
   return (
     <nav className="border-b shadow-sm py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
-        <Link 
-          to="/" 
-          className="text-2xl font-bold text-primary"
-          onClick={handleLogoClick}
-        >
-          The Klatsch
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link 
+            to="/" 
+            className="text-2xl font-bold text-primary flex items-center gap-2"
+            onClick={handleLogoClick}
+          >
+            The Klatsch
+            {currentIssue && (
+              <span className="text-sm text-muted-foreground ml-2">
+                {currentIssue}
+              </span>
+            )}
+          </Link>
+        </div>
         
         <div className="flex items-center gap-4">
           {user ? (
