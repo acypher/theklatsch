@@ -6,14 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 const Auth = () => {
-  const { user, signIn, signUp, loading } = useAuth();
+  const { user, signIn, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (user && !loading) {
@@ -38,32 +36,6 @@ const Auth = () => {
       }
     } catch (error) {
       toast.error("Failed to sign in");
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password || !username) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    try {
-      const { error } = await signUp(email, password, username);
-      
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Account created successfully! Check your email to confirm your account.");
-      }
-    } catch (error) {
-      toast.error("Failed to sign up");
       console.error(error);
     } finally {
       setIsSubmitting(false);
