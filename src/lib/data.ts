@@ -270,7 +270,7 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
   }
 };
 
-// Function to get current issue data - updated to use "issue" table with new key names
+// Function to get current issue data - updated to use direct table access
 export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
   try {
     const { data, error } = await supabase
@@ -291,7 +291,7 @@ export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
   }
 };
 
-// Function to update the current month and year in the issue table - updated with new key names
+// Function to update the current month and year in the issue table - using direct table access
 export const updateCurrentMonthYear = async (month: number, year: number): Promise<boolean> => {
   try {
     // Update display_month
