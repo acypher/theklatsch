@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [currentIssue, setCurrentIssue] = useState<string>("August 2023");
+  const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,7 +43,7 @@ const Index = () => {
       if (issueData?.text && issueData.text !== "Unknown \"2024\"") {
         setCurrentIssue(issueData.text);
       } else {
-        setCurrentIssue("August 2023");
+        setCurrentIssue("April 2025");
       }
     };
     

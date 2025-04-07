@@ -282,7 +282,7 @@ export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
     
     if (error) {
       console.error("Error fetching current issue:", error);
-      return { text: "August 2023" }; // Default fallback
+      return { text: "April 2025" }; // Default fallback
     }
     
     // If data exists, try to parse it properly
@@ -299,14 +299,14 @@ export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
         }
       } catch (e) {
         console.error("Error parsing issue value:", e);
-        return { text: "August 2023" }; // Default fallback
+        return { text: "April 2025" }; // Default fallback
       }
     }
     
-    return { text: "August 2023" }; // Default fallback
+    return { text: "April 2025" }; // Default fallback
   } catch (error) {
     console.error("Error in getCurrentIssue:", error);
-    return { text: "August 2023" }; // Default fallback
+    return { text: "April 2025" }; // Default fallback
   }
 };
 
