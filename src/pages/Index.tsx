@@ -1,19 +1,46 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { getCurrentIssue, getAllArticles } from "@/lib/data";
+import { getCurrentIssue, getAllArticles, getMaintenanceMode, updateMaintenanceMode } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2, ToggleLeft, ToggleRight } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
 import { Article } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [currentIssue, setCurrentIssue] = useState<string | null>(null);
-  const [showMaintenancePage, setShowMaintenancePage] = useState(true);
+  const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [maintenanceMode, setMaintenanceMode] = useState("normal");
+  const [checkingAuth, setCheckingAuth] = useState(true);
   
+  // Check if user is authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      setCheckingAuth(true);
+      const { data } = await supabase.auth.getSession();
+      setIsAdmin(!!data.session);
+      setCheckingAuth(false);
+    };
+    
+    checkAuth();
+    
+    // Listen for auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAdmin(!!session);
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+  
+  // Load current issue
   useEffect(() => {
     const loadCurrentIssue = async () => {
       const issueData = await getCurrentIssue();
@@ -25,6 +52,18 @@ const Index = () => {
     loadCurrentIssue();
   }, []);
   
+  // Load maintenance mode
+  useEffect(() => {
+    const loadMaintenanceMode = async () => {
+      const mode = await getMaintenanceMode();
+      setMaintenanceMode(mode);
+      setShowMaintenancePage(mode === "maintenance");
+    };
+    
+    loadMaintenanceMode();
+  }, []);
+  
+  // Fetch articles
   useEffect(() => {
     const fetchArticles = async () => {
       setLoading(true);
@@ -41,6 +80,7 @@ const Index = () => {
     fetchArticles();
   }, []);
   
+  // Handle logo upload/display
   useEffect(() => {
     const uploadLogo = async () => {
       try {
@@ -80,6 +120,17 @@ const Index = () => {
     
     uploadLogo();
   }, []);
+
+  const toggleMaintenanceMode = async () => {
+    const newMode = maintenanceMode === "normal" ? "maintenance" : "normal";
+    const success = await updateMaintenanceMode(newMode);
+    
+    if (success) {
+      setMaintenanceMode(newMode);
+      setShowMaintenancePage(newMode === "maintenance");
+      toast.success(`Maintenance mode is now ${newMode}`);
+    }
+  };
 
   const MaintenancePage = () => (
     <div className="flex flex-col items-center justify-center py-12">
@@ -136,6 +187,28 @@ const Index = () => {
           >
             {currentIssue || ""}
           </a>
+          
+          {isAdmin && !checkingAuth && (
+            <div className="mt-4 flex items-center justify-center">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={toggleMaintenanceMode}
+              >
+                {maintenanceMode === "normal" ? (
+                  <>
+                    <ToggleLeft className="h-5 w-5" />
+                    <span>Maintenance Mode: Off</span>
+                  </>
+                ) : (
+                  <>
+                    <ToggleRight className="h-5 w-5 text-amber-500" />
+                    <span className="text-amber-500">Maintenance Mode: On</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </header>
         
         {showMaintenancePage ? <MaintenancePage /> : <RegularHomePage />}
