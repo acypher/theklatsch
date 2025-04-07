@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [currentIssue, setCurrentIssue] = useState<string | null>(null);
+  const [currentIssue, setCurrentIssue] = useState<string>("August 2023");
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
@@ -177,7 +177,7 @@ const Index = () => {
             id="subtitle"
             className="text-xl text-muted-foreground max-w-2xl mx-auto block"
           >
-            {currentIssue || ""}
+            {currentIssue || "August 2023"}
           </p>
           
           {isAdmin && !checkingAuth && (
