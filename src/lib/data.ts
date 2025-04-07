@@ -326,18 +326,16 @@ export const updateCurrentMonthYear = async (month: number, year: number): Promi
 // Function to get the maintenance mode status
 export const getMaintenanceMode = async (): Promise<string> => {
   try {
+    // Use the rpc method to safely query the vars table
     const { data, error } = await supabase
-      .from('vars')
-      .select('value')
-      .eq('key', 'maintenance')
-      .single();
+      .rpc('get_var_value', { var_key: 'maintenance' });
     
     if (error) {
       console.error("Error fetching maintenance mode:", error);
       return 'normal'; // Default to normal mode if there's an error
     }
     
-    return data?.value || 'normal';
+    return data || 'normal';
   } catch (error) {
     console.error("Error in getMaintenanceMode:", error);
     return 'normal'; // Default to normal mode if there's an error
@@ -347,13 +345,12 @@ export const getMaintenanceMode = async (): Promise<string> => {
 // Function to update the maintenance mode
 export const updateMaintenanceMode = async (mode: string): Promise<boolean> => {
   try {
+    // Use the rpc method to safely update the vars table
     const { error } = await supabase
-      .from('vars')
-      .update({ 
-        value: mode,
-        updated_at: new Date().toISOString()
-      })
-      .eq('key', 'maintenance');
+      .rpc('set_var_value', { 
+        var_key: 'maintenance', 
+        var_value: mode
+      });
     
     if (error) {
       console.error("Error updating maintenance mode:", error);
