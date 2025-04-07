@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,22 @@ const ArticleDetail = () => {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
     }
+  };
+
+  // Markdown component renderer customization
+  const customRenderers = {
+    // Customize link rendering to use proper attributes and prevent dropdown issues
+    a: ({ node, ...props }: any) => (
+      <a 
+        {...props} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-primary hover:underline"
+        onClick={(e) => e.stopPropagation()}
+      />
+    ),
+    // Ensure paragraphs don't interfere with other UI components
+    p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
   };
 
   if (loading) {
@@ -234,17 +251,22 @@ const ArticleDetail = () => {
           </div>
           
           <div className="prose prose-lg max-w-none mb-8">
-            <p className="text-xl leading-relaxed mb-8">{article.description}</p>
+            <div className="markdown-wrapper text-xl leading-relaxed mb-8">
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]} 
+                components={customRenderers}
+              >
+                {article.description}
+              </ReactMarkdown>
+            </div>
             
             {article.more_content && (
               <div className="mt-8 pt-8 border-t">
                 <h2 className="text-2xl font-bold mb-4">More Information</h2>
-                <div className="prose prose-lg max-w-none">
+                <div className="prose prose-lg max-w-none markdown-wrapper">
                   <ReactMarkdown 
                     remarkPlugins={[remarkGfm]} 
-                    components={{
-                      p: ({node, ...props}) => <p {...props} />,
-                    }}
+                    components={customRenderers}
                   >
                     {article.more_content}
                   </ReactMarkdown>

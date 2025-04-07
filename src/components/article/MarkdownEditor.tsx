@@ -18,6 +18,22 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
     setMounted(true);
   }, []);
 
+  // Custom renderers for ReactMarkdown to handle links properly
+  const customRenderers = {
+    // Customize link rendering to use proper attributes
+    a: ({ node, ...props }: any) => (
+      <a 
+        {...props} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="text-primary hover:underline"
+        onClick={(e) => e.stopPropagation()}
+      />
+    ),
+    // Ensure paragraphs don't interfere with other UI components
+    p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
+  };
+
   if (!mounted) {
     return (
       <div className="border rounded-md h-64 p-4 bg-background">
@@ -38,12 +54,10 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
         }}
       />
       {value && (
-        <div className="mt-4 prose prose-lg max-w-none">
+        <div className="mt-4 prose prose-lg max-w-none markdown-preview">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]} 
-            components={{
-              p: ({node, ...props}) => <p {...props} />,
-            }}
+            components={customRenderers}
           >
             {value}
           </ReactMarkdown>
@@ -57,6 +71,17 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
         }
         .w-md-editor-toolbar {
           border-bottom: 1px solid var(--md-border-color) !important;
+        }
+        .markdown-preview a {
+          color: var(--primary);
+          text-decoration: none;
+          word-break: break-word;
+        }
+        .markdown-preview a:hover {
+          text-decoration: underline;
+        }
+        .markdown-paragraph {
+          margin-bottom: 1rem;
         }
       `}</style>
     </div>
