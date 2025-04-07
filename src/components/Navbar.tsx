@@ -38,7 +38,7 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
           >
             The Klatsch
             {currentIssue && (
-              <span className="text-sm text-muted-foreground ml-2">
+              <span className="text-2xl font-bold text-primary ml-2">
                 {currentIssue}
               </span>
             )}
