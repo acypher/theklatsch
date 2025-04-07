@@ -1,6 +1,30 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+export const getDefaultIssue = async (): Promise<string> => {
+  try {
+    const { data, error } = await supabase
+      .from('issue')
+      .select('value')
+      .eq('key', 'default_issue')
+      .single();
+    
+    if (error) {
+      console.error("Error getting default issue:", error);
+      return "April 2025";  // Fallback value
+    }
+    
+    // Clean up the value for consistent format
+    const cleanValue = typeof data?.value === 'string' 
+      ? data.value.replace(/^"|"$/g, '')
+      : "April 2025";
+    
+    return cleanValue || "April 2025";
+  } catch (error) {
+    console.error("Unexpected error retrieving default issue:", error);
+    return "April 2025";
+  }
+};
 
 export const checkAndFixDisplayIssue = async (): Promise<{ text: string, wasFixed: boolean }> => {
   try {
@@ -127,21 +151,5 @@ export const checkDisplayIssueValue = async () => {
     console.error("Unexpected error checking display issue:", error);
     toast.error("Unexpected error checking display issue");
     return null;
-  }
-};
-
-export const getDefaultIssue = async (): Promise<string> => {
-  try {
-    const { data, error } = await supabase.rpc('get_default_issue');
-    
-    if (error) {
-      console.error("Error getting default issue:", error);
-      return "April 2025";  // Fallback value
-    }
-    
-    return data || "April 2025";
-  } catch (error) {
-    console.error("Unexpected error retrieving default issue:", error);
-    return "April 2025";
   }
 };
