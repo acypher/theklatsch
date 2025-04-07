@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { format, addMonths } from "date-fns";
 
 export interface Issue {
   month: number;
@@ -31,6 +32,19 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
       'May', 'June', 'July', 'August',
       'September', 'October', 'November', 'December'
     ];
+
+    // Add next month's issue as the first entry
+    const today = new Date();
+    const nextMonth = addMonths(today, 1);
+    const nextMonthNum = nextMonth.getMonth() + 1; // 1-12
+    const nextMonthYear = nextMonth.getFullYear();
+    const nextMonthName = format(nextMonth, 'MMMM');
+
+    issueMap.set(`${nextMonthNum}-${nextMonthYear}`, {
+      month: nextMonthNum,
+      year: nextMonthYear,
+      text: `${nextMonthName} ${nextMonthYear}`
+    });
 
     // Process and deduplicate the issues
     data.forEach(article => {
