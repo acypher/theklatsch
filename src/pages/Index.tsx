@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
+import { AlertTriangle } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
 import { Article } from "@/lib/types";
+import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
+  const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -41,6 +44,15 @@ const Index = () => {
     };
     
     loadCurrentIssue();
+  }, []);
+  
+  useEffect(() => {
+    const loadMaintenanceMode = async () => {
+      const mode = await getMaintenanceMode();
+      setShowMaintenancePage(mode === "maintenance");
+    };
+    
+    loadMaintenanceMode();
   }, []);
   
   useEffect(() => {
@@ -99,9 +111,34 @@ const Index = () => {
     uploadLogo();
   }, []);
 
+  const MaintenancePage = () => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="max-w-3xl mx-auto text-center">
+        <div className="mb-6 flex justify-center">
+          <AlertTriangle className="h-16 w-16 text-amber-500" />
+        </div>
+        
+        <h2 className="text-3xl font-bold mb-6">Lovable Trouble</h2>
+        
+        <div className="flex justify-center mb-8">
+          <img 
+            src="/lovable-uploads/a99bdae2-b16b-477b-87c2-37edc603881f.png" 
+            alt="Person confused looking at computer with errors" 
+            className="max-w-full h-auto rounded-lg shadow-lg"
+          />
+        </div>
+        
+        <p className="text-lg text-muted-foreground mt-6">
+          We're currently experiencing some technical difficulties. 
+          Our team is working hard to resolve the issue.
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <div>
-      <Navbar onLogoClick={() => {}} />
+      <Navbar onLogoClick={() => setShowMaintenancePage(false)} />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
           {logoUrl ? (
@@ -126,10 +163,12 @@ const Index = () => {
           </p>
         </header>
         
-        <ArticleList 
-          articles={articles} 
-          loading={loading}
-        />
+        {showMaintenancePage ? <MaintenancePage /> : (
+          <ArticleList 
+            articles={articles} 
+            loading={loading}
+          />
+        )}
       </main>
     </div>
   );
