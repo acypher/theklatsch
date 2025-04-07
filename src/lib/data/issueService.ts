@@ -147,8 +147,6 @@ export const checkDisplayIssueValue = async () => {
   }
 };
 
-// New functions for the latest issue data
-
 // Function to get the latest month
 export const getLatestMonth = async (): Promise<number> => {
   try {
@@ -248,7 +246,8 @@ export const getLatestIssue = async (): Promise<string> => {
   }
 };
 
-// Function to update all latest issue values
+// Function to update the latest month and year 
+// (simplified since the trigger will handle updating latest_issue)
 export const updateLatestIssue = async (month: number, year: number): Promise<boolean> => {
   try {
     // Update latest_month
@@ -273,26 +272,10 @@ export const updateLatestIssue = async (month: number, year: number): Promise<bo
       return false;
     }
     
-    // Convert month number to name
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    const monthName = monthNames[month - 1] || "Unknown";
+    // We don't need to update latest_issue manually anymore
+    // as the database trigger will handle that automatically
     
-    // Create full issue text and update latest_issue
-    const issueText = `${monthName} ${year}`;
-    const { error: issueError } = await supabase
-      .from('issue')
-      .update({ value: JSON.stringify(issueText) })
-      .eq('key', 'latest_issue');
-    
-    if (issueError) {
-      console.error("Error updating latest issue:", issueError);
-      return false;
-    }
-    
-    toast.success(`Latest issue updated to ${issueText}`);
+    toast.success("Latest issue updated successfully");
     return true;
   } catch (error) {
     console.error("Error updating latest issue values:", error);
