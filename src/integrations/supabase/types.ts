@@ -144,6 +144,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_default_issue: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
