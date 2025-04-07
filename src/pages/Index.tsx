@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { getCurrentIssue, getAllArticles, getMaintenanceMode, updateMaintenanceMode } from "@/lib/data";
+import { getCurrentIssue, getAllArticles, getMaintenanceMode, updateMaintenanceMode, checkAndFixDisplayIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, Loader2, ToggleLeft, ToggleRight } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
@@ -17,6 +17,7 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [maintenanceMode, setMaintenanceMode] = useState("normal");
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [issueWasFixed, setIssueWasFixed] = useState(false);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -39,12 +40,9 @@ const Index = () => {
   
   useEffect(() => {
     const loadCurrentIssue = async () => {
-      const issueData = await getCurrentIssue();
-      if (issueData?.text && issueData.text !== "Unknown \"2024\"") {
-        setCurrentIssue(issueData.text);
-      } else {
-        setCurrentIssue("April 2025");
-      }
+      const issueData = await checkAndFixDisplayIssue();
+      setCurrentIssue(issueData.text);
+      setIssueWasFixed(issueData.wasFixed);
     };
     
     loadCurrentIssue();
@@ -180,6 +178,9 @@ const Index = () => {
             className="text-xl text-muted-foreground max-w-2xl mx-auto block"
           >
             {currentIssue}
+            {issueWasFixed && isAdmin && (
+              <span className="text-sm text-green-500 ml-2">(Fixed)</span>
+            )}
           </p>
           
           {isAdmin && !checkingAuth && (
