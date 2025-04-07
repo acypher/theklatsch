@@ -27,7 +27,6 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
         target="_blank" 
         rel="noopener noreferrer" 
         className="text-primary hover:underline"
-        onClick={(e) => e.stopPropagation()}
       />
     ),
     // Ensure paragraphs don't interfere with other UI components

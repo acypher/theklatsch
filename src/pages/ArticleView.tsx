@@ -11,7 +11,7 @@ const ArticleView = () => {
       </main>
       
       {/* Add styles to properly isolate markdown content */}
-      <style jsx>{`
+      <style>{`
         .markdown-content-container {
           isolation: isolate;
         }
