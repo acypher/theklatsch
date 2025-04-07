@@ -270,7 +270,7 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
   }
 };
 
-// Function to get current issue data - updated to use direct table access
+// Function to get current issue data - updated to handle JSON string format
 export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
   try {
     const { data, error } = await supabase
@@ -284,20 +284,26 @@ export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
       return null;
     }
     
-    return data?.value as { text: string } | null;
+    // Handle the JSON string format - transform it to { text: string } format for compatibility
+    if (data?.value) {
+      const issueText = typeof data.value === 'string' ? data.value : JSON.stringify(data.value);
+      return { text: issueText.replace(/^"|"$/g, '') }; // Remove surrounding quotes if present
+    }
+    
+    return null;
   } catch (error) {
     console.error("Error in getCurrentIssue:", error);
     return null;
   }
 };
 
-// Function to update the current month and year in the issue table - using direct table access
+// Function to update the current month and year in the issue table - updated to handle string format
 export const updateCurrentMonthYear = async (month: number, year: number): Promise<boolean> => {
   try {
-    // Update display_month
+    // Update display_month - convert to string and store as JSON string
     const { error: monthError } = await supabase
       .from('issue')
-      .update({ value: month })
+      .update({ value: JSON.stringify(month.toString()) })
       .eq('key', 'display_month');
     
     if (monthError) {
@@ -305,10 +311,10 @@ export const updateCurrentMonthYear = async (month: number, year: number): Promi
       return false;
     }
     
-    // Update display_year
+    // Update display_year - convert to string and store as JSON string
     const { error: yearError } = await supabase
       .from('issue')
-      .update({ value: year })
+      .update({ value: JSON.stringify(year.toString()) })
       .eq('key', 'display_year');
     
     if (yearError) {
