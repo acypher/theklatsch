@@ -35,3 +35,35 @@ BEGIN
     END IF;
 END;
 $$;
+
+-- Function to ensure that display_issue is always set properly
+CREATE OR REPLACE FUNCTION ensure_display_issue()
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    current_issue TEXT;
+BEGIN
+    -- Try to get the current display_issue
+    SELECT value INTO current_issue
+    FROM issue
+    WHERE key = 'display_issue';
+    
+    -- If it doesn't exist or is invalid, set it to "August 2023"
+    IF current_issue IS NULL OR current_issue = 'Unknown "2024"' THEN
+        UPDATE issue
+        SET value = '"August 2023"'
+        WHERE key = 'display_issue';
+        
+        IF NOT FOUND THEN
+            INSERT INTO issue (key, value)
+            VALUES ('display_issue', '"August 2023"');
+        END IF;
+        
+        RETURN 'August 2023';
+    END IF;
+    
+    RETURN current_issue;
+END;
+$$;

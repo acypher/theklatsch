@@ -40,8 +40,10 @@ const Index = () => {
   useEffect(() => {
     const loadCurrentIssue = async () => {
       const issueData = await getCurrentIssue();
-      if (issueData?.text) {
+      if (issueData?.text && issueData.text !== "Unknown \"2024\"") {
         setCurrentIssue(issueData.text);
+      } else {
+        setCurrentIssue("August 2023");
       }
     };
     
@@ -177,7 +179,7 @@ const Index = () => {
             id="subtitle"
             className="text-xl text-muted-foreground max-w-2xl mx-auto block"
           >
-            {currentIssue || "August 2023"}
+            {currentIssue}
           </p>
           
           {isAdmin && !checkingAuth && (
