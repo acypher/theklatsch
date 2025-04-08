@@ -57,7 +57,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error("Error fetching profile:", error);
       } else if (data) {
-        setProfile(data as Profile);
+        // Ensure the data conforms to our Profile type by adding missing fields
+        const profileData: Profile = {
+          id: data.id,
+          username: data.username,
+          display_name: data.display_name || null,
+          avatar_url: data.avatar_url
+        };
+        setProfile(profileData);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -152,9 +159,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
 
-      setProfile(data as Profile);
+      // Ensure the returned data conforms to our Profile type
+      const updatedProfile: Profile = {
+        id: data.id,
+        username: data.username,
+        display_name: data.display_name || null,
+        avatar_url: data.avatar_url
+      };
+      
+      setProfile(updatedProfile);
       toast.success("Profile updated successfully");
-      return { error: null, data: data as Profile };
+      return { error: null, data: updatedProfile };
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
