@@ -57,7 +57,7 @@ const Auth = () => {
         
         <Card>
           <CardHeader>
-            <CardTitle>Login</CardTitle>
+            <CardTitle>Sign In</CardTitle>
             <CardDescription>
               Enter your credentials to access your account
             </CardDescription>
