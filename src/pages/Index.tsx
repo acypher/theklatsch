@@ -169,7 +169,7 @@ const Index = () => {
               <img 
                 src="/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png" 
                 alt="The Klatsch Storefront" 
-                className="w-1/4 h-auto object-cover rounded-lg shadow-md"
+                className="w-1/4 h-auto object-cover rounded-lg shadow-md max-w-[240px]"
               />
             </div>
           </>
