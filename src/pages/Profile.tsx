@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,13 +8,72 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Profile = () => {
   const { user, profile, updateProfile, profileLoading } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState(profile?.username || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user exists but profile doesn't
+    if (user && !profile && !profileLoading) {
+      setIsCreatingProfile(true);
+      createProfileForUser().catch(console.error);
+    }
+  }, [user, profile, profileLoading]);
+
+  const createProfileForUser = async () => {
+    if (!user) return;
+    
+    try {
+      // Check if profile already exists
+      const { data, error: checkError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      
+      if (checkError && checkError.code !== "PGRST116") {
+        console.error("Error checking profile:", checkError);
+        toast.error("Error checking profile");
+        return;
+      }
+      
+      // If profile already exists, no need to create
+      if (data) {
+        return;
+      }
+      
+      // Create profile
+      const { error } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          username: null,
+          display_name: null,
+          avatar_url: null
+        });
+      
+      if (error) {
+        console.error("Error creating profile:", error);
+        toast.error("Error creating profile");
+        return;
+      }
+      
+      toast.success("Profile created successfully");
+      // Force refresh the page to reload auth context
+      window.location.reload();
+    } catch (error) {
+      console.error("Error in createProfileForUser:", error);
+    } finally {
+      setIsCreatingProfile(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +90,13 @@ const Profile = () => {
     }
   };
 
-  if (profileLoading) {
+  if (profileLoading || isCreatingProfile) {
     return (
       <>
         <Navbar />
         <div className="flex justify-center items-center min-h-[70vh]">
           <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="ml-2">{isCreatingProfile ? "Creating your profile..." : "Loading profile..."}</p>
         </div>
       </>
     );
