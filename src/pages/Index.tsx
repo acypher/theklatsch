@@ -6,6 +6,7 @@ import { AlertTriangle } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
+import { updateSpecificArticle } from "@/lib/data/updateSpecificArticle";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -109,6 +110,10 @@ const Index = () => {
     };
     
     uploadLogo();
+  }, []);
+
+  useEffect(() => {
+    updateSpecificArticle();
   }, []);
 
   const MaintenancePage = () => (

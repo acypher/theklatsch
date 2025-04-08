@@ -3,6 +3,7 @@ import { Article } from "@/lib/types";
 import { toast } from "sonner";
 import { handleApiError, mapArticleFromDb } from "./utils";
 import { getCurrentIssue } from "./issue/currentIssue";
+import { getLatestMonth, getLatestYear } from "./issue/latestIssue";
 
 // Function to get the month and year from an issue string (e.g., "May 2025" -> { month: 5, year: 2025 })
 const parseIssueString = (issueString: string): { month: number | null, year: number | null } => {
@@ -234,6 +235,40 @@ export const updateArticlesOrder = async (articlesOrder: { id: string, position:
   } catch (error) {
     console.error("Error updating articles order:", error);
     toast.error("Failed to update article order");
+    return false;
+  }
+};
+
+// Function to update an article with the latest issue data and set its position to 1
+export const updateArticleWithLatestIssue = async (articleId: string): Promise<boolean> => {
+  try {
+    // Get the latest month and year from the issue table
+    const latestMonth = await getLatestMonth();
+    const latestYear = await getLatestYear();
+    
+    console.log(`Updating article ${articleId} to latest issue: Month ${latestMonth}, Year ${latestYear}`);
+    
+    // Update the article with the latest issue data and set display_position to 1
+    const { error } = await supabase
+      .from('articles')
+      .update({ 
+        month: latestMonth,
+        year: latestYear,
+        display_position: 1 
+      })
+      .eq('id', articleId);
+    
+    if (error) {
+      console.error("Error updating article with latest issue:", error);
+      toast.error("Failed to update article with latest issue");
+      return false;
+    }
+    
+    toast.success("Article updated with latest issue data");
+    return true;
+  } catch (error) {
+    console.error("Error updating article with latest issue:", error);
+    toast.error("Failed to update article with latest issue");
     return false;
   }
 };
