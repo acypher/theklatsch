@@ -12,6 +12,7 @@ interface Comment {
   content: string;
   author_name: string;
   created_at: string;
+  article_id: string;
 }
 
 interface CommentDialogProps {
@@ -47,7 +48,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
         throw error;
       }
 
-      setComments(data || []);
+      setComments(data as Comment[] || []);
     } catch (error) {
       console.error("Error fetching comments:", error);
       toast.error("Failed to load comments");
