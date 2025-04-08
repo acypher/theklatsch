@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -55,11 +56,11 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
       <CardHeader className="p-0">
         <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">
-          <AspectRatio ratio={16 / 9} className="overflow-hidden">
+          <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
             <img 
               src={getImageUrl(article.imageUrl)} 
               alt={article.title} 
-              className="w-full h-full object-cover transition-transform hover:scale-105"
+              className="w-full h-full object-contain"
               loading="lazy"
             />
           </AspectRatio>
