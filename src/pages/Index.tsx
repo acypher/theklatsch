@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
@@ -167,9 +168,9 @@ const Index = () => {
             
             <div className="mt-16 mb-8">
               <img 
-                src="/lovable-uploads/photo-1506744038136-46273834b3fb.jpg" 
-                alt="Scenic landscape" 
-                className="w-full h-auto max-h-[400px] object-cover rounded-lg shadow-md"
+                src="/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png" 
+                alt="The Klatsch Storefront" 
+                className="w-full h-auto max-h-[600px] object-cover rounded-lg shadow-md"
               />
               <p className="text-center text-sm text-muted-foreground mt-2">
                 The Klatsch - Stories worth sharing
