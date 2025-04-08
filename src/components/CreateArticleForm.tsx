@@ -170,7 +170,7 @@ const CreateArticleForm = () => {
             <FormItem>
               <FormField 
                 id="keywords" 
-                label="Keywords (space separated)"
+                label="Keywords"
                 description="Separate keywords with spaces"
               >
                 <FormControl>
