@@ -18,5 +18,4 @@ export const updateSpecificArticle = async (): Promise<void> => {
   }
 };
 
-// Execute the update immediately
-updateSpecificArticle();
+// Note: This function is now called only when explicitly needed, not automatically

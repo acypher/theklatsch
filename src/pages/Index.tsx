@@ -112,10 +112,6 @@ const Index = () => {
     uploadLogo();
   }, []);
 
-  useEffect(() => {
-    updateSpecificArticle();
-  }, []);
-
   const MaintenancePage = () => (
     <div className="flex flex-col items-center justify-center py-12">
       <div className="max-w-3xl mx-auto text-center">

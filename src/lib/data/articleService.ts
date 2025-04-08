@@ -98,6 +98,12 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
 // Function to add a new article to Supabase
 export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
   try {
+    // Get the latest month and year from the issue table
+    const latestMonth = await getLatestMonth();
+    const latestYear = await getLatestYear();
+    
+    console.log(`Creating new article with latest issue: Month ${latestMonth}, Year ${latestYear}`);
+    
     const newArticle = {
       title: article.title,
       description: article.description,
@@ -106,7 +112,10 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
       more_content: article.more_content,
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      user_id: (await supabase.auth.getUser()).data.user?.id,
+      month: latestMonth,
+      year: latestYear,
+      display_position: 1 // Set as the first article for this issue
     };
     
     const { data, error } = await supabase
