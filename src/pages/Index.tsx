@@ -159,10 +159,23 @@ const Index = () => {
         </header>
         
         {showMaintenancePage ? <MaintenancePage /> : (
-          <ArticleList 
-            articles={articles} 
-            loading={loading}
-          />
+          <>
+            <ArticleList 
+              articles={articles} 
+              loading={loading}
+            />
+            
+            <div className="mt-16 mb-8">
+              <img 
+                src="/lovable-uploads/photo-1506744038136-46273834b3fb.jpg" 
+                alt="Scenic landscape" 
+                className="w-full h-auto max-h-[400px] object-cover rounded-lg shadow-md"
+              />
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                The Klatsch - Stories worth sharing
+              </p>
+            </div>
+          </>
         )}
       </main>
     </div>
