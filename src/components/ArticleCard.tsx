@@ -6,12 +6,18 @@ import KeywordBadge from "./KeywordBadge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useState } from "react";
+import { MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import CommentDialog from "./CommentDialog";
 
 interface ArticleCardProps {
   article: Article;
 }
 
 const ArticleCard = ({ article }: ArticleCardProps) => {
+  const [showComments, setShowComments] = useState(false);
+  
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -79,11 +85,35 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             {article.description}
           </ReactMarkdown>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {article.keywords.map((keyword, index) => (
-            <KeywordBadge key={index} keyword={keyword} />
-          ))}
+        <div className="flex justify-between items-center">
+          <div className="flex flex-wrap gap-2">
+            {article.keywords.map((keyword, index) => (
+              <KeywordBadge key={index} keyword={keyword} />
+            ))}
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setShowComments(true);
+            }}
+            className="flex items-center gap-1 text-xs"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Comments
+          </Button>
         </div>
+        
+        {showComments && (
+          <CommentDialog 
+            articleId={article.id} 
+            articleTitle={article.title}
+            isOpen={showComments}
+            onClose={() => setShowComments(false)}
+          />
+        )}
       </CardContent>
     </Card>
   );
