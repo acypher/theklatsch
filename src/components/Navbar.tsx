@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, MoveHorizontal, ChevronDown, User } from "lucide-react";
@@ -40,6 +39,7 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
     
     console.log('User object:', user);
     console.log('Profile object:', profile);
+    console.log('Email address:', user.email);
     
     // Use display_name from profile if available
     if (profile?.display_name) {
@@ -50,9 +50,18 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
       return profile.display_name.substring(0, 2).toUpperCase();
     }
     
-    // Fallback to email
-    const email = user.email || "";
-    return email.substring(0, 2).toUpperCase();
+    // Fallback to email if no display name
+    if (user.email) {
+      // If email contains a dot, use first letter of each part before the @ symbol
+      const emailParts = user.email.split('@')[0].split('.');
+      if (emailParts.length >= 2) {
+        return `${emailParts[0][0]}${emailParts[1][0]}`.toUpperCase();
+      }
+      // Otherwise use first two letters of email
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    
+    return "??";
   };
 
   const handleLogoClick = (event: React.MouseEvent) => {
@@ -138,11 +147,20 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
               </Button>
               
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Avatar className="h-8 w-8 cursor-pointer">
-                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
+                        <Avatar className="h-8 w-8 cursor-pointer">
+                          <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                        </Avatar>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Your profile</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <DropdownMenuContent align="end">
                   <div className="px-2 py-1.5 text-sm font-medium">
                     {profile?.display_name || user.email}
