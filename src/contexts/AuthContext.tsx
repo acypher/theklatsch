@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -44,7 +43,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profileLoading, setProfileLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch user profile data
   const fetchProfile = async (userId: string) => {
     setProfileLoading(true);
     try {
@@ -57,7 +55,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error("Error fetching profile:", error);
       } else if (data) {
-        // Ensure the data conforms to our Profile type by adding missing fields
         const profileData: Profile = {
           id: data.id,
           username: data.username,
@@ -74,13 +71,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // Fetch profile if user is logged in
         if (currentSession?.user) {
           fetchProfile(currentSession.user.id);
         } else {
@@ -89,7 +84,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -118,7 +112,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, username: string) => {
-    // Use emailRedirectTo: undefined to disable email confirmation
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -148,6 +141,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
+      if (updates.username !== undefined && !updates.username?.trim()) {
+        throw new Error("Username cannot be empty");
+      }
+
       const { data, error } = await supabase
         .from("profiles")
         .update(updates)
@@ -159,7 +156,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
 
-      // Ensure the returned data conforms to our Profile type
       const updatedProfile: Profile = {
         id: data.id,
         username: data.username,
@@ -177,7 +173,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Calculate isAuthenticated based on user presence
   const isAuthenticated = !!user;
 
   return (

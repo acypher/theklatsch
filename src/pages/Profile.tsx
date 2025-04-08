@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 const Profile = () => {
   const { user, profile, updateProfile, profileLoading } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
+  const [username, setUsername] = useState(profile?.username || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -21,7 +22,10 @@ const Profile = () => {
     setIsSubmitting(true);
     
     try {
-      await updateProfile({ display_name: displayName });
+      await updateProfile({ 
+        display_name: displayName,
+        username: username 
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -69,12 +73,12 @@ const Profile = () => {
                 <Label htmlFor="username">Username</Label>
                 <Input 
                   id="username" 
-                  value={profile?.username || ""} 
-                  disabled 
-                  className="bg-muted"
+                  value={username} 
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Username was set during registration
+                  This is your unique username
                 </p>
               </div>
               
@@ -102,7 +106,7 @@ const Profile = () => {
               </Button>
               <Button 
                 type="submit" 
-                disabled={isSubmitting || !displayName.trim()}
+                disabled={isSubmitting || (!displayName.trim() && !username.trim())}
               >
                 {isSubmitting ? (
                   <>
