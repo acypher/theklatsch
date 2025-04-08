@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Comment {
   id: string;
@@ -23,17 +23,44 @@ interface CommentDialogProps {
 }
 
 const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDialogProps) => {
+  const { user, profile } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [authorName, setAuthorName] = useState("Anonymous");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const getUserInitials = () => {
+    if (!user) return "Anonymous";
+    
+    if (profile?.display_name) {
+      const nameParts = profile.display_name.split(" ");
+      if (nameParts.length >= 2) {
+        return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+      }
+      return profile.display_name.substring(0, 2).toUpperCase();
+    }
+    
+    if (user.email) {
+      const emailParts = user.email.split('@')[0].split('.');
+      if (emailParts.length >= 2) {
+        return `${emailParts[0][0]}${emailParts[1][0]}`.toUpperCase();
+      }
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    
+    return "Anonymous";
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchComments();
+      
+      if (user) {
+        setAuthorName(getUserInitials());
+      }
     }
-  }, [isOpen, articleId]);
+  }, [isOpen, articleId, user]);
 
   const fetchComments = async () => {
     setIsLoading(true);
