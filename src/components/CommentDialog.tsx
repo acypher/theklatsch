@@ -102,34 +102,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
           <DialogTitle className="text-xl">Comments for "{articleTitle}"</DialogTitle>
         </DialogHeader>
         
-        <div className="flex-grow overflow-y-auto my-4 pr-2">
-          {isLoading ? (
-            <div className="flex justify-center items-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <MessageSquare className="mx-auto h-12 w-12 opacity-30 mb-2" />
-              <p>No comments yet. Be the first to comment!</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {comments.map((comment) => (
-                <div key={comment.id} className="border rounded-lg p-3 bg-card">
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="font-medium">{comment.author_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(comment.created_at)}
-                    </p>
-                  </div>
-                  <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-2 mb-6 space-y-4">
           <div>
             <Textarea
               placeholder="Write a comment..."
@@ -163,6 +136,33 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             </Button>
           </div>
         </form>
+        
+        <div className="flex-grow overflow-y-auto my-2 pr-2 border-t pt-4">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : comments.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <MessageSquare className="mx-auto h-12 w-12 opacity-30 mb-2" />
+              <p>No comments yet. Be the first to comment!</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {comments.map((comment) => (
+                <div key={comment.id} className="border rounded-lg p-3 bg-card">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="font-medium">{comment.author_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(comment.created_at)}
+                    </p>
+                  </div>
+                  <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
