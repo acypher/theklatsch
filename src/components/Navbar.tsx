@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PenLine, LogOut, LogIn, MoveHorizontal, ChevronDown } from "lucide-react";
+import { PenLine, LogOut, LogIn, MoveHorizontal, ChevronDown, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -9,7 +9,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 import { Issue, getAvailableIssues, setCurrentIssue } from "@/lib/data/issue/availableIssues";
@@ -21,7 +22,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
   
@@ -36,6 +37,17 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
   
   const getUserInitials = () => {
     if (!user) return "?";
+    
+    // Use display_name from profile if available
+    if (profile?.display_name) {
+      const nameParts = profile.display_name.split(" ");
+      if (nameParts.length >= 2) {
+        return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+      }
+      return profile.display_name.substring(0, 2).toUpperCase();
+    }
+    
+    // Fallback to email
     const email = user.email || "";
     return email.substring(0, 2).toUpperCase();
   };
@@ -122,24 +134,29 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
                 </Link>
               </Button>
               
-              <div className="flex items-center gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Avatar className="h-8 w-8 cursor-pointer">
-                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                      </Avatar>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{user.email}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                
-                <Button variant="ghost" size="icon" onClick={signOut}>
-                  <LogOut size={18} />
-                </Button>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <div className="px-2 py-1.5 text-sm font-medium">
+                    {profile?.display_name || user.email}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut} className="cursor-pointer text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <Button asChild variant="default">
