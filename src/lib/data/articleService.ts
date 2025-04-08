@@ -1,8 +1,7 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
-import { DEFAULT_ARTICLES, handleApiError, mapArticleFromDb } from "./utils";
+import { handleApiError, mapArticleFromDb } from "./utils";
 import { getCurrentIssue } from "./issue/currentIssue";
 
 // Function to get the month and year from an issue string (e.g., "May 2025" -> { month: 5, year: 2025 })
@@ -65,11 +64,12 @@ export const getAllArticles = async (): Promise<Article[]> => {
     if (articles && articles.length > 0) {
       return articles.map(mapArticleFromDb);
     } else {
-      console.log("No articles found for the current issue, showing default articles instead");
-      return DEFAULT_ARTICLES;
+      console.log("No articles found for the current issue");
+      return [];
     }
   } catch (error) {
-    return handleApiError(error);
+    console.error("Error fetching articles:", error);
+    return [];
   }
 };
 
@@ -90,7 +90,7 @@ export const getArticleById = async (id: string): Promise<Article | undefined> =
     return mapArticleFromDb(article);
   } catch (error) {
     console.error(`Error fetching article ${id}:`, error);
-    return DEFAULT_ARTICLES.find(article => article.id === id);
+    return undefined;
   }
 };
 
