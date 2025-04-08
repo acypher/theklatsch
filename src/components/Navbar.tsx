@@ -38,6 +38,9 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
   const getUserInitials = () => {
     if (!user) return "?";
     
+    console.log('User object:', user);
+    console.log('Profile object:', profile);
+    
     // Use display_name from profile if available
     if (profile?.display_name) {
       const nameParts = profile.display_name.split(" ");
