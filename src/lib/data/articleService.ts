@@ -30,6 +30,34 @@ const parseIssueString = (issueString: string): { month: number | null, year: nu
   }
 };
 
+// Function to get the maximum display position for a given month and year
+const getMaxDisplayPosition = async (month: number, year: number): Promise<number> => {
+  try {
+    const { data, error } = await supabase
+      .from('articles')
+      .select('display_position')
+      .eq('month', month)
+      .eq('year', year)
+      .eq('deleted', false)
+      .order('display_position', { ascending: false })
+      .limit(1);
+    
+    if (error) {
+      console.error("Error fetching max display position:", error);
+      return 1; // Default to 1 if there's an error
+    }
+    
+    if (data && data.length > 0 && data[0].display_position !== null) {
+      return data[0].display_position + 1; // Return the max position + 1
+    }
+    
+    return 1; // If no articles exist yet, return 1
+  } catch (error) {
+    console.error("Error in getMaxDisplayPosition:", error);
+    return 1;
+  }
+};
+
 // Function to fetch all articles from Supabase
 export const getAllArticles = async (): Promise<Article[]> => {
   try {
@@ -104,6 +132,10 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
     
     console.log(`Creating new article with latest issue: Month ${latestMonth}, Year ${latestYear}`);
     
+    // Get the maximum display position for this month/year
+    const maxPosition = await getMaxDisplayPosition(latestMonth, latestYear);
+    console.log(`Using display position ${maxPosition} for new article`);
+    
     const newArticle = {
       title: article.title,
       description: article.description,
@@ -115,7 +147,7 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       user_id: (await supabase.auth.getUser()).data.user?.id,
       month: latestMonth,
       year: latestYear,
-      display_position: 1 // Set as the first article for this issue
+      display_position: maxPosition // Set as the next highest position for this issue
     };
     
     const { data, error } = await supabase
