@@ -8,9 +8,17 @@ interface MarkdownEditorProps {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
   placeholder?: string;
+  height?: number;
+  showPreview?: boolean;
 }
 
-const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) => {
+const MarkdownEditor = ({ 
+  value, 
+  onChange, 
+  placeholder, 
+  height = 400, 
+  showPreview = true 
+}: MarkdownEditorProps) => {
   // Need to prevent hydration issues with SSR
   const [mounted, setMounted] = useState(false);
   
@@ -46,13 +54,13 @@ const MarkdownEditor = ({ value, onChange, placeholder }: MarkdownEditorProps) =
       <MDEditor
         value={value || ''}
         onChange={onChange}
-        height={400}
+        height={height}
         preview="edit"
         textareaProps={{
           placeholder: placeholder || 'Write your content here...'
         }}
       />
-      {value && (
+      {showPreview && value && (
         <div className="mt-4 prose prose-lg max-w-none markdown-preview">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]} 

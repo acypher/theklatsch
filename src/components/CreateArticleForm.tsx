@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -114,12 +115,12 @@ const CreateArticleForm = () => {
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormField id="title" label="Title" required>
+              <FormField id="title" label="Title" required description="Use Markdown to format your title">
                 <FormControl>
-                  <Input 
-                    id="title"
+                  <MarkdownEditor
+                    value={field.value}
+                    onChange={(value) => field.onChange(value || "")}
                     placeholder="Enter article title"
-                    {...field} 
                   />
                 </FormControl>
               </FormField>
