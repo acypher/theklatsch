@@ -83,6 +83,13 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     ),
     // Keep paragraphs contained
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
+    // Remove margins from headings in card titles
+    h1: ({ node, ...props }: any) => <h1 className="m-0 p-0 text-xl font-semibold" {...props} />,
+    h2: ({ node, ...props }: any) => <h2 className="m-0 p-0 text-xl font-semibold" {...props} />,
+    h3: ({ node, ...props }: any) => <h3 className="m-0 p-0 text-xl font-semibold" {...props} />,
+    h4: ({ node, ...props }: any) => <h4 className="m-0 p-0 text-xl font-semibold" {...props} />,
+    h5: ({ node, ...props }: any) => <h5 className="m-0 p-0 text-xl font-semibold" {...props} />,
+    h6: ({ node, ...props }: any) => <h6 className="m-0 p-0 text-xl font-semibold" {...props} />,
   };
 
   return (
@@ -101,7 +108,14 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
       </CardHeader>
       <CardContent className="flex-grow pt-6">
         <Link to={`/article/${article.id}`}>
-          <h3 className="text-xl font-semibold line-clamp-2 hover:text-primary transition-colors mb-2">{article.title}</h3>
+          <div className="line-clamp-2 hover:text-primary transition-colors mb-2 prose-sm prose">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={customRenderers}
+            >
+              {article.title}
+            </ReactMarkdown>
+          </div>
         </Link>
         <p className="text-muted-foreground text-sm mb-2">By {article.author} • {formatDate(article.createdAt)}</p>
         <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper">

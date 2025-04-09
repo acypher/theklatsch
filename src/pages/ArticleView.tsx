@@ -25,10 +25,26 @@ const ArticleView = () => {
         <ArticleDetail />
       </main>
       
-      {/* Add styles to properly isolate markdown content */}
+      {/* Add styles to properly isolate markdown content and ensure titles render correctly */}
       <style>{`
         .markdown-content-container {
           isolation: isolate;
+        }
+        
+        /* Fix heading margins in markdown content */
+        .prose-headings h1, 
+        .prose-headings h2, 
+        .prose-headings h3, 
+        .prose-headings h4, 
+        .prose-headings h5, 
+        .prose-headings h6 {
+          margin: 0;
+          line-height: 1.3;
+        }
+        
+        /* Remove extra paragraph margins in markdown headings */
+        .prose-headings p {
+          margin: 0;
         }
       `}</style>
     </div>

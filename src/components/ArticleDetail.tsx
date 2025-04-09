@@ -152,7 +152,11 @@ const ArticleDetail = () => {
         {article && (
           <>
             <div className="flex justify-between items-start mb-4">
-              <h1 className="text-3xl md:text-4xl font-bold">{article.title}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold prose prose-headings">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={customRenderers}>
+                  {article.title}
+                </ReactMarkdown>
+              </h1>
               
               {isAuthenticated && (
                 <div className="flex space-x-2">
