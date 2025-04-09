@@ -6,10 +6,11 @@ import KeywordBadge from "./KeywordBadge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CommentDialog from "./CommentDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ArticleCardProps {
   article: Article;
@@ -17,6 +18,32 @@ interface ArticleCardProps {
 
 const ArticleCard = ({ article }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchCommentCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from("comments")
+          .select("*", { count: 'exact', head: true })
+          .eq("article_id", article.id);
+        
+        if (error) {
+          console.error("Error fetching comment count:", error);
+          return;
+        }
+        
+        setCommentCount(count || 0);
+      } catch (error) {
+        console.error("Error in fetchCommentCount:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchCommentCount();
+  }, [article.id]);
   
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -102,7 +129,11 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             className="flex items-center gap-1 text-xs"
           >
             <MessageSquare className="h-4 w-4" />
-            Comments
+            {commentCount > 0 ? (
+              <>Comments {commentCount}</>
+            ) : (
+              <>Comments</>
+            )}
           </Button>
         </div>
         
