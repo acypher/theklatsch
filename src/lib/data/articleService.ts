@@ -30,6 +30,76 @@ const parseIssueString = (issueString: string): { month: number | null, year: nu
   }
 };
 
+// Function to determine the appropriate display position based on keywords/tags
+const determineDisplayPosition = async (keywords: string[], month: number, year: number): Promise<number> => {
+  try {
+    // RULE 1: If it has a "venue" tag, place it at position 1
+    if (keywords.includes('venue')) {
+      return 1;
+    }
+    
+    // Get current articles for this issue sorted by position
+    const { data: articles, error } = await supabase
+      .from('articles')
+      .select('id, keywords, display_position')
+      .eq('month', month)
+      .eq('year', year)
+      .eq('deleted', false)
+      .order('display_position', { ascending: true });
+    
+    if (error) {
+      console.error("Error fetching articles for position determination:", error);
+      return 999; // Default to a high position if there's an error
+    }
+    
+    // If no articles exist yet
+    if (!articles || articles.length === 0) {
+      return 1;
+    }
+    
+    // RULE 2: If it has an "ott" tag
+    if (keywords.includes('ott')) {
+      // Find the largest position where all lower positions have 'venue' or 'ott' tags
+      let position = 1;
+      for (const article of articles) {
+        const articleKeywords = article.keywords || [];
+        if (articleKeywords.includes('venue') || articleKeywords.includes('ott')) {
+          position = article.display_position + 1;
+        } else {
+          break;
+        }
+      }
+      return position;
+    }
+    
+    // RULE 3: If it has a "tmm" tag
+    if (keywords.includes('tmm')) {
+      // Find the largest position where all lower positions have 'venue', 'ott', or 'tmm' tags
+      let position = 1;
+      for (const article of articles) {
+        const articleKeywords = article.keywords || [];
+        if (articleKeywords.includes('venue') || 
+            articleKeywords.includes('ott') || 
+            articleKeywords.includes('tmm')) {
+          position = article.display_position + 1;
+        } else {
+          break;
+        }
+      }
+      return position;
+    }
+    
+    // RULE 4: Otherwise, put it in the last position
+    const maxPosition = articles.length > 0 
+      ? Math.max(...articles.map(a => a.display_position || 0)) + 1 
+      : 1;
+    return maxPosition;
+  } catch (error) {
+    console.error("Error in determineDisplayPosition:", error);
+    return 999; // Default to a high position if there's an error
+  }
+};
+
 // Function to get the maximum display position for a given month and year
 const getMaxDisplayPosition = async (month: number, year: number): Promise<number> => {
   try {
@@ -132,9 +202,9 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
     
     console.log(`Creating new article with latest issue: Month ${latestMonth}, Year ${latestYear}`);
     
-    // Get the maximum display position for this month/year
-    const maxPosition = await getMaxDisplayPosition(latestMonth, latestYear);
-    console.log(`Using display position ${maxPosition} for new article`);
+    // Determine the display position based on tags/keywords
+    const position = await determineDisplayPosition(article.keywords, latestMonth, latestYear);
+    console.log(`Using display position ${position} for new article with keywords: ${article.keywords.join(', ')}`);
     
     const newArticle = {
       title: article.title,
@@ -147,7 +217,7 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       user_id: (await supabase.auth.getUser()).data.user?.id,
       month: latestMonth,
       year: latestYear,
-      display_position: maxPosition // Set as the next highest position for this issue
+      display_position: position
     };
     
     const { data, error } = await supabase
