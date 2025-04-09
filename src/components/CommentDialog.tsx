@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +12,7 @@ interface Comment {
   id: string;
   content: string;
   author_name: string;
+  author_email?: string;
   created_at: string;
   article_id: string;
 }
@@ -27,6 +29,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [authorName, setAuthorName] = useState("Anonymous");
+  const [authorEmail, setAuthorEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,10 +60,19 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
       fetchComments();
       
       if (user) {
-        setAuthorName(getUserInitials());
+        if (profile?.display_name) {
+          setAuthorName(profile.display_name);
+        } else {
+          setAuthorName(getUserInitials());
+        }
+        
+        // Set email if available from user object
+        if (user.email) {
+          setAuthorEmail(user.email);
+        }
       }
     }
-  }, [isOpen, articleId, user]);
+  }, [isOpen, articleId, user, profile]);
 
   const fetchComments = async () => {
     setIsLoading(true);
@@ -94,6 +106,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
         article_id: articleId,
         content: newComment.trim(),
         author_name: authorName.trim() || "Anonymous",
+        author_email: authorEmail.trim() || null,
       });
 
       if (error) {
@@ -141,17 +154,26 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             />
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <input
               type="text"
-              placeholder="Your Name (optional)"
+              placeholder="Your name"
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isSubmitting}
             />
             
-            <Button type="submit" disabled={isSubmitting || !newComment.trim()}>
+            <input
+              type="email"
+              placeholder="Email address"
+              value={authorEmail}
+              onChange={(e) => setAuthorEmail(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isSubmitting}
+            />
+            
+            <Button type="submit" className="w-full" disabled={isSubmitting || !newComment.trim()}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
