@@ -3,27 +3,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { addArticle } from "@/lib/data";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import FormField from "@/components/article/FormField";
 import DraftManager from "@/components/article/DraftManager";
-import MarkdownEditor from "@/components/article/MarkdownEditor";
-import ImageUploader from "@/components/article/ImageUploader";
+import ArticleForm from "@/components/article/ArticleForm";
 import { 
   ArticleFormValues, 
   DRAFT_STORAGE_KEY, 
   articleFormSchema, 
   defaultFormValues 
 } from "@/components/article/ArticleFormSchema";
-import {
-  Form,
-  FormControl,
-  FormField as HookFormField,
-  FormItem,
-} from "@/components/ui/form";
 
 const CreateArticleForm = () => {
   const navigate = useNavigate();
@@ -66,10 +55,6 @@ const CreateArticleForm = () => {
     form.reset(defaultFormValues);
   };
 
-  const handleImageUpload = (imageUrl: string) => {
-    form.setValue('imageUrl', imageUrl);
-  };
-
   const onSubmit = async (data: ArticleFormValues) => {
     setIsSubmitting(true);
 
@@ -102,170 +87,15 @@ const CreateArticleForm = () => {
   };
 
   return (
-    <Form {...form}>
-      <form 
-        onSubmit={form.handleSubmit(onSubmit)} 
-        onChange={handleFormChange} 
-        className="space-y-6"
-      >
-        <DraftManager storageKey={DRAFT_STORAGE_KEY} clearDraft={clearDraft} />
-        
-        <HookFormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormField id="title" label="Title" required description="Use Markdown to format your title">
-                <FormControl>
-                  <MarkdownEditor
-                    value={field.value}
-                    onChange={(value) => field.onChange(value || "")}
-                    placeholder="Enter article title"
-                  />
-                </FormControl>
-              </FormField>
-            </FormItem>
-          )}
-        />
-        
-        <HookFormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormField id="description" label="Description" required description="Use Markdown to format your description">
-                <FormControl>
-                  <MarkdownEditor
-                    value={field.value}
-                    onChange={(value) => field.onChange(value || "")}
-                    placeholder="Write a short description of your article"
-                  />
-                </FormControl>
-              </FormField>
-            </FormItem>
-          )}
-        />
-        
-        <HookFormField
-          control={form.control}
-          name="author"
-          render={({ field }) => (
-            <FormItem>
-              <FormField id="author" label="Author">
-                <FormControl>
-                  <Input
-                    id="author"
-                    placeholder="Your name (optional)"
-                    {...field} 
-                  />
-                </FormControl>
-              </FormField>
-            </FormItem>
-          )}
-        />
-        
-        <HookFormField
-          control={form.control}
-          name="keywords"
-          render={({ field }) => (
-            <FormItem>
-              <FormField 
-                id="keywords" 
-                label="Keywords"
-                description="Separate keywords with spaces"
-              >
-                <FormControl>
-                  <Input
-                    id="keywords"
-                    placeholder="Web Development JavaScript Design"
-                    {...field} 
-                  />
-                </FormControl>
-              </FormField>
-            </FormItem>
-          )}
-        />
-        
-        <HookFormField
-          control={form.control}
-          name="imageUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormField 
-                id="imageUrl" 
-                label="Article Image"
-                description="Upload an image or provide an image URL"
-              >
-                <div className="flex space-x-4 items-center">
-                  <FormControl>
-                    <Input
-                      id="imageUrl"
-                      placeholder="https://example.com/image.jpg"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <ImageUploader onImageUpload={handleImageUpload} />
-                </div>
-              </FormField>
-            </FormItem>
-          )}
-        />
-        
-        <HookFormField
-          control={form.control}
-          name="sourceUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormField 
-                id="sourceUrl" 
-                label="Source URL"
-              >
-                <FormControl>
-                  <Input
-                    id="sourceUrl"
-                    placeholder="https://example.com/your-article"
-                    {...field} 
-                  />
-                </FormControl>
-              </FormField>
-            </FormItem>
-          )}
-        />
-        
-        <HookFormField
-          control={form.control}
-          name="more_content"
-          render={({ field }) => (
-            <FormItem>
-              <FormField 
-                id="more_content" 
-                label="More Content (Markdown)"
-                description="Use Markdown to format additional content"
-              >
-                <FormControl>
-                  <MarkdownEditor
-                    value={field.value}
-                    onChange={(value) => field.onChange(value || "")}
-                    placeholder="Write additional content using Markdown..."
-                  />
-                </FormControl>
-              </FormField>
-            </FormItem>
-          )}
-        />
-        
-        <div className="pt-4">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                Publishing...
-              </>
-            ) : "Publish Article"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <ArticleForm
+      form={form}
+      onSubmit={onSubmit}
+      isSubmitting={isSubmitting}
+      submitButtonText="Publish Article"
+      onChange={handleFormChange}
+    >
+      <DraftManager storageKey={DRAFT_STORAGE_KEY} clearDraft={clearDraft} />
+    </ArticleForm>
   );
 };
 
