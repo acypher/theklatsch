@@ -59,34 +59,76 @@ const determineDisplayPosition = async (keywords: string[], month: number, year:
     
     // RULE 2: If it has an "ott" tag
     if (keywords.includes('ott')) {
-      // Find the largest position where all lower positions have 'venue' or 'ott' tags
+      // Find the position after the last article with 'venue' or 'ott' tags
       let position = 1;
-      for (const article of articles) {
-        const articleKeywords = article.keywords || [];
+      let allPreviousHaveRequiredTags = true;
+      
+      for (let i = 0; i < articles.length; i++) {
+        const articleKeywords = articles[i].keywords || [];
         if (articleKeywords.includes('venue') || articleKeywords.includes('ott')) {
-          position = article.display_position + 1;
+          // This article has a required tag
+          position = (articles[i].display_position || 0) + 1;
         } else {
+          // Found an article without required tags, stop here
+          allPreviousHaveRequiredTags = false;
           break;
         }
       }
-      return position;
+      
+      // If all articles had required tags, position should be after the last one
+      if (allPreviousHaveRequiredTags) {
+        return position;
+      } else {
+        // Otherwise, find the first position where an article doesn't have required tags
+        for (let i = 0; i < articles.length; i++) {
+          const articleKeywords = articles[i].keywords || [];
+          if (!(articleKeywords.includes('venue') || articleKeywords.includes('ott'))) {
+            return articles[i].display_position || i + 1;
+          }
+        }
+        return position;
+      }
     }
     
     // RULE 3: If it has a "tmm" tag
     if (keywords.includes('tmm')) {
-      // Find the largest position where all lower positions have 'venue', 'ott', or 'tmm' tags
+      // Find the position after the last article with 'venue', 'ott', or 'tmm' tags
       let position = 1;
-      for (const article of articles) {
-        const articleKeywords = article.keywords || [];
-        if (articleKeywords.includes('venue') || 
-            articleKeywords.includes('ott') || 
-            articleKeywords.includes('tmm')) {
-          position = article.display_position + 1;
+      let allPreviousHaveRequiredTags = true;
+      
+      for (let i = 0; i < articles.length; i++) {
+        const articleKeywords = articles[i].keywords || [];
+        if (
+          articleKeywords.includes('venue') || 
+          articleKeywords.includes('ott') || 
+          articleKeywords.includes('tmm')
+        ) {
+          // This article has a required tag
+          position = (articles[i].display_position || 0) + 1;
         } else {
+          // Found an article without required tags, stop here
+          allPreviousHaveRequiredTags = false;
           break;
         }
       }
-      return position;
+      
+      // If all articles had required tags, position should be after the last one
+      if (allPreviousHaveRequiredTags) {
+        return position;
+      } else {
+        // Otherwise, find the first position where an article doesn't have required tags
+        for (let i = 0; i < articles.length; i++) {
+          const articleKeywords = articles[i].keywords || [];
+          if (!(
+            articleKeywords.includes('venue') || 
+            articleKeywords.includes('ott') || 
+            articleKeywords.includes('tmm')
+          )) {
+            return articles[i].display_position || i + 1;
+          }
+        }
+        return position;
+      }
     }
     
     // RULE 4: Otherwise, put it in the last position
