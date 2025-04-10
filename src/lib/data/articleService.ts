@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
@@ -282,6 +283,27 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
 // Function to update an existing article in Supabase
 export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
   try {
+    // First, get the current article to determine its month and year
+    const { data: currentArticle, error: fetchError } = await supabase
+      .from('articles')
+      .select('month, year')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      throw new Error(fetchError.message);
+    }
+
+    // Recalculate display position based on keywords
+    const position = await determineDisplayPosition(
+      article.keywords, 
+      currentArticle.month, 
+      currentArticle.year
+    );
+    
+    console.log(`Recalculating position for updated article ${id} with keywords: ${article.keywords.join(', ')}`);
+    console.log(`New position: ${position}`);
+
     const updatedArticle = {
       title: article.title,
       description: article.description,
@@ -289,7 +311,8 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
       keywords: article.keywords,
       imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
-      more_content: article.more_content
+      more_content: article.more_content,
+      display_position: position
     };
     
     const { data, error } = await supabase
