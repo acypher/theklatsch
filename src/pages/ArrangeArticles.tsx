@@ -87,7 +87,7 @@ const ArrangeArticles = () => {
             </SheetDescription>
           </SheetHeader>
           
-          <ScrollArea className="h-[calc(100vh-250px)] mt-6 pr-4">
+          <ScrollArea className="h-[calc(100vh-250px)] mt-6 pr-4 relative" id="articles-scroll-area">
             {loading ? (
               <div className="flex justify-center items-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -129,4 +129,3 @@ const ArrangeArticles = () => {
 };
 
 export default ArrangeArticles;
-

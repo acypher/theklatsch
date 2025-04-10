@@ -32,12 +32,24 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
   const handleAutoScroll = (clientY: number) => {
     if (!scrollAreaRef.current) return;
     
-    const container = scrollAreaRef.current.closest('.scroll-area-viewport') as HTMLDivElement;
-    if (!container) return;
+    // Find the ScrollArea viewport - we need to look for both possible selector patterns
+    // since the class name in the DOM may vary between development and production
+    const scrollViewport = document.querySelector('.scroll-area-viewport') || 
+                          document.querySelector('[data-radix-scroll-area-viewport]');
+                          
+    if (!scrollViewport) {
+      console.log("Scroll viewport not found");
+      return;
+    }
     
-    const containerRect = container.getBoundingClientRect();
+    const containerRect = scrollViewport.getBoundingClientRect();
     const topThreshold = containerRect.top + SCROLL_THRESHOLD;
     const bottomThreshold = containerRect.bottom - SCROLL_THRESHOLD;
+    
+    // Debug logs to help see what's happening
+    console.log("Client Y:", clientY);
+    console.log("Container top:", containerRect.top, "bottom:", containerRect.bottom);
+    console.log("Thresholds - top:", topThreshold, "bottom:", bottomThreshold);
     
     // Clear any existing auto-scroll interval
     if (autoScrollIntervalRef.current) {
@@ -48,13 +60,15 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
     // Start new auto-scroll interval if needed
     if (clientY < topThreshold) {
       // Scroll up
+      console.log("Auto-scrolling UP triggered");
       autoScrollIntervalRef.current = setInterval(() => {
-        container.scrollBy(0, -SCROLL_SPEED);
+        scrollViewport.scrollBy(0, -SCROLL_SPEED);
       }, 16);
     } else if (clientY > bottomThreshold) {
       // Scroll down
+      console.log("Auto-scrolling DOWN triggered");
       autoScrollIntervalRef.current = setInterval(() => {
-        container.scrollBy(0, SCROLL_SPEED);
+        scrollViewport.scrollBy(0, SCROLL_SPEED);
       }, 16);
     }
   };
