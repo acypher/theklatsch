@@ -13,7 +13,7 @@ interface ArticleArrangeListProps {
 const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) => {
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const SCROLL_SPEED = 10;
   const SCROLL_THRESHOLD = 150; // Threshold area to trigger auto-scroll
@@ -30,15 +30,16 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
 
   // Start auto-scroll if necessary
   const handleAutoScroll = (clientY: number) => {
-    if (!scrollAreaRef.current) return;
+    console.log("Auto-scroll handler called with clientY:", clientY);
     
-    // Find the ScrollArea viewport - we need to look for both possible selector patterns
-    // since the class name in the DOM may vary between development and production
-    const scrollViewport = document.querySelector('.scroll-area-viewport') || 
-                          document.querySelector('[data-radix-scroll-area-viewport]');
+    // Find the ScrollArea viewport using multiple selectors for better compatibility
+    const scrollViewport = 
+      document.querySelector('[data-radix-scroll-area-viewport]') || 
+      document.querySelector('.scroll-area-viewport') ||
+      document.getElementById('articles-scroll-area')?.querySelector('[data-radix-scroll-area-viewport]');
                           
     if (!scrollViewport) {
-      console.log("Scroll viewport not found");
+      console.error("Scroll viewport not found - tried multiple selectors");
       return;
     }
     
@@ -62,13 +63,19 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
       // Scroll up
       console.log("Auto-scrolling UP triggered");
       autoScrollIntervalRef.current = setInterval(() => {
-        scrollViewport.scrollBy(0, -SCROLL_SPEED);
+        scrollViewport.scrollBy({
+          top: -SCROLL_SPEED,
+          behavior: 'auto'
+        });
       }, 16);
     } else if (clientY > bottomThreshold) {
       // Scroll down
       console.log("Auto-scrolling DOWN triggered");
       autoScrollIntervalRef.current = setInterval(() => {
-        scrollViewport.scrollBy(0, SCROLL_SPEED);
+        scrollViewport.scrollBy({
+          top: SCROLL_SPEED,
+          behavior: 'auto'
+        });
       }, 16);
     }
   };
@@ -150,7 +157,7 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
   };
 
   return (
-    <div className="space-y-4" ref={scrollAreaRef}>
+    <div className="space-y-4" ref={containerRef}>
       {articles.map((article, index) => (
         <Card 
           key={article.id} 
