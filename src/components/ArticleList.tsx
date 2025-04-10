@@ -1,6 +1,7 @@
 
 import { Article } from "@/lib/types";
 import ArticleCard from "./ArticleCard";
+import TableOfContents from "./TableOfContents";
 import { Loader2 } from "lucide-react";
 
 interface ArticleListProps {
@@ -43,11 +44,21 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
           <p className="text-muted-foreground mt-2">Select a different month for the Issue</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Table of Contents card as the first item */}
+            <div className="col-span-1">
+              <TableOfContents articles={articles} />
+            </div>
+            
+            {/* Article cards */}
+            {articles.map((article) => (
+              <div key={article.id} id={`article-${article.id}`}>
+                <ArticleCard article={article} />
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
