@@ -65,7 +65,7 @@ const ArticleContent = ({ description, moreContent, sourceUrl }: ArticleContentP
             onClick={() => window.open(sourceUrl, '_blank', 'noopener,noreferrer')}
           >
             <ExternalLink size={16} />
-            Go to the article
+            Go to the Source article
           </Button>
         )}
         
