@@ -20,23 +20,38 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   
   useEffect(() => {
     const fetchCommentCount = async () => {
       try {
-        const { count, error } = await supabase
+        setIsLoading(true);
+        setHasError(false);
+        
+        // Add a timeout to help catch network issues early
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timed out')), 8000)
+        );
+        
+        const fetchPromise = supabase
           .from("comments")
           .select("*", { count: 'exact', head: true })
           .eq("article_id", article.id);
         
+        // Race between fetch and timeout
+        const { count, error } = await Promise.race([
+          fetchPromise,
+          timeoutPromise.then(() => { throw new Error('Request timed out'); })
+        ]) as any;
+        
         if (error) {
-          console.error("Error fetching comment count:", error);
-          return;
+          throw error;
         }
         
         setCommentCount(count || 0);
       } catch (error) {
-        console.error("Error in fetchCommentCount:", error);
+        console.error("Error fetching comment count:", error);
+        setHasError(true);
       } finally {
         setIsLoading(false);
       }
@@ -158,9 +173,10 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
               setShowComments(true);
             }}
             className="flex items-center gap-1 text-xs"
+            title={hasError ? "Error loading comment count" : ""}
           >
             <MessageSquare className="h-4 w-4" />
-            {commentCount > 0 ? (
+            {!isLoading && !hasError && commentCount > 0 ? (
               <>Comments {commentCount}</>
             ) : (
               <>Comments</>
@@ -182,4 +198,3 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
 };
 
 export default ArticleCard;
-

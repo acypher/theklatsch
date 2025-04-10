@@ -4,9 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface Comment {
   id: string;
@@ -32,6 +33,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const [authorEmail, setAuthorEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const getUserInitials = () => {
     if (!user) return "Anonymous";
@@ -76,20 +78,33 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
 
   const fetchComments = async () => {
     setIsLoading(true);
+    setFetchError(null);
     try {
-      const { data, error } = await supabase
+      // Add a timeout to help catch network issues early
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timed out')), 10000)
+      );
+      
+      const fetchPromise = supabase
         .from("comments")
         .select("*")
         .eq("article_id", articleId)
         .order("created_at", { ascending: false });
+        
+      // Race between fetch and timeout
+      const { data, error } = await Promise.race([
+        fetchPromise,
+        timeoutPromise.then(() => { throw new Error('Request timed out'); })
+      ]) as any;
 
       if (error) {
         throw error;
       }
 
       setComments(data as Comment[] || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching comments:", error);
+      setFetchError(error?.message || "Failed to load comments. Please try again later.");
       toast.error("Failed to load comments");
     } finally {
       setIsLoading(false);
@@ -102,12 +117,23 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("comments").insert({
+      // Add a timeout to help catch network issues early
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timed out')), 10000)
+      );
+      
+      const insertPromise = supabase.from("comments").insert({
         article_id: articleId,
         content: newComment.trim(),
         author_name: authorName.trim() || "Anonymous",
         author_email: authorEmail.trim() || null,
       });
+      
+      // Race between insert and timeout
+      const { error } = await Promise.race([
+        insertPromise,
+        timeoutPromise.then(() => { throw new Error('Request timed out'); })
+      ]) as any;
 
       if (error) {
         throw error;
@@ -116,9 +142,9 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
       setNewComment("");
       toast.success("Comment added successfully");
       fetchComments();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding comment:", error);
-      toast.error("Failed to add comment");
+      toast.error(`Failed to add comment: ${error?.message || "Unknown error"}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -133,6 +159,10 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
       minute: '2-digit'
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const handleRetry = () => {
+    fetchComments();
   };
 
   return (
@@ -190,6 +220,20 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : fetchError ? (
+            <div className="py-4">
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{fetchError}</AlertDescription>
+              </Alert>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleRetry}
+              >
+                Retry
+              </Button>
             </div>
           ) : comments.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
