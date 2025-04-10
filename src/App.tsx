@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import ArrangeArticles from "./pages/ArrangeArticles";
+import ImageDisplay from "./pages/ImageDisplay";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/image" element={<ImageDisplay />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

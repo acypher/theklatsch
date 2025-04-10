@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Image } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { updateSpecificArticle } from "@/lib/data/updateSpecificArticle";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -165,7 +167,14 @@ const Index = () => {
               loading={loading}
             />
             
-            <div className="mt-16 mb-8 flex justify-center">
+            <div className="mt-16 mb-8 flex flex-col items-center">
+              <Link to="/image" className="mb-4">
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Image className="h-4 w-4" />
+                  View Full Size Image
+                </Button>
+              </Link>
+              
               <img 
                 src="/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png" 
                 alt="The Klatsch Storefront" 
