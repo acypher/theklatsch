@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -122,11 +121,11 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
         setTimeout(() => reject(new Error('Request timed out')), 10000)
       );
       
+      // Remove the author_email field from the insert operation
       const insertPromise = supabase.from("comments").insert({
         article_id: articleId,
         content: newComment.trim(),
         author_name: authorName.trim() || "Anonymous",
-        author_email: authorEmail.trim() || null,
       });
       
       // Race between insert and timeout
