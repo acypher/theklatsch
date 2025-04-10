@@ -1,16 +1,17 @@
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 interface ArticleContentProps {
   description: string;
   moreContent?: string | null;
+  sourceUrl?: string | null;
 }
 
-const ArticleContent = ({ description, moreContent }: ArticleContentProps) => {
+const ArticleContent = ({ description, moreContent, sourceUrl }: ArticleContentProps) => {
   const navigate = useNavigate();
   
   // Markdown component renderer customization
@@ -56,13 +57,25 @@ const ArticleContent = ({ description, moreContent }: ArticleContentProps) => {
         )}
       </div>
       
-      <div className="mt-12">
+      <div className="mt-12 space-y-4">
+        {sourceUrl && (
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto flex items-center justify-center gap-2"
+            onClick={() => window.open(sourceUrl, '_blank', 'noopener,noreferrer')}
+          >
+            <ExternalLink size={16} />
+            Go to the article
+          </Button>
+        )}
+        
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={() => navigate("/")}
+          className="w-full sm:w-auto flex items-center justify-center gap-2"
         >
-          <ArrowLeft size={16} className="mr-2" />
+          <ArrowLeft size={16} />
           Back to articles
         </Button>
       </div>

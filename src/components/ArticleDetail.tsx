@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -138,6 +137,7 @@ const ArticleDetail = () => {
           <ArticleContent 
             description={article.description} 
             moreContent={article.more_content}
+            sourceUrl={article.sourceUrl}
           />
 
           {/* Delete confirmation dialog */}

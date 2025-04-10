@@ -7,7 +7,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useState, useEffect } from "react";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CommentDialog from "./CommentDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,6 +126,23 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             {article.description}
           </ReactMarkdown>
         </div>
+        
+        <div className="mt-4 mb-3 flex justify-between items-center">
+          {article.sourceUrl && (
+            <a 
+              href={article.sourceUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Go to the article
+            </a>
+          )}
+          <div className="flex-grow"></div>
+        </div>
+        
         <div className="flex justify-between items-center">
           <div className="flex flex-wrap gap-2">
             {article.keywords.map((keyword, index) => (
