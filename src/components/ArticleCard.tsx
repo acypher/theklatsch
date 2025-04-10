@@ -95,7 +95,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
       <CardHeader className="p-0">
-        <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">
+        <Link to={`/article/${article.id}`}>
           <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
             <img 
               src={getImageUrl(article.imageUrl)} 
@@ -104,7 +104,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
               loading="lazy"
             />
           </AspectRatio>
-        </a>
+        </Link>
       </CardHeader>
       <CardContent className="flex-grow pt-6">
         <Link to={`/article/${article.id}`}>
@@ -182,3 +182,4 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
 };
 
 export default ArticleCard;
+
