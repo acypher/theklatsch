@@ -4,10 +4,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MessageSquare, AlertCircle } from "lucide-react";
+import { Loader2, MessageSquare, AlertCircle, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom";
 
 interface Comment {
   id: string;
@@ -34,6 +35,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const getUserInitials = () => {
     if (!user) return "Anonymous";
@@ -114,6 +116,10 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
+    if (!user) {
+      toast.error("You must be logged in to post a comment");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -165,6 +171,11 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     fetchComments();
   };
 
+  const handleLoginRedirect = () => {
+    onClose();
+    navigate("/auth");
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
@@ -172,49 +183,66 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
           <DialogTitle className="text-xl">Comments for "{articleTitle}"</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="mt-2 mb-6 space-y-4">
-          <div>
-            <Textarea
-              placeholder="Write a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              rows={3}
-              className="w-full resize-none"
-              disabled={isSubmitting}
-            />
-          </div>
-          
-          <div className="flex flex-col gap-2">
-            <input
-              type="text"
-              placeholder="Your name"
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isSubmitting}
-            />
+        {user ? (
+          <form onSubmit={handleSubmit} className="mt-2 mb-6 space-y-4">
+            <div>
+              <Textarea
+                placeholder="Write a comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                rows={3}
+                className="w-full resize-none"
+                disabled={isSubmitting}
+              />
+            </div>
             
-            <input
-              type="email"
-              placeholder="Email address"
-              value={authorEmail}
-              onChange={(e) => setAuthorEmail(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isSubmitting}
-            />
-            
-            <Button type="submit" className="w-full" disabled={isSubmitting || !newComment.trim()}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Posting...
-                </>
-              ) : (
-                "Post Comment"
-              )}
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                placeholder="Your name"
+                value={authorName}
+                onChange={(e) => setAuthorName(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isSubmitting}
+              />
+              
+              <input
+                type="email"
+                placeholder="Email address"
+                value={authorEmail}
+                onChange={(e) => setAuthorEmail(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isSubmitting}
+              />
+              
+              <Button type="submit" className="w-full" disabled={isSubmitting || !newComment.trim()}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Posting...
+                  </>
+                ) : (
+                  "Post Comment"
+                )}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="mt-2 mb-6 space-y-4">
+            <Alert>
+              <AlertDescription>
+                You need to be signed in to post a comment.
+              </AlertDescription>
+            </Alert>
+            <Button 
+              onClick={handleLoginRedirect}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <LogIn size={16} />
+              Sign In to Comment
             </Button>
           </div>
-        </form>
+        )}
         
         <div className="flex-grow overflow-y-auto my-2 pr-2 border-t pt-4">
           {isLoading ? (
