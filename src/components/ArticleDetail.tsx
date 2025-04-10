@@ -2,36 +2,17 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { getArticleById, deleteArticle } from "@/lib/data";
 import { Article } from "@/lib/types";
-import KeywordBadge from "./KeywordBadge";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
-const getImageUrl = (url: string) => {
-  if (url.includes('drive.google.com/file/d/')) {
-    const fileIdMatch = url.match(/\/d\/([^/]+)/);
-    if (fileIdMatch && fileIdMatch[1]) {
-      const fileId = fileIdMatch[1];
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
-    }
-  }
-  return url;
-};
+import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import ArticleHeader from "./article/ArticleHeader";
+import ArticleImage from "./article/ArticleImage";
+import ArticleContent from "./article/ArticleContent";
+import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
+import { getImageUrl } from "./article/ImageUtils";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,20 +64,13 @@ const ArticleDetail = () => {
     }
   };
 
-  // Markdown component renderer customization
-  const customRenderers = {
-    // Customize link rendering to use proper attributes and prevent dropdown issues
-    a: ({ node, ...props }: any) => (
-      <a 
-        {...props} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="text-primary hover:underline"
-        onClick={(e) => e.stopPropagation()}
-      />
-    ),
-    // Ensure paragraphs don't interfere with other UI components
-    p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   if (loading) {
@@ -127,15 +101,6 @@ const ArticleDetail = () => {
     );
   }
 
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -151,144 +116,38 @@ const ArticleDetail = () => {
         
         {article && (
           <>
-            <div className="flex justify-between items-start mb-4">
-              <h1 className="text-3xl md:text-4xl font-bold prose prose-headings">
-                <ReactMarkdown remarkPlugins={[remarkGfm]} components={customRenderers}>
-                  {article.title}
-                </ReactMarkdown>
-              </h1>
-              
-              {isAuthenticated && (
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate(`/article/${article.id}/edit`)}
-                  >
-                    <Pencil size={16} className="mr-2" />
-                    Edit
-                  </Button>
-                  
-                  <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="text-destructive border-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 size={16} className="mr-2" />
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the article
-                          "{article.title}" from the database.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
-                          onClick={handleDelete}
-                          disabled={isDeleting}
-                          className="bg-destructive hover:bg-destructive/90"
-                        >
-                          {isDeleting ? "Deleting..." : "Delete"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              )}
-            </div>
-            
-            <div className="flex flex-wrap items-center text-muted-foreground mb-6">
-              <span className="font-medium text-foreground">{article.author}</span>
-              <span className="mx-2">•</span>
-              <span>{formatDate(article.createdAt)}</span>
-            </div>
-            
-            <div className="mb-6 flex flex-wrap gap-2">
-              {article.keywords.map((keyword, index) => (
-                <KeywordBadge 
-                  key={index} 
-                  keyword={keyword} 
-                  onClick={() => navigate(`/?keyword=${encodeURIComponent(keyword)}`)} 
-                />
-              ))}
-            </div>
+            <ArticleHeader 
+              article={article} 
+              isAuthenticated={isAuthenticated} 
+              onDeleteClick={() => setIsDeleteDialogOpen(true)}
+              formatDate={formatDate}
+            />
           </>
         )}
       </div>
       
       {article && (
         <>
-          <div className="mb-8">
-            {article.sourceUrl ? (
-              <a 
-                href={article.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden block cursor-pointer hover:opacity-90 transition-opacity bg-muted/20"
-                aria-label={`View original source for ${article.title}`}
-              >
-                <img 
-                  src={getImageUrl(article.imageUrl)} 
-                  alt={article.title} 
-                  className="w-full h-full object-contain"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all flex items-center justify-center">
-                  <div className="p-3 rounded-full bg-white bg-opacity-0 hover:bg-opacity-70 transition-all"></div>
-                </div>
-              </a>
-            ) : (
-              <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden bg-muted/20">
-                <img 
-                  src={getImageUrl(article.imageUrl)} 
-                  alt={article.title} 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            )}
-          </div>
+          <ArticleImage 
+            imageUrl={article.imageUrl} 
+            sourceUrl={article.sourceUrl} 
+            title={article.title}
+            getImageUrl={getImageUrl}
+          />
           
-          <div className="prose prose-lg max-w-none mb-8">
-            <div className="markdown-wrapper text-xl leading-relaxed mb-8">
-              <ReactMarkdown 
-                remarkPlugins={[remarkGfm]} 
-                components={customRenderers}
-              >
-                {article.description}
-              </ReactMarkdown>
-            </div>
-            
-            {article.more_content && (
-              <div className="mt-8 pt-8 border-t">
-                <h2 className="text-2xl font-bold mb-4">More Information</h2>
-                <div className="prose prose-lg max-w-none markdown-wrapper">
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]} 
-                    components={customRenderers}
-                  >
-                    {article.more_content}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-12">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate("/")}
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              Back to articles
-            </Button>
-          </div>
+          <ArticleContent 
+            description={article.description} 
+            moreContent={article.more_content}
+          />
+
+          {/* Delete confirmation dialog */}
+          <DeleteConfirmationDialog 
+            isOpen={isDeleteDialogOpen}
+            title={article.title}
+            isDeleting={isDeleting}
+            onOpenChange={setIsDeleteDialogOpen}
+            onConfirm={handleDelete}
+          />
         </>
       )}
     </div>
