@@ -168,13 +168,6 @@ const Index = () => {
             />
             
             <div className="mt-16 mb-8 flex flex-col items-center">
-              <Link to="/image" className="mb-4">
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Image className="h-4 w-4" />
-                  View Full Size Image
-                </Button>
-              </Link>
-              
               <img 
                 src="/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png" 
                 alt="The Klatsch Storefront" 
