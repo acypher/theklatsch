@@ -133,7 +133,7 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
           {user ? (
             <>
               <Button asChild variant="outline">
-                <Link to="/?mode=arrange" className="flex items-center gap-2">
+                <Link to="/arrange" className="flex items-center gap-2">
                   <MoveHorizontal size={18} />
                   Arrange
                 </Link>

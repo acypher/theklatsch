@@ -12,6 +12,7 @@ import EditArticle from "./pages/EditArticle";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import ArrangeArticles from "./pages/ArrangeArticles";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,14 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<Index />} />
+            <Route
+              path="/arrange"
+              element={
+                <ProtectedRoute>
+                  <ArrangeArticles />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/create"
               element={
