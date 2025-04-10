@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -28,7 +27,6 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         setIsLoading(true);
         setHasError(false);
         
-        // Add a timeout to help catch network issues early
         const timeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Request timed out')), 8000)
         );
@@ -38,7 +36,6 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           .select("*", { count: 'exact', head: true })
           .eq("article_id", article.id);
         
-        // Race between fetch and timeout
         const { count, error } = await Promise.race([
           fetchPromise,
           timeoutPromise.then(() => { throw new Error('Request timed out'); })
@@ -66,23 +63,17 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   const getImageUrl = (url: string) => {
-    // Check if it's a Google Drive URL
     if (url.includes('drive.google.com/file/d/')) {
-      // Extract the file ID from the URL
       const fileIdMatch = url.match(/\/d\/([^/]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
         const fileId = fileIdMatch[1];
-        // Return the direct image URL format for Google Drive
         return `https://drive.google.com/uc?export=view&id=${fileId}`;
       }
     }
-    // Return the original URL for non-Google Drive images
     return url;
   };
 
-  // Custom renderers for ReactMarkdown to handle links properly
   const customRenderers = {
-    // Customize link rendering to use proper attributes and prevent dropdown issues
     a: ({ node, ...props }: any) => (
       <a 
         {...props} 
@@ -96,9 +87,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         }}
       />
     ),
-    // Keep paragraphs contained
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
-    // Remove margins from headings in card titles
     h1: ({ node, ...props }: any) => <h1 className="m-0 p-0 text-xl font-semibold" {...props} />,
     h2: ({ node, ...props }: any) => <h2 className="m-0 p-0 text-xl font-semibold" {...props} />,
     h3: ({ node, ...props }: any) => <h3 className="m-0 p-0 text-xl font-semibold" {...props} />,
@@ -152,7 +141,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
               onClick={(e) => e.stopPropagation()}
             >
               <ExternalLink className="h-4 w-4" />
-              Go to the article
+              Go to the Source article
             </a>
           )}
           <div className="flex-grow"></div>
