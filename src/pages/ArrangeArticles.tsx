@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { getAllArticles } from "@/lib/data";
 import { updateArticlesOrder } from "@/lib/data/article/specialOperations";
@@ -86,7 +87,7 @@ const ArrangeArticles = () => {
             </SheetDescription>
           </SheetHeader>
           
-          <div className="mt-6">
+          <ScrollArea className="h-[calc(100vh-250px)] mt-6 pr-4">
             {loading ? (
               <div className="flex justify-center items-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -99,7 +100,7 @@ const ArrangeArticles = () => {
                   setArticles={setArticles} 
                 />
                 
-                <div className="mt-6 flex justify-end">
+                <div className="mt-6 flex justify-end sticky bottom-0 bg-background pt-4">
                   <Button 
                     onClick={handleSaveOrder}
                     disabled={saving}
@@ -120,7 +121,7 @@ const ArrangeArticles = () => {
                 </div>
               </>
             )}
-          </div>
+          </ScrollArea>
         </SheetContent>
       </Sheet>
     </div>
@@ -128,3 +129,4 @@ const ArrangeArticles = () => {
 };
 
 export default ArrangeArticles;
+
