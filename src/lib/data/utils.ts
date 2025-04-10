@@ -1,27 +1,24 @@
-
-import { toast } from "sonner";
 import { Article } from "@/lib/types";
+import { toast } from "sonner";
 
-// Function to handle API errors
-export const handleApiError = (error: unknown) => {
+export const handleApiError = (error: any): never => {
   console.error("API Error:", error);
-  toast.error("Failed to connect to the articles database.");
-  return []; // Return empty array instead of default articles
+  toast.error("An unexpected error occurred. Please try again.");
+  throw error;
 };
 
-// Function to map database fields to our Article type
-export const mapArticleFromDb = (dbArticle: any): Article => {
-  return {
-    id: dbArticle.id,
-    title: dbArticle.title,
-    description: dbArticle.description,
-    author: dbArticle.author,
-    keywords: dbArticle.keywords || [],
-    imageUrl: dbArticle.imageurl,
-    sourceUrl: dbArticle.sourceurl,
-    createdAt: dbArticle.created_at,
-    more_content: dbArticle.more_content,
-    deleted: dbArticle.deleted,
-    deletedAt: dbArticle.deleted_at
-  };
-};
+// Make sure mapArticleFromDb includes the displayPosition mapping
+export const mapArticleFromDb = (article: any): Article => ({
+  id: article.id,
+  title: article.title,
+  description: article.description,
+  author: article.author,
+  keywords: article.keywords || [],
+  imageUrl: article.imageurl,
+  sourceUrl: article.sourceurl,
+  createdAt: article.created_at,
+  more_content: article.more_content,
+  deleted: article.deleted,
+  deletedAt: article.deleted_at,
+  displayPosition: article.display_position
+});
