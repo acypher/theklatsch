@@ -1,5 +1,5 @@
 
-import { updateArticleWithLatestIssue } from "./articleService";
+import { updateArticleWithLatestIssue } from "./article/specialOperations";
 
 // Function to update a specific article with the latest issue data
 export const updateSpecificArticle = async (): Promise<void> => {
