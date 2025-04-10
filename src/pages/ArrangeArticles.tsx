@@ -79,7 +79,10 @@ const ArrangeArticles = () => {
     <div>
       <Navbar />
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl" onCloseAutoFocus={handleCloseSheet}>
+        <SheetContent 
+          className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl" 
+          onCloseAutoFocus={handleCloseSheet}
+        >
           <SheetHeader>
             <SheetTitle>Arrange Articles</SheetTitle>
             <SheetDescription>
@@ -88,7 +91,7 @@ const ArrangeArticles = () => {
           </SheetHeader>
           
           <ScrollArea 
-            className="h-[calc(100vh-250px)] mt-6 pr-4 relative" 
+            className="h-[calc(100vh-200px)] mt-4 pr-4" 
             id="articles-scroll-area"
           >
             {loading ? (
@@ -103,7 +106,7 @@ const ArrangeArticles = () => {
                   setArticles={setArticles} 
                 />
                 
-                <div className="mt-6 flex justify-end sticky bottom-0 bg-background pt-4">
+                <div className="mt-4 flex justify-end sticky bottom-0 bg-background pt-2">
                   <Button 
                     onClick={handleSaveOrder}
                     disabled={saving}
