@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Article } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -13,7 +13,52 @@ interface ArticleArrangeListProps {
 const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) => {
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [dragOverItemIndex, setDragOverItemIndex] = useState<number | null>(null);
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const SCROLL_SPEED = 10;
+  const SCROLL_THRESHOLD = 150; // Threshold area to trigger auto-scroll
+  
+  // Setup and cleanup auto-scroll functionality
+  useEffect(() => {
+    return () => {
+      if (autoScrollIntervalRef.current) {
+        clearInterval(autoScrollIntervalRef.current);
+        autoScrollIntervalRef.current = null;
+      }
+    };
+  }, []);
 
+  // Start auto-scroll if necessary
+  const handleAutoScroll = (clientY: number) => {
+    if (!scrollAreaRef.current) return;
+    
+    const container = scrollAreaRef.current.closest('.scroll-area-viewport') as HTMLDivElement;
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const topThreshold = containerRect.top + SCROLL_THRESHOLD;
+    const bottomThreshold = containerRect.bottom - SCROLL_THRESHOLD;
+    
+    // Clear any existing auto-scroll interval
+    if (autoScrollIntervalRef.current) {
+      clearInterval(autoScrollIntervalRef.current);
+      autoScrollIntervalRef.current = null;
+    }
+    
+    // Start new auto-scroll interval if needed
+    if (clientY < topThreshold) {
+      // Scroll up
+      autoScrollIntervalRef.current = setInterval(() => {
+        container.scrollBy(0, -SCROLL_SPEED);
+      }, 16);
+    } else if (clientY > bottomThreshold) {
+      // Scroll down
+      autoScrollIntervalRef.current = setInterval(() => {
+        container.scrollBy(0, SCROLL_SPEED);
+      }, 16);
+    }
+  };
+  
   // Handle drag start
   const handleDragStart = (index: number, e: React.DragEvent) => {
     setDraggedItemIndex(index);
@@ -34,11 +79,20 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
     e.preventDefault(); // Allow drop
     e.dataTransfer.dropEffect = 'move';
     setDragOverItemIndex(index);
+    
+    // Trigger auto-scroll based on mouse position
+    handleAutoScroll(e.clientY);
   };
 
   // Handle drop of an item
   const handleDrop = (targetIndex: number, e: React.DragEvent) => {
     e.preventDefault();
+    
+    // Stop auto-scrolling when item is dropped
+    if (autoScrollIntervalRef.current) {
+      clearInterval(autoScrollIntervalRef.current);
+      autoScrollIntervalRef.current = null;
+    }
     
     if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
 
@@ -66,6 +120,12 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
 
   // Handle drag end (cleanup)
   const handleDragEnd = () => {
+    // Stop auto-scrolling when drag ends
+    if (autoScrollIntervalRef.current) {
+      clearInterval(autoScrollIntervalRef.current);
+      autoScrollIntervalRef.current = null;
+    }
+    
     setDraggedItemIndex(null);
     setDragOverItemIndex(null);
   };
@@ -76,7 +136,7 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={scrollAreaRef}>
       {articles.map((article, index) => (
         <Card 
           key={article.id} 
