@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MessageSquare, AlertCircle, LogIn } from "lucide-react";
+import { Loader2, MessageSquare, AlertCircle, LogIn, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -35,6 +35,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [showCommentForm, setShowCommentForm] = useState(false);
   const navigate = useNavigate();
 
   const getUserInitials = () => {
@@ -148,6 +149,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
       setNewComment("");
       toast.success("Comment added successfully");
       fetchComments();
+      setShowCommentForm(false); // Collapse the form after successful submission
     } catch (error: any) {
       console.error("Error adding comment:", error);
       toast.error(`Failed to add comment: ${error?.message || "Unknown error"}`);
@@ -184,49 +186,77 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
         </DialogHeader>
         
         {user ? (
-          <form onSubmit={handleSubmit} className="mt-2 mb-6 space-y-4">
-            <div>
-              <Textarea
-                placeholder="Write a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                rows={3}
-                className="w-full resize-none"
-                disabled={isSubmitting}
-              />
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                placeholder="Your name"
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isSubmitting}
-              />
-              
-              <input
-                type="email"
-                placeholder="Email address"
-                value={authorEmail}
-                onChange={(e) => setAuthorEmail(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isSubmitting}
-              />
-              
-              <Button type="submit" className="w-full" disabled={isSubmitting || !newComment.trim()}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Posting...
-                  </>
-                ) : (
-                  "Post Comment"
-                )}
+          <div className="mt-2 mb-6">
+            {showCommentForm ? (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Textarea
+                    placeholder="Write a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    rows={3}
+                    className="w-full resize-none"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={isSubmitting}
+                  />
+                  
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    value={authorEmail}
+                    onChange={(e) => setAuthorEmail(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={isSubmitting}
+                  />
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setShowCommentForm(false)}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1" 
+                      disabled={isSubmitting || !newComment.trim()}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Posting...
+                        </>
+                      ) : (
+                        "Post Comment"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            ) : (
+              <Button 
+                onClick={() => setShowCommentForm(true)} 
+                variant="outline" 
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <Plus size={16} />
+                Add a comment
               </Button>
-            </div>
-          </form>
+            )}
+          </div>
         ) : (
           <div className="mt-2 mb-6 space-y-4">
             <Alert>
