@@ -186,7 +186,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
         </DialogHeader>
         
         {user ? (
-          <div className="mt-2 mb-6">
+          <div className="mt-2 mb-2">
             {showCommentForm ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -258,7 +258,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             )}
           </div>
         ) : (
-          <div className="mt-2 mb-6 space-y-4">
+          <div className="mt-2 mb-2 space-y-4">
             <Alert>
               <AlertDescription>
                 You need to be signed in to post a comment.
@@ -274,7 +274,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
           </div>
         )}
         
-        <div className="flex-grow overflow-y-auto my-2 pr-2 border-t pt-4">
+        <div className="flex-grow overflow-y-auto mt-1 pr-2 border-t pt-3">
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />

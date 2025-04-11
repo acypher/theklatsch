@@ -23,16 +23,16 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
   const isMobile = useIsMobile();
   
   useEffect(() => {
-    // Function to calculate the max height based on viewport width
+    // Calculate max height based on viewport width
     const calculateMaxHeight = () => {
       const viewportWidth = window.innerWidth;
       // Using approximately 2:1 ratio (1050:550)
       // But clamping between reasonable min/max values
       const calculatedHeight = Math.floor(viewportWidth / 2);
       
-      // Set reasonable limits
-      const minHeight = 300;
-      const maxHeight = 650;
+      // Reduce the max height to make ToC more compact
+      const minHeight = 250;
+      const maxHeight = 500;
       
       return Math.min(Math.max(calculatedHeight, minHeight), maxHeight);
     };
@@ -111,8 +111,8 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
   };
 
   // Calculate remaining height for article list
-  const recommendationsHeight = recommendations ? 150 : 0;
-  const articlesListHeight = isMobile ? 300 : (maxHeight - recommendationsHeight);
+  const recommendationsHeight = recommendations ? 120 : 0;
+  const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight);
 
   return (
     <Card className={`h-full flex flex-col ${className || ""}`}>
@@ -124,10 +124,10 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
       </CardHeader>
       <CardContent className="flex-grow p-6 pt-0 flex flex-col">
         <ScrollArea 
-          className={`h-[${articlesListHeight}px]`} 
+          className="flex-1"
           style={{ height: articlesListHeight }}
         >
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {articles.map((article, index) => (
               <li 
                 key={article.id}
@@ -142,7 +142,7 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
                   onClick={() => handleItemClick(article.id)}
                   aria-current={activeItem === article.id ? "true" : undefined}
                 >
-                  <span className="font-medium text-muted-foreground min-w-8">
+                  <span className="font-medium text-muted-foreground min-w-6">
                     {index + 1}.
                   </span>
                   <span>{article.title}</span>
@@ -153,11 +153,13 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
         </ScrollArea>
         
         {!loading && (
-          <EditableMarkdown 
-            content={recommendations} 
-            onSave={handleSaveRecommendations} 
-            placeholder="Add recommendations here..."
-          />
+          <div className="mt-3">
+            <EditableMarkdown 
+              content={recommendations} 
+              onSave={handleSaveRecommendations} 
+              placeholder="Add recommendations here..."
+            />
+          </div>
         )}
       </CardContent>
     </Card>
