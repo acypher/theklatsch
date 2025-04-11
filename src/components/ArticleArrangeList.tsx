@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Article } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -30,27 +29,18 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
 
   // Start auto-scroll if necessary
   const handleAutoScroll = (clientY: number) => {
-    console.log("Auto-scroll handler called with clientY:", clientY);
+    // Get the parent container with scrolling capabilities
+    const scrollContainer = document.querySelector('.scroll-area-viewport') || 
+                            document.getElementById('articles-scroll-area');
     
-    // Find the ScrollArea viewport using multiple selectors for better compatibility
-    const scrollViewport = 
-      document.querySelector('[data-radix-scroll-area-viewport]') || 
-      document.querySelector('.scroll-area-viewport') ||
-      document.getElementById('articles-scroll-area')?.querySelector('[data-radix-scroll-area-viewport]');
-                          
-    if (!scrollViewport) {
-      console.error("Scroll viewport not found - tried multiple selectors");
+    if (!scrollContainer) {
+      console.error("Scroll container not found");
       return;
     }
     
-    const containerRect = scrollViewport.getBoundingClientRect();
+    const containerRect = scrollContainer.getBoundingClientRect();
     const topThreshold = containerRect.top + SCROLL_THRESHOLD;
     const bottomThreshold = containerRect.bottom - SCROLL_THRESHOLD;
-    
-    // Debug logs to help see what's happening
-    console.log("Client Y:", clientY);
-    console.log("Container top:", containerRect.top, "bottom:", containerRect.bottom);
-    console.log("Thresholds - top:", topThreshold, "bottom:", bottomThreshold);
     
     // Clear any existing auto-scroll interval
     if (autoScrollIntervalRef.current) {
@@ -63,7 +53,7 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
       // Scroll up
       console.log("Auto-scrolling UP triggered");
       autoScrollIntervalRef.current = setInterval(() => {
-        scrollViewport.scrollBy({
+        scrollContainer.scrollBy({
           top: -SCROLL_SPEED,
           behavior: 'auto'
         });
@@ -72,7 +62,7 @@ const ArticleArrangeList = ({ articles, setArticles }: ArticleArrangeListProps) 
       // Scroll down
       console.log("Auto-scrolling DOWN triggered");
       autoScrollIntervalRef.current = setInterval(() => {
-        scrollViewport.scrollBy({
+        scrollContainer.scrollBy({
           top: SCROLL_SPEED,
           behavior: 'auto'
         });
