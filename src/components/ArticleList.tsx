@@ -67,7 +67,11 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
             
             {/* Article cards - using sortedArticles instead of articles */}
             {sortedArticles.map((article) => (
-              <div key={article.id} id={`article-${article.id}`}>
+              <div 
+                key={article.id} 
+                id={`article-${article.id}`} 
+                className="transition-all duration-300"
+              >
                 <ArticleCard article={article} />
               </div>
             ))}

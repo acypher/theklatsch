@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Article } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GripVertical, ScrollText, Save } from "lucide-react";
@@ -23,6 +23,7 @@ const TableOfContents = ({ articles, onArticlesReordered }: TableOfContentsProps
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saving, setSaving] = useState(false);
   const { isAuthenticated } = useAuth();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Update local state when articles prop changes
   useEffect(() => {
@@ -66,16 +67,29 @@ const TableOfContents = ({ articles, onArticlesReordered }: TableOfContentsProps
   }, []);
 
   const scrollToArticle = (id: string) => {
+    // Find the target article element in the DOM
     const articleElement = document.getElementById(`article-${id}`);
+    
     if (articleElement) {
       // Add a small offset to account for any fixed headers
-      const yOffset = -20;
-      const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      const yOffset = -80; // Increased offset to account for navbar and header
       
+      // Get the element's position relative to the viewport
+      const y = articleElement.getBoundingClientRect().top + window.scrollY + yOffset;
+      
+      // Scroll smoothly to the target position
       window.scrollTo({
         top: y,
         behavior: 'smooth'
       });
+      
+      // Add a brief highlight effect to the article card
+      articleElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+      setTimeout(() => {
+        articleElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+      }, 1500);
+    } else {
+      console.warn(`Article element with ID article-${id} not found in the DOM`);
     }
   };
 
@@ -199,7 +213,7 @@ const TableOfContents = ({ articles, onArticlesReordered }: TableOfContentsProps
         </div>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col">
-        <ScrollArea className="flex-grow pr-4 h-[300px]">
+        <ScrollArea className="flex-grow pr-4 h-[300px]" ref={scrollAreaRef}>
           <div className="space-y-2">
             {localArticles.length === 0 ? (
               <p className="text-muted-foreground text-sm italic">No articles in this issue</p>
@@ -233,6 +247,7 @@ const TableOfContents = ({ articles, onArticlesReordered }: TableOfContentsProps
                       <button 
                         onClick={() => scrollToArticle(article.id)}
                         className="w-full text-left group"
+                        aria-label={`Scroll to ${article.title}`}
                       >
                         <p className="text-sm group-hover:text-primary transition-colors">
                           {article.title}
