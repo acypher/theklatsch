@@ -55,9 +55,9 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('issue_content')
-          .select('recommendations')
-          .eq('key', 'current_issue')
+          .from('vars')
+          .select('value')
+          .eq('key', 'recommendations')
           .single();
         
         if (error) {
@@ -66,7 +66,7 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
         }
         
         if (data) {
-          setRecommendations(data.recommendations || '');
+          setRecommendations(data.value || '');
         }
       } catch (error) {
         console.error('Error fetching recommendations:', error);
@@ -86,11 +86,11 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
   const handleSaveRecommendations = async (content: string) => {
     try {
       const { error } = await supabase
-        .from('issue_content')
+        .from('vars')
         .upsert(
           { 
-            key: 'current_issue', 
-            recommendations: content,
+            key: 'recommendations', 
+            value: content,
             updated_at: new Date().toISOString()
           },
           { onConflict: 'key' }
