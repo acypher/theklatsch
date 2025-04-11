@@ -1,9 +1,10 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Article } from "@/lib/types";
 import { BookOpen } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -13,6 +14,35 @@ interface TableOfContentsProps {
 
 const TableOfContents = ({ articles, onArticleClick, className }: TableOfContentsProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
+  const [maxHeight, setMaxHeight] = useState<number>(400);
+  const isMobile = useIsMobile();
+  
+  useEffect(() => {
+    // Function to calculate the max height based on viewport width
+    const calculateMaxHeight = () => {
+      const viewportWidth = window.innerWidth;
+      // Using approximately 2:1 ratio (1050:550)
+      // But clamping between reasonable min/max values
+      const calculatedHeight = Math.floor(viewportWidth / 2);
+      
+      // Set reasonable limits
+      const minHeight = 300;
+      const maxHeight = 650;
+      
+      return Math.min(Math.max(calculatedHeight, minHeight), maxHeight);
+    };
+    
+    // Set initial height
+    setMaxHeight(calculateMaxHeight());
+    
+    // Update on resize
+    const handleResize = () => {
+      setMaxHeight(calculateMaxHeight());
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const handleItemClick = (articleId: string) => {
     setActiveItem(articleId);
@@ -27,8 +57,8 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
           In This Issue
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
-        <ScrollArea className="h-[400px] pr-4">
+      <CardContent className="flex-grow p-6 pt-0">
+        <ScrollArea className={`h-[${isMobile ? '300px' : maxHeight + 'px'}]`} style={{ height: isMobile ? 300 : maxHeight }}>
           <ul className="space-y-3">
             {articles.map((article, index) => (
               <li 
