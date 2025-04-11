@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PenLine, LogOut, LogIn, MoveHorizontal, ChevronDown, User } from "lucide-react";
+import { PenLine, LogOut, LogIn, ChevronDown, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -132,13 +132,6 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <Button asChild variant="outline">
-                <Link to="/arrange" className="flex items-center gap-2">
-                  <MoveHorizontal size={18} />
-                  Arrange
-                </Link>
-              </Button>
-              
               <Button asChild variant="default">
                 <Link to="/create" className="flex items-center gap-2">
                   <PenLine size={18} />

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+import MarkdownEditor from "./article/MarkdownEditor";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, MessageSquare, AlertCircle, LogIn, Plus } from "lucide-react";
@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Comment {
   id: string;
@@ -190,13 +192,12 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             {showCommentForm ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Textarea
-                    placeholder="Write a comment..."
+                  <MarkdownEditor
                     value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    rows={3}
-                    className="w-full resize-none"
-                    disabled={isSubmitting}
+                    onChange={(val) => setNewComment(val || "")}
+                    height={150}
+                    placeholder="Write a comment..."
+                    showPreview={false}
                   />
                 </div>
                 
@@ -308,7 +309,11 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
                       {formatDate(comment.created_at)}
                     </p>
                   </div>
-                  <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
+                  <div className="prose prose-sm max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {comment.content}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               ))}
             </div>
