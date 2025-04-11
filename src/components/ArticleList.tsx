@@ -21,6 +21,9 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     );
   }
 
+  // Sort articles by displayPosition to ensure consistency between TOC and article cards
+  const sortedArticles = [...articles].sort((a, b) => (a.displayPosition || 999) - (b.displayPosition || 999));
+
   return (
     <div className="space-y-6">
       {selectedKeyword && (
@@ -51,8 +54,8 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
               <TableOfContents articles={articles} />
             </div>
             
-            {/* Article cards */}
-            {articles.map((article) => (
+            {/* Article cards - using sortedArticles instead of articles */}
+            {sortedArticles.map((article) => (
               <div key={article.id} id={`article-${article.id}`}>
                 <ArticleCard article={article} />
               </div>
