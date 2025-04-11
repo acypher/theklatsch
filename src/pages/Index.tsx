@@ -141,7 +141,7 @@ const Index = () => {
   );
 
   return (
-    <div>
+    <div className="min-h-screen">
       <Navbar 
         onLogoClick={() => setShowMaintenancePage(false)} 
         currentIssue={currentIssue}

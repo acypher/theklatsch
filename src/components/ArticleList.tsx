@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import ArticleCard from "./ArticleCard";
+import TableOfContents from "./TableOfContents";
 import { Loader2, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { updateArticlesOrder } from "@/lib/data/article/specialOperations";
@@ -19,6 +21,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   
   useEffect(() => {
     setLocalArticles(articles);
@@ -137,6 +140,23 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     }
   };
 
+  const scrollToArticle = (articleId: string) => {
+    const articleElement = articleRefs.current.get(articleId);
+    if (articleElement) {
+      // Scroll with offset to account for any fixed headers
+      const yOffset = -100; 
+      const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // Get the article content excluding the ToC
+  const contentArticles = [...localArticles];
+
   return (
     <div className="space-y-6">
       {selectedKeyword && (
@@ -161,9 +181,22 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {localArticles.map((article) => (
+          {/* Table of Contents Card - First Position */}
+          <div className="h-full">
+            <TableOfContents 
+              articles={contentArticles} 
+              onArticleClick={scrollToArticle}
+            />
+          </div>
+          
+          {/* Article Cards */}
+          {contentArticles.map((article) => (
             <div
               key={article.id}
+              ref={(el) => {
+                if (el) articleRefs.current.set(article.id, el);
+                return el;
+              }}
               draggable={isLoggedIn}
               onDragStart={(e) => handleDragStart(e, article)}
               onDragEnd={handleDragEnd}
