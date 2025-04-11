@@ -188,7 +188,7 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
         </div>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col">
-        <ScrollArea className="flex-grow pr-4">
+        <ScrollArea className="flex-grow pr-4 h-[300px]">
           <div className="space-y-2">
             {localArticles.length === 0 ? (
               <p className="text-muted-foreground text-sm italic">No articles in this issue</p>
@@ -214,13 +214,11 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
                   >
                     {index > 0 && <Separator className="mb-2" />}
                     <div className="flex items-start gap-2">
-                      <div className="flex-shrink-0 mt-1">
-                        {isAuthenticated ? (
+                      {isAuthenticated && (
+                        <div className="flex-shrink-0 mt-1">
                           <GripVertical className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <ListOrdered className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </div>
+                        </div>
+                      )}
                       <button 
                         onClick={() => scrollToArticle(article.id)}
                         className="w-full text-left group"
@@ -255,4 +253,3 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
 };
 
 export default TableOfContents;
-

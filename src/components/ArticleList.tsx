@@ -46,8 +46,8 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Table of Contents card as the first item */}
-            <div className="col-span-1">
+            {/* Table of Contents card */}
+            <div className="col-span-1 h-full">
               <TableOfContents articles={articles} />
             </div>
             
