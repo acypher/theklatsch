@@ -2,13 +2,14 @@
 import { useEffect, useState } from "react";
 import { Article } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GripVertical, ListOrdered, ScrollText } from "lucide-react";
+import { GripVertical, ListOrdered, Save, ScrollText } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { updateArticlesOrder } from "@/lib/data/article/specialOperations";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -17,6 +18,9 @@ interface TableOfContentsProps {
 const TableOfContents = ({ articles }: TableOfContentsProps) => {
   const [localArticles, setLocalArticles] = useState<Article[]>(articles);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [dragOverItem, setDragOverItem] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { isAuthenticated } = useAuth();
 
   // Update local state when articles prop changes
@@ -47,6 +51,8 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
                   : article
               ).sort((a, b) => (a.displayPosition || 999) - (b.displayPosition || 999))
             );
+            // Reset unsaved changes flag as we received an update from the server
+            setHasUnsavedChanges(false);
           }
         }
       )
@@ -86,9 +92,10 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
   const handleDragOver = (e: React.DragEvent, id: string) => {
     if (!isAuthenticated || !draggedItem || draggedItem === id) return;
     e.preventDefault();
+    setDragOverItem(id);
   };
 
-  const handleDrop = async (e: React.DragEvent, targetId: string) => {
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
     if (!isAuthenticated || !draggedItem || draggedItem === targetId) return;
     e.preventDefault();
     
@@ -114,51 +121,63 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
     // Insert it at the target position
     updatedArticles.splice(targetIndex, 0, removed);
     
-    // Update the display positions
-    const articlePositions = updatedArticles.map((article, index) => ({
-      id: article.id,
-      position: index + 1 // Start from 1
+    // Update local display positions
+    const articlePositionsForUi = updatedArticles.map((article, index) => ({
+      ...article,
+      displayPosition: index + 1 // Update display position for UI
     }));
     
-    // Optimistically update the local state
-    setLocalArticles(updatedArticles.map((article, index) => ({
-      ...article,
-      displayPosition: index + 1
-    })));
-    
-    // Send the update to the server
-    try {
-      const success = await updateArticlesOrder(articlePositions);
-      if (success) {
-        toast.success("Article order updated successfully");
-      } else {
-        toast.error("Failed to update article order");
-        // Revert to original order if the update fails
-        setLocalArticles(articles);
-      }
-    } catch (error) {
-      console.error("Error updating article order:", error);
-      toast.error("Failed to update article order");
-      setLocalArticles(articles);
-    }
-    
+    // Update local state immediately for visual feedback
+    setLocalArticles(articlePositionsForUi);
+    setHasUnsavedChanges(true);
     setDraggedItem(null);
+    setDragOverItem(null);
   };
 
   const handleDragEnd = () => {
     setDraggedItem(null);
+    setDragOverItem(null);
+  };
+
+  const saveOrder = async () => {
+    if (!hasUnsavedChanges) return;
+    
+    setSaving(true);
+    
+    try {
+      // Prepare article positions for the server
+      const articlePositions = localArticles.map((article, index) => ({
+        id: article.id,
+        position: index + 1
+      }));
+      
+      // Send the update to the server
+      const success = await updateArticlesOrder(articlePositions);
+      
+      if (success) {
+        toast.success("Article order updated successfully");
+        setHasUnsavedChanges(false);
+      } else {
+        toast.error("Failed to update article order");
+      }
+    } catch (error) {
+      console.error("Error updating article order:", error);
+      toast.error("Failed to update article order");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <ScrollText className="h-5 w-5 text-primary" />
           <CardTitle className="text-xl">In This Issue</CardTitle>
         </div>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[300px] pr-4">
+      <CardContent className="flex-grow flex flex-col">
+        <ScrollArea className="flex-grow pr-4">
           <div className="space-y-3">
             {localArticles.length === 0 ? (
               <p className="text-muted-foreground text-sm italic">No articles in this issue</p>
@@ -174,9 +193,13 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
                     onDragOver={(e) => handleDragOver(e, article.id)}
                     onDrop={(e) => handleDrop(e, article.id)}
                     onDragEnd={handleDragEnd}
-                    className={`${draggedItem === article.id ? 'opacity-50' : 'opacity-100'} 
-                               ${isAuthenticated ? 'cursor-move' : 'cursor-pointer'}
-                               transition-opacity`}
+                    className={`
+                      ${draggedItem === article.id ? 'opacity-50' : 'opacity-100'} 
+                      ${dragOverItem === article.id ? 'bg-accent/50 rounded-md -mx-2 px-2' : ''}
+                      ${isAuthenticated ? 'cursor-move' : 'cursor-pointer'}
+                      transition-all duration-200 transform
+                      ${draggedItem === article.id ? 'scale-105' : 'scale-100'}
+                    `}
                   >
                     {index > 0 && <Separator className="my-2" />}
                     <div className="flex items-start gap-2">
@@ -201,6 +224,20 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
             )}
           </div>
         </ScrollArea>
+        
+        {isAuthenticated && hasUnsavedChanges && (
+          <div className="mt-3 pt-3 border-t">
+            <Button 
+              onClick={saveOrder} 
+              className="w-full flex items-center justify-center gap-2"
+              disabled={saving}
+              size="sm"
+            >
+              <Save className="h-4 w-4" />
+              {saving ? "Saving..." : "Save Order"}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
