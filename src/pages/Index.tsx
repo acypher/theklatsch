@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Image } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { updateSpecificArticle } from "@/lib/data/updateSpecificArticle";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
