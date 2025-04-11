@@ -82,16 +82,27 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
   const handleDragStart = (e: React.DragEvent, id: string) => {
     if (!isAuthenticated) return;
     setDraggedItem(id);
+    
+    // Create a ghost image to visually show what is being dragged
+    if (e.target instanceof HTMLElement) {
+      // Use the current element as the drag image 
+      // Set no offset to position it at the cursor
+      const rect = e.target.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const offsetY = e.clientY - rect.top;
+      
+      // Using the actual element for drag feedback
+      e.dataTransfer.setDragImage(e.target, offsetX, offsetY);
+    }
+    
+    e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', id);
-    // Make the drag image transparent
-    const dragImage = new Image();
-    dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    e.dataTransfer.setDragImage(dragImage, 0, 0);
   };
 
   const handleDragOver = (e: React.DragEvent, id: string) => {
     if (!isAuthenticated || !draggedItem || draggedItem === id) return;
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     setDragOverItem(id);
   };
 
@@ -178,7 +189,7 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
       </CardHeader>
       <CardContent className="flex-grow flex flex-col">
         <ScrollArea className="flex-grow pr-4">
-          <div className="space-y-3">
+          <div className="space-y-2">
             {localArticles.length === 0 ? (
               <p className="text-muted-foreground text-sm italic">No articles in this issue</p>
             ) : (
@@ -194,14 +205,14 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
                     onDrop={(e) => handleDrop(e, article.id)}
                     onDragEnd={handleDragEnd}
                     className={`
-                      ${draggedItem === article.id ? 'opacity-50' : 'opacity-100'} 
-                      ${dragOverItem === article.id ? 'bg-accent/50 rounded-md -mx-2 px-2' : ''}
+                      ${draggedItem === article.id ? 'opacity-50 bg-accent/20' : 'opacity-100'} 
+                      ${dragOverItem === article.id ? 'bg-accent/50 rounded-md -mx-2 px-2 border-l-2 border-primary' : ''}
                       ${isAuthenticated ? 'cursor-move' : 'cursor-pointer'}
-                      transition-all duration-200 transform
-                      ${draggedItem === article.id ? 'scale-105' : 'scale-100'}
+                      transition-colors duration-200 transform
+                      p-2 rounded-md hover:bg-accent/30
                     `}
                   >
-                    {index > 0 && <Separator className="my-2" />}
+                    {index > 0 && <Separator className="mb-2" />}
                     <div className="flex items-start gap-2">
                       <div className="flex-shrink-0 mt-1">
                         {isAuthenticated ? (
@@ -244,3 +255,4 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
 };
 
 export default TableOfContents;
+
