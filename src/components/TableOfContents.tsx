@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Article } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GripVertical, ListOrdered, Save, ScrollText } from "lucide-react";
+import { GripVertical, ScrollText, Save } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 
 interface TableOfContentsProps {
   articles: Article[];
+  onArticlesReordered?: (updatedArticles: Article[]) => void;
 }
 
-const TableOfContents = ({ articles }: TableOfContentsProps) => {
+const TableOfContents = ({ articles, onArticlesReordered }: TableOfContentsProps) => {
   const [localArticles, setLocalArticles] = useState<Article[]>(articles);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [dragOverItem, setDragOverItem] = useState<string | null>(null);
@@ -143,6 +144,11 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
     setHasUnsavedChanges(true);
     setDraggedItem(null);
     setDragOverItem(null);
+    
+    // Notify parent component of the change
+    if (onArticlesReordered) {
+      onArticlesReordered(articlePositionsForUi);
+    }
   };
 
   const handleDragEnd = () => {
@@ -168,6 +174,11 @@ const TableOfContents = ({ articles }: TableOfContentsProps) => {
       if (success) {
         toast.success("Article order updated successfully");
         setHasUnsavedChanges(false);
+        
+        // Notify parent component of successful save
+        if (onArticlesReordered) {
+          onArticlesReordered(localArticles);
+        }
       } else {
         toast.error("Failed to update article order");
       }

@@ -3,6 +3,7 @@ import { Article } from "@/lib/types";
 import ArticleCard from "./ArticleCard";
 import TableOfContents from "./TableOfContents";
 import { Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface ArticleListProps {
   articles: Article[];
@@ -12,6 +13,13 @@ interface ArticleListProps {
 }
 
 const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = false }: ArticleListProps) => {
+  const [localArticles, setLocalArticles] = useState<Article[]>(articles);
+
+  // Update local state when articles prop changes
+  useEffect(() => {
+    setLocalArticles(articles);
+  }, [articles]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -22,7 +30,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   }
 
   // Sort articles by displayPosition to ensure consistency between TOC and article cards
-  const sortedArticles = [...articles].sort((a, b) => (a.displayPosition || 999) - (b.displayPosition || 999));
+  const sortedArticles = [...localArticles].sort((a, b) => (a.displayPosition || 999) - (b.displayPosition || 999));
 
   return (
     <div className="space-y-6">
@@ -41,7 +49,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
         </div>
       )}
       
-      {articles.length === 0 ? (
+      {localArticles.length === 0 ? (
         <div className="text-center py-12">
           <h3 className="text-xl font-medium text-gray-600">No articles found</h3>
           <p className="text-muted-foreground mt-2">Select a different month for the Issue</p>
@@ -49,9 +57,12 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Table of Contents card */}
+            {/* Table of Contents card with a callback to update article order */}
             <div className="col-span-1 h-full">
-              <TableOfContents articles={articles} />
+              <TableOfContents 
+                articles={localArticles} 
+                onArticlesReordered={(updatedArticles) => setLocalArticles(updatedArticles)}
+              />
             </div>
             
             {/* Article cards - using sortedArticles instead of articles */}
