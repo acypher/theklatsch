@@ -5,6 +5,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Article } from "@/lib/types";
 import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import EditableMarkdown from "./EditableMarkdown";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -15,6 +18,8 @@ interface TableOfContentsProps {
 const TableOfContents = ({ articles, onArticleClick, className }: TableOfContentsProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [maxHeight, setMaxHeight] = useState<number>(400);
+  const [recommendations, setRecommendations] = useState<string>("");
+  const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -44,10 +49,70 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
+  useEffect(() => {
+    // Fetch recommendations
+    const fetchRecommendations = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('issue_content')
+          .select('recommendations')
+          .eq('key', 'current_issue')
+          .single();
+        
+        if (error) {
+          console.error('Error fetching recommendations:', error);
+          return;
+        }
+        
+        if (data) {
+          setRecommendations(data.recommendations || '');
+        }
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchRecommendations();
+  }, []);
+  
   const handleItemClick = (articleId: string) => {
     setActiveItem(articleId);
     onArticleClick(articleId);
   };
+  
+  const handleSaveRecommendations = async (content: string) => {
+    try {
+      const { error } = await supabase
+        .from('issue_content')
+        .upsert(
+          { 
+            key: 'current_issue', 
+            recommendations: content,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'key' }
+        );
+      
+      if (error) {
+        console.error('Error saving recommendations:', error);
+        toast.error('Failed to save recommendations');
+        throw error;
+      }
+      
+      setRecommendations(content);
+      toast.success('Recommendations saved successfully');
+    } catch (error) {
+      console.error('Error saving recommendations:', error);
+      throw error;
+    }
+  };
+
+  // Calculate remaining height for article list
+  const recommendationsHeight = recommendations ? 150 : 0;
+  const articlesListHeight = isMobile ? 300 : (maxHeight - recommendationsHeight);
 
   return (
     <Card className={`h-full flex flex-col ${className || ""}`}>
@@ -57,8 +122,11 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
           In This Issue
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow p-6 pt-0">
-        <ScrollArea className={`h-[${isMobile ? '300px' : maxHeight + 'px'}]`} style={{ height: isMobile ? 300 : maxHeight }}>
+      <CardContent className="flex-grow p-6 pt-0 flex flex-col">
+        <ScrollArea 
+          className={`h-[${articlesListHeight}px]`} 
+          style={{ height: articlesListHeight }}
+        >
           <ul className="space-y-3">
             {articles.map((article, index) => (
               <li 
@@ -83,6 +151,14 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
             ))}
           </ul>
         </ScrollArea>
+        
+        {!loading && (
+          <EditableMarkdown 
+            content={recommendations} 
+            onSave={handleSaveRecommendations} 
+            placeholder="Add recommendations here..."
+          />
+        )}
       </CardContent>
     </Card>
   );
