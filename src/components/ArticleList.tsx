@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Article } from "@/lib/types";
 import ArticleCard from "./ArticleCard";
@@ -21,7 +20,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   
-  // Set up initial state and auth check
   useEffect(() => {
     setLocalArticles(articles);
     
@@ -41,7 +39,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     };
   }, [articles]);
 
-  // If loading, show loader
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -51,90 +48,72 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     );
   }
 
-  // Handle drag start
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: Article) => {
     if (!isLoggedIn) return;
     
     setDraggedItem(item);
     setIsDragging(true);
     
-    // Set the drag image (optional)
     const dragImage = new Image();
     dragImage.src = item.imageUrl;
     dragImage.style.opacity = '0.5';
     
-    // Set relevant data for transfer
     e.dataTransfer.setData("text/plain", item.id);
     
-    // Make drag effect look correct
     e.dataTransfer.effectAllowed = "move";
     
-    // Store a reference to the dragged element
     const element = e.currentTarget;
     if (element) {
-      // To create a proper drag image
       setTimeout(() => {
         element.classList.add("opacity-50", "scale-95");
       }, 0);
     }
   };
 
-  // Handle drag end
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
     setIsDragging(false);
     
-    // Remove styling from the dragged element
     const element = e.currentTarget;
     if (element) {
       element.classList.remove("opacity-50", "scale-95");
     }
     
-    // Save changes if there are any
     if (hasChanges) {
       saveChanges();
     }
   };
 
-  // Handle drag over
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   };
 
-  // Handle drop to reorder
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => {
     e.preventDefault();
     
     if (!draggedItem || draggedItem.id === targetItem.id) return;
     
-    // Create a copy of the articles array
     const updatedArticles = [...localArticles];
     
-    // Find the indices
     const draggedIndex = updatedArticles.findIndex(item => item.id === draggedItem.id);
     const targetIndex = updatedArticles.findIndex(item => item.id === targetItem.id);
     
     if (draggedIndex < 0 || targetIndex < 0) return;
     
-    // Remove the dragged item
     const [removed] = updatedArticles.splice(draggedIndex, 1);
     
-    // Insert at the new position
     updatedArticles.splice(targetIndex, 0, removed);
     
-    // Update display positions
     const articlesWithNewPositions = updatedArticles.map((article, index) => ({
       ...article,
       displayPosition: index + 1
     }));
     
-    // Update state
     setLocalArticles(articlesWithNewPositions);
     setHasChanges(true);
     setDraggedItem(null);
   };
 
-  // Save changes to the database
   const saveChanges = async () => {
     const orderData = localArticles.map((article, index) => ({
       id: article.id,
@@ -147,7 +126,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
         toast.success("Article order updated successfully");
       } else {
         toast.error("Failed to update article order");
-        // Reset to original order if save failed
         setLocalArticles(articles);
       }
     } catch (error) {
@@ -173,15 +151,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
               ×
             </button>
           </span>
-        </div>
-      )}
-      
-      {isLoggedIn && (
-        <div className="bg-muted/30 rounded-lg p-3 mb-4">
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
-            <GripVertical className="h-4 w-4" />
-            You can drag and drop articles to rearrange them
-          </p>
         </div>
       )}
       
