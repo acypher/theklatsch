@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ArticleContentProps {
   description: string;

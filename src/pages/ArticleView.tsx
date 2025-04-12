@@ -19,9 +19,9 @@ const ArticleView = () => {
   }, []);
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Navbar currentIssue={currentIssue} />
-      <main className="prose prose-lg max-w-none pb-12 markdown-content-container">
+      <main className="prose prose-lg max-w-none pb-12 markdown-content-container flex-grow overflow-y-auto">
         <ArticleDetail />
       </main>
       
@@ -45,6 +45,12 @@ const ArticleView = () => {
         /* Remove extra paragraph margins in markdown headings */
         .prose-headings p {
           margin: 0;
+        }
+        
+        /* Ensure content is scrollable */
+        html, body {
+          height: 100%;
+          overflow-y: auto;
         }
       `}</style>
     </div>
