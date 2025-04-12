@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import ArticleCard from "./ArticleCard";
@@ -143,7 +142,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   const scrollToArticle = (articleId: string) => {
     const articleElement = articleRefs.current.get(articleId);
     if (articleElement) {
-      // Scroll with offset to account for any fixed headers
       const yOffset = -100; 
       const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
       
@@ -154,7 +152,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     }
   };
 
-  // Get the article content excluding the ToC
   const contentArticles = [...localArticles];
 
   return (
@@ -181,7 +178,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Table of Contents Card - First Position */}
           <div className="h-full">
             <TableOfContents 
               articles={contentArticles} 
@@ -189,10 +185,10 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
             />
           </div>
           
-          {/* Article Cards */}
           {contentArticles.map((article) => (
             <div
               key={article.id}
+              id={`article-${article.id}`}
               ref={(el) => {
                 if (el) articleRefs.current.set(article.id, el);
                 return el;

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +20,7 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [issueWasFixed, setIssueWasFixed] = useState(false);
+  const articleListRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -74,6 +75,37 @@ const Index = () => {
   useEffect(() => {
     fetchArticles();
   }, []);
+
+  // Effect to restore scroll position when returning from article detail
+  useEffect(() => {
+    const restoreScrollPosition = async () => {
+      const lastViewedArticleId = sessionStorage.getItem('lastViewedArticleId');
+      
+      if (lastViewedArticleId && articles.length > 0 && articleListRef.current) {
+        // Wait for article list to render
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const articleElement = document.getElementById(`article-${lastViewedArticleId}`);
+        if (articleElement) {
+          // Scroll to article with a small offset from the top
+          const yOffset = -50;
+          const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          
+          window.scrollTo({
+            top: y,
+            behavior: 'auto'
+          });
+          
+          // Remove the stored ID after using it
+          sessionStorage.removeItem('lastViewedArticleId');
+        }
+      }
+    };
+    
+    if (articles.length > 0) {
+      restoreScrollPosition();
+    }
+  }, [articles]);
   
   useEffect(() => {
     const uploadLogo = async () => {
@@ -163,10 +195,12 @@ const Index = () => {
         
         {showMaintenancePage ? <MaintenancePage /> : (
           <>
-            <ArticleList 
-              articles={articles} 
-              loading={loading}
-            />
+            <div ref={articleListRef}>
+              <ArticleList 
+                articles={articles} 
+                loading={loading}
+              />
+            </div>
             
             <div className="mt-16 mb-8 flex flex-col items-center">
               <img 

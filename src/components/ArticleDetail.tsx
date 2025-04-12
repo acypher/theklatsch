@@ -73,6 +73,14 @@ const ArticleDetail = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const handleNavigateBack = () => {
+    // Save the current article ID to session storage before navigating
+    if (article) {
+      sessionStorage.setItem('lastViewedArticleId', article.id);
+    }
+    navigate("/");
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -108,7 +116,7 @@ const ArticleDetail = () => {
           variant="ghost" 
           size="sm" 
           className="mb-6" 
-          onClick={() => navigate("/")}
+          onClick={handleNavigateBack}
         >
           <ArrowLeft size={16} className="mr-2" />
           Back to articles
@@ -139,6 +147,7 @@ const ArticleDetail = () => {
             description={article.description} 
             moreContent={article.more_content}
             sourceUrl={article.sourceUrl}
+            onBackClick={handleNavigateBack}
           />
 
           {/* Delete confirmation dialog */}

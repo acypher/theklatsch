@@ -10,9 +10,10 @@ interface ArticleContentProps {
   description: string;
   moreContent?: string | null;
   sourceUrl?: string | null;
+  onBackClick?: () => void;
 }
 
-const ArticleContent = ({ description, moreContent, sourceUrl }: ArticleContentProps) => {
+const ArticleContent = ({ description, moreContent, sourceUrl, onBackClick }: ArticleContentProps) => {
   const navigate = useNavigate();
   
   // Markdown component renderer customization
@@ -29,6 +30,14 @@ const ArticleContent = ({ description, moreContent, sourceUrl }: ArticleContentP
     ),
     // Ensure paragraphs don't interfere with other UI components
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
+  };
+
+  const handleBackClick = () => {
+    if (onBackClick) {
+      onBackClick();
+    } else {
+      navigate("/");
+    }
   };
   
   return (
@@ -73,7 +82,7 @@ const ArticleContent = ({ description, moreContent, sourceUrl }: ArticleContentP
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={() => navigate("/")}
+          onClick={handleBackClick}
           className="w-full sm:w-auto flex items-center justify-center gap-2"
         >
           <ArrowLeft size={16} />
