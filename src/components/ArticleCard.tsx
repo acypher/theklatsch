@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -111,7 +112,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         </Link>
       </CardHeader>
       <CardContent className="flex-grow pt-6">
-        <Link to={`/article/${article.id}`}>
+        <Link to={`/article/${article.id}`} className="block">
           <div className="line-clamp-2 hover:text-primary transition-colors mb-2 prose-sm prose">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
@@ -120,16 +121,16 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
               {article.title}
             </ReactMarkdown>
           </div>
+          <p className="text-muted-foreground text-sm mb-2 hover:text-primary transition-colors cursor-pointer">By {article.author} • {formatDate(article.createdAt)}</p>
+          <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper hover:text-primary/80 transition-colors cursor-pointer">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={customRenderers}
+            >
+              {article.description}
+            </ReactMarkdown>
+          </div>
         </Link>
-        <p className="text-muted-foreground text-sm mb-2">By {article.author} • {formatDate(article.createdAt)}</p>
-        <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper">
-          <ReactMarkdown 
-            remarkPlugins={[remarkGfm]}
-            components={customRenderers}
-          >
-            {article.description}
-          </ReactMarkdown>
-        </div>
         
         <div className="mt-4 mb-3 flex justify-between items-center">
           {article.sourceUrl && (
