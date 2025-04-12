@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,6 @@ const Profile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user exists but profile doesn't
     if (user && !profile && !profileLoading) {
       setIsCreatingProfile(true);
       createProfileForUser().catch(console.error);
@@ -31,7 +29,6 @@ const Profile = () => {
     if (!user) return;
     
     try {
-      // Check if profile already exists
       const { data, error: checkError } = await supabase
         .from("profiles")
         .select("*")
@@ -44,12 +41,10 @@ const Profile = () => {
         return;
       }
       
-      // If profile already exists, no need to create
       if (data) {
         return;
       }
       
-      // Create profile
       const { error } = await supabase
         .from("profiles")
         .insert({
@@ -66,7 +61,6 @@ const Profile = () => {
       }
       
       toast.success("Profile created successfully");
-      // Force refresh the page to reload auth context
       window.location.reload();
     } catch (error) {
       console.error("Error in createProfileForUser:", error);
@@ -143,15 +137,15 @@ const Profile = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name</Label>
+                <Label htmlFor="displayName">Display Name (or Initials)</Label>
                 <Input 
                   id="displayName" 
                   value={displayName} 
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Enter your preferred display name"
+                  placeholder="Enter your preferred display name or initials"
                 />
                 <p className="text-xs text-muted-foreground">
-                  This is the name that will be displayed to other users
+                  This is the name or initials that will be displayed to other users
                 </p>
               </div>
             </CardContent>
