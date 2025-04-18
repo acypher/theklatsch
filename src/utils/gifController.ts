@@ -1,5 +1,5 @@
 
-export const initGifController = (playDuration: number = 5000) => {
+export const initGifController = (playDuration: number = 10000) => {
   const gif = document.getElementById('animated-gif');
   if (!gif) return;
 
@@ -27,7 +27,10 @@ export const initGifController = (playDuration: number = 5000) => {
   };
 
   // Handle click event to toggle play/pause
-  gif.addEventListener('click', () => {
+  gif.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (isPlaying) {
       stopGif();
     } else {
@@ -49,4 +52,14 @@ export const initGifController = (playDuration: number = 5000) => {
 
   observer.observe(gif);
   startGif();
+  
+  return {
+    startGif,
+    stopGif,
+    dispose: () => {
+      observer.disconnect();
+      gif.removeEventListener('click', stopGif);
+      clearTimeout(stopTimeout);
+    }
+  };
 };

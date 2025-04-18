@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -6,11 +5,12 @@ import KeywordBadge from "./KeywordBadge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageSquare, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CommentDialog from "./CommentDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { initGifController } from '@/utils/gifController';
 
 interface ArticleCardProps {
   article: Article;
@@ -21,6 +21,26 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   const [commentCount, setCommentCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const gifControllerRef = useRef<{ dispose: () => void } | null>(null);
+  const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
+  
+  useEffect(() => {
+    if (isGif) {
+      const timer = setTimeout(() => {
+        const controller = initGifController();
+        if (controller) {
+          gifControllerRef.current = controller;
+        }
+      }, 100);
+      
+      return () => {
+        clearTimeout(timer);
+        if (gifControllerRef.current) {
+          gifControllerRef.current.dispose();
+        }
+      };
+    }
+  }, [isGif, article.imageUrl]);
   
   useEffect(() => {
     const fetchCommentCount = async () => {
@@ -97,16 +117,27 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     h6: ({ node, ...props }: any) => <h6 className="m-0 p-0 text-xl font-semibold" {...props} />,
   };
 
+  const handleImageClick = (e: React.MouseEvent) => {
+    if (isGif) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
       <CardHeader className="p-0">
-        <Link to={`/article/${article.id}`}>
+        <Link 
+          to={`/article/${article.id}`}
+          onClick={isGif ? handleImageClick : undefined}
+        >
           <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
             <img 
               src={getImageUrl(article.imageUrl)} 
               alt={article.title} 
               className="w-full h-full object-contain"
               loading="lazy"
+              id={isGif ? "animated-gif" : undefined}
             />
           </AspectRatio>
         </Link>
@@ -133,7 +164,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         </Link>
         
         <div className="mt-4 mb-3 flex justify-between items-center">
-          {article.sourceUrl && (
+          {article.sourceUrl && !isGif && (
             <a 
               href={article.sourceUrl} 
               target="_blank" 
