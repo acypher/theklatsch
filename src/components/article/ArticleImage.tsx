@@ -7,6 +7,9 @@ interface ArticleImageProps {
 }
 
 const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageProps) => {
+  // Only apply GIF controls if the image is a GIF
+  const isGif = imageUrl.toLowerCase().endsWith('.gif');
+  
   return (
     <div className="mb-8">
       {sourceUrl ? (
@@ -21,6 +24,7 @@ const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageP
             src={getImageUrl(imageUrl)} 
             alt={title} 
             className="w-full h-full object-contain"
+            id={isGif ? "animated-gif" : undefined}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all flex items-center justify-center">
             <div className="p-3 rounded-full bg-white bg-opacity-0 hover:bg-opacity-70 transition-all"></div>
@@ -32,6 +36,7 @@ const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageP
             src={getImageUrl(imageUrl)} 
             alt={title} 
             className="w-full h-full object-contain"
+            id={isGif ? "animated-gif" : undefined}
           />
         </div>
       )}

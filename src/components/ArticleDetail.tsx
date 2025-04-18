@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import ArticleImage from "./article/ArticleImage";
 import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
+import { initGifController } from '@/utils/gifController';
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,6 +46,13 @@ const ArticleDetail = () => {
 
     fetchArticle();
   }, [id, navigate]);
+
+  useEffect(() => {
+    if (article?.imageUrl?.toLowerCase().endsWith('.gif')) {
+      // Initialize the GIF controller when the article loads
+      initGifController();
+    }
+  }, [article]);
 
   const handleDelete = async () => {
     if (!id) return;
