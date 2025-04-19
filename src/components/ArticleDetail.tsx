@@ -50,7 +50,15 @@ const ArticleDetail = () => {
   useEffect(() => {
     if (article?.imageUrl?.toLowerCase().endsWith('.gif')) {
       // Initialize the GIF controller when the article loads
-      initGifController();
+      const initGif = async () => {
+        try {
+          await initGifController();
+        } catch (error) {
+          console.error("Error initializing GIF controller:", error);
+        }
+      };
+      
+      initGif();
     }
   }, [article]);
 

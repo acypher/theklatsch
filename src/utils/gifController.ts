@@ -15,14 +15,14 @@ const isAnimatedGif = async (url: string): Promise<boolean> => {
 
 export const initGifController = async (playDuration: number = 10000) => {
   const gif = document.getElementById('animated-gif');
-  if (!gif) return;
+  if (!gif) return null;
 
   // Get the URLs - we'll extract the base name from the GIF URL
   const gifUrl = (gif as HTMLImageElement).src;
   
   // Check if this is actually an animated GIF
   const isAnimated = await isAnimatedGif(gifUrl);
-  if (!isAnimated) return;
+  if (!isAnimated) return null;
   
   const staticUrl = gifUrl.replace('.gif', '.png');
   

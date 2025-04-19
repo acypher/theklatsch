@@ -26,14 +26,20 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   
   useEffect(() => {
     if (isGif) {
-      const timer = setTimeout(() => {
-        const controller = initGifController();
-        if (controller) {
-          gifControllerRef.current = controller;
+      let isMounted = true;
+      const timer = setTimeout(async () => {
+        try {
+          const controller = await initGifController();
+          if (isMounted && controller) {
+            gifControllerRef.current = controller;
+          }
+        } catch (error) {
+          console.error("Error initializing GIF controller:", error);
         }
       }, 100);
       
       return () => {
+        isMounted = false;
         clearTimeout(timer);
         if (gifControllerRef.current) {
           gifControllerRef.current.dispose();
@@ -125,7 +131,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
+    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card" data-article-id={article.id}>
       <CardHeader className="p-0">
         <Link 
           to={`/article/${article.id}`}
