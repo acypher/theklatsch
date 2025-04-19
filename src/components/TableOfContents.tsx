@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,27 +22,21 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
   const isMobile = useIsMobile();
   
   useEffect(() => {
-    // Calculate max height based on viewport width
     const calculateMaxHeight = () => {
       const viewportWidth = window.innerWidth;
-      // Limit max height to 600px on large screens
       const maxAllowedHeight = 600;
       const minHeight = 250;
       
-      // For large screens (>1200px), fix at max allowed height
       if (viewportWidth >= 1200) {
         return maxAllowedHeight;
       }
       
-      // For smaller screens, calculate based on viewport width
       const calculatedHeight = Math.floor(viewportWidth / 2);
       return Math.min(Math.max(calculatedHeight, minHeight), maxAllowedHeight);
     };
     
-    // Set initial height
     setMaxHeight(calculateMaxHeight());
     
-    // Update on resize
     const handleResize = () => {
       setMaxHeight(calculateMaxHeight());
     };
@@ -53,7 +46,6 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
   }, []);
   
   useEffect(() => {
-    // Fetch recommendations
     const fetchRecommendations = async () => {
       setLoading(true);
       try {
@@ -113,7 +105,6 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
     }
   };
 
-  // Calculate height for article list
   const recommendationsHeight = recommendations ? 120 : 0;
   const articlesListHeight = isMobile ? 250 : Math.min(350, maxHeight - recommendationsHeight);
 
