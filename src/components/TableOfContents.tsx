@@ -106,8 +106,19 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
     }
   };
 
-  const recommendationsHeight = recommendations ? 120 : 0;
-  const articlesListHeight = isMobile ? 250 : Math.min(350, maxHeight - recommendationsHeight);
+  // Calculate the height available for the articles list based on overall ToC card max height (600px)
+  // and accounting for the recommendations section (if present)
+  const RECOMMENDATIONS_TITLE_HEIGHT = 24; // Height of "Recommendations:" title
+  const RECOMMENDATION_SECTION_HEIGHT = recommendations ? 120 : 0; // Total height allocated for recommendations section
+  const CARD_HEADER_HEIGHT = 60; // Approximate height of the card header
+  const ARTICLES_TITLE_HEIGHT = 30; // Height of "Articles:" title
+  const PADDING_BOTTOM = 20; // Bottom padding
+
+  // Calculate available height for the articles list
+  const articlesListMaxHeight = Math.max(
+    250, // Minimum height for articles list
+    600 - CARD_HEADER_HEIGHT - ARTICLES_TITLE_HEIGHT - RECOMMENDATION_SECTION_HEIGHT - PADDING_BOTTOM
+  );
 
   return (
     <Card className={`flex flex-col ${className || ""}`} style={{ maxHeight: "600px" }}>
@@ -121,7 +132,7 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
         <div className="mb-3 flex-shrink-0 font-medium text-sm text-muted-foreground">
           Articles:
         </div>
-        <ScrollArea className="flex-grow pr-3" style={{ height: articlesListHeight }}>
+        <ScrollArea className="flex-grow pr-3" style={{ height: `${articlesListMaxHeight}px` }}>
           <ul className="space-y-2">
             {articles.map((article, index) => (
               <li 
@@ -150,13 +161,15 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
         {!loading && recommendations && (
           <div className="mt-4 flex-shrink-0">
             <div className="text-sm font-medium text-muted-foreground mb-1">Recommendations:</div>
-            <ScrollArea className="overflow-y-auto" style={{ maxHeight: '120px' }}>
-              <EditableMarkdown 
-                content={recommendations} 
-                onSave={handleSaveRecommendations} 
-                placeholder="Add recommendations here..."
-              />
-            </ScrollArea>
+            <div style={{ maxHeight: `${RECOMMENDATION_SECTION_HEIGHT - RECOMMENDATIONS_TITLE_HEIGHT}px`, overflow: 'hidden' }}>
+              <ScrollArea className="overflow-y-auto" style={{ maxHeight: '100%' }}>
+                <EditableMarkdown 
+                  content={recommendations} 
+                  onSave={handleSaveRecommendations} 
+                  placeholder="Add recommendations here..."
+                />
+              </ScrollArea>
+            </div>
           </div>
         )}
         
