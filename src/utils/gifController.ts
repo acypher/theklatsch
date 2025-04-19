@@ -1,10 +1,29 @@
 
-export const initGifController = (playDuration: number = 25000) => {
+const isAnimatedGif = async (url: string): Promise<boolean> => {
+  try {
+    const response = await fetch(url);
+    const buffer = await response.arrayBuffer();
+    // GIF header is 6 bytes
+    // After that, we have the Logical Screen Descriptor (7 bytes)
+    // If there's more data after that, it's likely animated
+    return buffer.byteLength > 13;
+  } catch (error) {
+    console.error("Error checking if GIF is animated:", error);
+    return false;
+  }
+};
+
+export const initGifController = async (playDuration: number = 10000) => {
   const gif = document.getElementById('animated-gif');
   if (!gif) return;
 
   // Get the URLs - we'll extract the base name from the GIF URL
   const gifUrl = (gif as HTMLImageElement).src;
+  
+  // Check if this is actually an animated GIF
+  const isAnimated = await isAnimatedGif(gifUrl);
+  if (!isAnimated) return;
+  
   const staticUrl = gifUrl.replace('.gif', '.png');
   
   let isPlaying = true;
@@ -26,15 +45,38 @@ export const initGifController = (playDuration: number = 25000) => {
     stopTimeout = window.setTimeout(stopGif, playDuration);
   };
 
-  // Handle click event to toggle play/pause
+  let clickTimeout: number | null = null;
+  let clickCount = 0;
+
+  // Handle click event to toggle play/pause or navigate on double click
   gif.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (isPlaying) {
-      stopGif();
-    } else {
-      startGif();
+    clickCount++;
+    
+    if (clickCount === 1) {
+      clickTimeout = window.setTimeout(() => {
+        // Single click - toggle play/pause
+        if (isPlaying) {
+          stopGif();
+        } else {
+          startGif();
+        }
+        clickCount = 0;
+      }, 300);
+    } else if (clickCount === 2) {
+      clearTimeout(clickTimeout!);
+      clickCount = 0;
+      
+      // Double click - navigate to article detail
+      const articleCard = gif.closest('.article-card');
+      if (articleCard) {
+        const articleId = articleCard.getAttribute('data-article-id');
+        if (articleId) {
+          window.location.href = `/article/${articleId}`;
+        }
+      }
     }
   });
 

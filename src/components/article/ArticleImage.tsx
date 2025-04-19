@@ -20,7 +20,7 @@ const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageP
   
   return (
     <div className="mb-8">
-      {sourceUrl && !isGif ? (
+      {sourceUrl ? (
         <a 
           href={sourceUrl}
           target="_blank"
@@ -49,7 +49,7 @@ const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageP
             className="w-full h-full object-contain"
             id={isGif ? "animated-gif" : undefined}
           />
-          {isGif && sourceUrl && (
+          {isGif && (
             <div className="absolute bottom-2 right-2 bg-background/80 text-sm text-muted-foreground p-1 px-2 rounded">
               Click to play/pause
             </div>
