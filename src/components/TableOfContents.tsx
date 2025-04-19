@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -112,23 +113,23 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
     }
   };
 
-  // Calculate remaining height for article list
+  // Calculate height for article list
   const recommendationsHeight = recommendations ? 120 : 0;
-  const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight);
+  const articlesListHeight = isMobile ? 250 : Math.min(350, maxHeight - recommendationsHeight);
 
   return (
-    <Card className={`max-h-[600px] flex flex-col ${className || ""}`}>
-      <CardHeader className="pb-2">
+    <Card className={`flex flex-col ${className || ""}`} style={{ maxHeight: "600px" }}>
+      <CardHeader className="pb-2 flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-xl">
           <BookOpen className="h-5 w-5" />
           In This Issue
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow p-6 pt-0 flex flex-col">
-        <ScrollArea 
-          className="flex-1"
-          style={{ height: articlesListHeight }}
-        >
+      <CardContent className="flex flex-col p-6 pt-0 overflow-hidden flex-grow">
+        <div className="mb-3 flex-shrink-0 font-medium text-sm text-muted-foreground">
+          Articles:
+        </div>
+        <ScrollArea className="flex-grow pr-3" style={{ height: articlesListHeight }}>
           <ul className="space-y-2">
             {articles.map((article, index) => (
               <li 
@@ -154,8 +155,21 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
           </ul>
         </ScrollArea>
         
-        {!loading && (
-          <div className="mt-3">
+        {!loading && recommendations && (
+          <div className="mt-4 pt-3 border-t flex-shrink-0">
+            <div className="text-sm font-medium text-muted-foreground mb-1">Recommendations:</div>
+            <ScrollArea className="max-h-[120px]">
+              <EditableMarkdown 
+                content={recommendations} 
+                onSave={handleSaveRecommendations} 
+                placeholder="Add recommendations here..."
+              />
+            </ScrollArea>
+          </div>
+        )}
+        
+        {!loading && !recommendations && (
+          <div className="mt-3 flex-shrink-0">
             <EditableMarkdown 
               content={recommendations} 
               onSave={handleSaveRecommendations} 
