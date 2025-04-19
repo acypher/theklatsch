@@ -1,5 +1,5 @@
 
-export const initGifController = (playDuration: number = 10000) => {
+export const initGifController = (playDuration: number = 25000) => {
   const gif = document.getElementById('animated-gif');
   if (!gif) return;
 
