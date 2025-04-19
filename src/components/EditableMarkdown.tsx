@@ -38,7 +38,7 @@ const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations 
   }
 
   return (
-    <div className="relative mt-4 pt-4 border-t border-border">
+    <div className="relative">
       {isAuthenticated && (
         <TooltipProvider>
           <Tooltip>
@@ -46,7 +46,7 @@ const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations 
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="absolute top-4 right-0 h-6 w-6" 
+                className="absolute top-0 right-0 h-6 w-6" 
                 onClick={() => {
                   setEditContent(content);
                   setIsEditing(true);

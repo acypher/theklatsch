@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -147,9 +148,9 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
         </ScrollArea>
         
         {!loading && recommendations && (
-          <div className="mt-4 pt-3 border-t flex-shrink-0">
+          <div className="mt-4 flex-shrink-0">
             <div className="text-sm font-medium text-muted-foreground mb-1">Recommendations:</div>
-            <ScrollArea className="max-h-[120px]">
+            <ScrollArea className="overflow-y-auto" style={{ maxHeight: '120px' }}>
               <EditableMarkdown 
                 content={recommendations} 
                 onSave={handleSaveRecommendations} 
