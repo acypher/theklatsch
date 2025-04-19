@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,15 +25,18 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
     // Calculate max height based on viewport width
     const calculateMaxHeight = () => {
       const viewportWidth = window.innerWidth;
-      // Using approximately 2:1 ratio (1050:550)
-      // But clamping between reasonable min/max values
-      const calculatedHeight = Math.floor(viewportWidth / 2);
-      
-      // Reduce the max height to make ToC more compact
+      // Limit max height to 600px on large screens
+      const maxAllowedHeight = 600;
       const minHeight = 250;
-      const maxHeight = 500;
       
-      return Math.min(Math.max(calculatedHeight, minHeight), maxHeight);
+      // For large screens (>1200px), fix at max allowed height
+      if (viewportWidth >= 1200) {
+        return maxAllowedHeight;
+      }
+      
+      // For smaller screens, calculate based on viewport width
+      const calculatedHeight = Math.floor(viewportWidth / 2);
+      return Math.min(Math.max(calculatedHeight, minHeight), maxAllowedHeight);
     };
     
     // Set initial height
@@ -115,7 +117,7 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
   const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight);
 
   return (
-    <Card className={`h-full flex flex-col ${className || ""}`}>
+    <Card className={`max-h-[600px] flex flex-col ${className || ""}`}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-xl">
           <BookOpen className="h-5 w-5" />

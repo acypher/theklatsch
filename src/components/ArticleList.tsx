@@ -177,7 +177,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
           <p className="text-muted-foreground mt-2">Select a different month for the Issue</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <div className="h-full">
             <TableOfContents 
               articles={contentArticles} 
