@@ -22,8 +22,8 @@ export const Recommendations = ({
       <div className="text-sm font-medium text-muted-foreground mb-1">
         Recommendations:
       </div>
-      <div style={{ height: `${sectionHeight - titleHeight}px`, overflow: 'hidden' }}>
-        <ScrollArea className="h-full w-full">
+      <div style={{ height: `${sectionHeight - titleHeight}px` }}>
+        <ScrollArea className="h-full w-full rounded-md border p-2">
           <EditableMarkdown 
             content={content} 
             onSave={onSave} 
