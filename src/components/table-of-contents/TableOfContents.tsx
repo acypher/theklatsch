@@ -87,11 +87,13 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
     }
   };
 
-  // Calculate available height for the articles list
+  // Calculate available height for the articles list, accounting for actual recommendations section height
+  const actualRecommendationHeight = recommendations ? RECOMMENDATION_SECTION_HEIGHT : 0;
+  
   const articlesListMaxHeight = Math.max(
     250, // Minimum height for articles list
     MAX_TOC_HEIGHT - CARD_HEADER_HEIGHT - ARTICLES_TITLE_HEIGHT - 
-    (recommendations ? RECOMMENDATION_SECTION_HEIGHT : 0) - PADDING_BOTTOM
+    actualRecommendationHeight - PADDING_BOTTOM
   );
 
   return (

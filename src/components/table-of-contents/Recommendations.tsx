@@ -22,13 +22,15 @@ export const Recommendations = ({
       <div className="text-sm font-medium text-muted-foreground mb-1">
         Recommendations:
       </div>
-      <div style={{ height: `${sectionHeight - titleHeight}px` }}>
-        <ScrollArea className="h-full w-full rounded-md border p-2">
-          <EditableMarkdown 
-            content={content} 
-            onSave={onSave} 
-            placeholder="Add recommendations here..."
-          />
+      <div className="overflow-hidden" style={{ height: `${sectionHeight - titleHeight}px` }}>
+        <ScrollArea className="h-full w-full pr-2">
+          <div className="pb-1">
+            <EditableMarkdown 
+              content={content} 
+              onSave={onSave} 
+              placeholder="Add recommendations here..."
+            />
+          </div>
         </ScrollArea>
       </div>
     </div>

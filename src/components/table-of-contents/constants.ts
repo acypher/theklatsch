@@ -1,6 +1,6 @@
 
 export const RECOMMENDATIONS_TITLE_HEIGHT = 24;
-export const RECOMMENDATION_SECTION_HEIGHT = 120;
+export const RECOMMENDATION_SECTION_HEIGHT = 150; // Increased from 120
 export const CARD_HEADER_HEIGHT = 60;
 export const ARTICLES_TITLE_HEIGHT = 30;
 export const PADDING_BOTTOM = 20;
