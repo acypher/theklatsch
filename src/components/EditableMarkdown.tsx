@@ -38,7 +38,7 @@ const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations 
   }
 
   return (
-    <div className="relative mt-4 pt-4 border-t border-border">
+    <div className="relative pt-4 border-t border-border">
       {isAuthenticated && (
         <TooltipProvider>
           <Tooltip>
@@ -64,7 +64,7 @@ const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations 
       )}
 
       {content ? (
-        <div className="prose prose-sm max-w-none">
+        <div className="prose prose-sm max-w-none pr-8">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {content}
           </ReactMarkdown>

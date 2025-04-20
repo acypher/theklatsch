@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -114,19 +115,19 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
 
   // Calculate remaining height for article list
   const recommendationsHeight = recommendations ? 120 : 0;
-  const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight);
+  const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60); // Added padding buffer
 
   return (
-    <Card className={`max-h-[600px] flex flex-col ${className || ""}`}>
+    <Card className={`h-full max-h-[600px] flex flex-col ${className || ""}`}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-xl">
           <BookOpen className="h-5 w-5" />
           In This Issue
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow p-6 pt-0 flex flex-col">
+      <CardContent className="flex-grow overflow-hidden p-6 pt-0 flex flex-col">
         <ScrollArea 
-          className="flex-1"
+          className="pr-4"
           style={{ height: articlesListHeight }}
         >
           <ul className="space-y-2">
@@ -155,12 +156,14 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
         </ScrollArea>
         
         {!loading && (
-          <div className="mt-3">
-            <EditableMarkdown 
-              content={recommendations} 
-              onSave={handleSaveRecommendations} 
-              placeholder="Add recommendations here..."
-            />
+          <div className="mt-3 max-h-[120px] overflow-hidden">
+            <ScrollArea className="h-[120px]">
+              <EditableMarkdown 
+                content={recommendations} 
+                onSave={handleSaveRecommendations} 
+                placeholder="Add recommendations here..."
+              />
+            </ScrollArea>
           </div>
         )}
       </CardContent>
