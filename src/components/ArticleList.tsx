@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import ArticleCard from "./ArticleCard";
@@ -46,6 +47,16 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
       <div className="flex justify-center items-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <span className="ml-2 text-lg">Loading articles...</span>
+      </div>
+    );
+  }
+
+  // Only show "No articles found" if loading is false and articles array is empty
+  if (!loading && articles.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-xl font-medium text-gray-600">No articles found</h3>
+        <p className="text-muted-foreground mt-2">Select a different month for the Issue</p>
       </div>
     );
   }
