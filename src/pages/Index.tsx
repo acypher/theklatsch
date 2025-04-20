@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
@@ -9,7 +10,6 @@ import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { updateSpecificArticle } from "@/lib/data/updateSpecificArticle";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import TableOfContents from "@/components/table-of-contents/TableOfContents";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
