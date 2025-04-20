@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -87,7 +86,7 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
     }
   };
 
-  // Calculate available height for the articles list, accounting for actual recommendations section height
+  // Calculate available height for the articles list
   const actualRecommendationHeight = recommendations ? RECOMMENDATION_SECTION_HEIGHT : 0;
   
   const articlesListMaxHeight = Math.max(
@@ -104,7 +103,7 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
           In This Issue
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col p-6 pt-0 overflow-hidden flex-grow">
+      <CardContent className="flex flex-col p-6 pt-0 overflow-hidden">
         <ArticlesList
           articles={articles}
           activeItem={activeItem}
