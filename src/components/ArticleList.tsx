@@ -1,12 +1,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
-import ArticleCard from "./ArticleCard";
 import TableOfContents from "./TableOfContents";
-import { Loader2, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { updateArticlesOrder } from "@/lib/data/article/specialOperations";
 import { toast } from "sonner";
+import DraggableArticle from "./article/DraggableArticle";
+import LoadingState from "./article/LoadingState";
+import NoArticlesFound from "./article/NoArticlesFound";
+import UnsavedChangesPrompt from "./article/UnsavedChangesPrompt";
 
 interface ArticleListProps {
   articles: Article[];
@@ -43,22 +45,11 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   }, [articles]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-lg">Loading articles...</span>
-      </div>
-    );
+    return <LoadingState />;
   }
 
-  // Only show "No articles found" if loading is false and articles array is empty
   if (!loading && articles.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <h3 className="text-xl font-medium text-gray-600">No articles found</h3>
-        <p className="text-muted-foreground mt-2">Select a different month for the Issue</p>
-      </div>
-    );
+    return <NoArticlesFound />;
   }
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: Article) => {
@@ -67,12 +58,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     setDraggedItem(item);
     setIsDragging(true);
     
-    const dragImage = new Image();
-    dragImage.src = item.imageUrl;
-    dragImage.style.opacity = '0.5';
-    
     e.dataTransfer.setData("text/plain", item.id);
-    
     e.dataTransfer.effectAllowed = "move";
     
     const element = e.currentTarget;
@@ -114,7 +100,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     if (draggedIndex < 0 || targetIndex < 0) return;
     
     const [removed] = updatedArticles.splice(draggedIndex, 1);
-    
     updatedArticles.splice(targetIndex, 0, removed);
     
     const articlesWithNewPositions = updatedArticles.map((article, index) => ({
@@ -163,7 +148,10 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     }
   };
 
-  const contentArticles = [...localArticles];
+  const handleCancelChanges = () => {
+    setLocalArticles(articles);
+    setHasChanges(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -182,70 +170,38 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
         </div>
       )}
       
-      {localArticles.length === 0 ? (
-        <div className="text-center py-12">
-          <h3 className="text-xl font-medium text-gray-600">No articles found</h3>
-          <p className="text-muted-foreground mt-2">Select a different month for the Issue</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="h-full">
+          <TableOfContents 
+            articles={localArticles} 
+            onArticleClick={scrollToArticle}
+          />
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <div className="h-full">
-            <TableOfContents 
-              articles={contentArticles} 
-              onArticleClick={scrollToArticle}
-            />
-          </div>
-          
-          {contentArticles.map((article) => (
-            <div
-              key={article.id}
-              id={`article-${article.id}`}
-              ref={(el) => {
-                if (el) articleRefs.current.set(article.id, el);
-                return el;
-              }}
-              draggable={isLoggedIn}
-              onDragStart={(e) => handleDragStart(e, article)}
-              onDragEnd={handleDragEnd}
-              onDragOver={(e) => handleDragOver(e)}
-              onDrop={(e) => handleDrop(e, article)}
-              className={`transition-all duration-200 ${
-                isLoggedIn ? "cursor-grab active:cursor-grabbing" : ""
-              } ${isDragging && draggedItem?.id === article.id ? "opacity-50" : "opacity-100"}`}
-            >
-              <div className={`relative ${isLoggedIn ? "hover:ring-2 hover:ring-primary/30 rounded-lg" : ""}`}>
-                {isLoggedIn && (
-                  <div className="absolute top-2 left-2 bg-background/90 rounded-full p-1 shadow-sm">
-                    <GripVertical className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                )}
-                <ArticleCard article={article} />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+        
+        {localArticles.map((article) => (
+          <DraggableArticle
+            key={article.id}
+            article={article}
+            isLoggedIn={isLoggedIn}
+            isDragging={isDragging}
+            draggedItemId={draggedItem?.id || null}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            ref={(el) => {
+              if (el) articleRefs.current.set(article.id, el);
+              return el;
+            }}
+          />
+        ))}
+      </div>
       
       {hasChanges && (
-        <div className="fixed bottom-4 right-4 z-10">
-          <div className="bg-primary text-primary-foreground rounded-lg shadow-lg p-4">
-            <p className="mb-2">You have unsaved changes to the article order</p>
-            <div className="flex justify-end gap-2">
-              <button 
-                onClick={() => {setLocalArticles(articles); setHasChanges(false);}}
-                className="px-3 py-1 bg-primary-foreground/20 rounded"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={saveChanges}
-                className="px-3 py-1 bg-primary-foreground/50 rounded font-medium"
-              >
-                Save changes
-              </button>
-            </div>
-          </div>
-        </div>
+        <UnsavedChangesPrompt 
+          onCancel={handleCancelChanges}
+          onSave={saveChanges}
+        />
       )}
     </div>
   );
