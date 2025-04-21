@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -6,17 +5,21 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useState, useEffect } from "react";
 import CommentDialog from "./CommentDialog";
-import { supabase } from "@/integrations/supabase/client";
 import ArticleCardHeader from "./article/ArticleCardHeader";
 import ArticleCardMeta from "./article/ArticleCardMeta";
 import ArticleCardFooter from "./article/ArticleCardFooter";
+import ReadCheckbox from "./article/ReadCheckbox";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ArticleCardProps {
   article: Article;
+  isRead?: boolean;
+  onReadChange?: (articleId: string) => void;
 }
 
-const ArticleCard = ({ article }: ArticleCardProps) => {
+const ArticleCard = ({ article, isRead = false, onReadChange }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
+  const { isAuthenticated } = useAuth();
   const [commentCount, setCommentCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -99,7 +102,13 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card" data-article-id={article.id}>
+    <Card className="h-full flex flex-col relative hover:shadow-md transition-shadow article-card" data-article-id={article.id}>
+      {isAuthenticated && (
+        <ReadCheckbox
+          isRead={isRead}
+          onChange={() => onReadChange?.(article.id)}
+        />
+      )}
       <CardHeader className="p-0">
         <ArticleCardHeader 
           articleId={article.id}

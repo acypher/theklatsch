@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -9,6 +8,10 @@ import DraggableArticle from "./article/DraggableArticle";
 import LoadingState from "./article/LoadingState";
 import NoArticlesFound from "./article/NoArticlesFound";
 import UnsavedChangesPrompt from "./article/UnsavedChangesPrompt";
+import { useArticleReads } from "@/hooks/use-article-reads";
+import { useAuth } from "@/contexts/AuthContext";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 
 interface ArticleListProps {
   articles: Article[];
@@ -18,6 +21,10 @@ interface ArticleListProps {
 }
 
 const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = false }: ArticleListProps) => {
+  const [filterRead, setFilterRead] = useState(false);
+  const { readArticles, toggleRead, loading: readStatesLoading } = useArticleReads();
+  const { isAuthenticated } = useAuth();
+  
   const [draggedItem, setDraggedItem] = useState<Article | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -44,13 +51,22 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     };
   }, [articles]);
 
-  if (loading) {
+  if (loading || readStatesLoading) {
     return <LoadingState />;
   }
 
   if (!loading && articles.length === 0) {
     return <NoArticlesFound />;
   }
+
+  const getFilteredArticles = () => {
+    if (!filterRead || !isAuthenticated) return localArticles;
+    
+    const read = localArticles.filter(article => readArticles[article.id]);
+    const unread = localArticles.filter(article => !readArticles[article.id]);
+    
+    return [...unread, <Separator className="my-8" key="separator" />, ...read];
+  };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: Article) => {
     if (!isLoggedIn) return;
@@ -155,46 +171,68 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
 
   return (
     <div className="space-y-6">
-      {selectedKeyword && (
-        <div className="flex items-center gap-2">
-          <p className="font-medium">Filtered by keyword:</p>
-          <span className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-sm flex items-center gap-1">
-            {selectedKeyword}
-            <button 
-              onClick={onKeywordClear} 
-              className="ml-1 hover:bg-primary-foreground/20 rounded-full w-5 h-5 inline-flex items-center justify-center text-xs"
-            >
-              ×
-            </button>
-          </span>
-        </div>
-      )}
+      <div className="flex items-center justify-between mb-4">
+        {selectedKeyword && (
+          <div className="flex items-center gap-2">
+            <p className="font-medium">Filtered by keyword:</p>
+            <span className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-sm flex items-center gap-1">
+              {selectedKeyword}
+              <button 
+                onClick={onKeywordClear} 
+                className="ml-1 hover:bg-primary-foreground/20 rounded-full w-5 h-5 inline-flex items-center justify-center text-xs"
+              >
+                ×
+              </button>
+            </span>
+          </div>
+        )}
+        {isAuthenticated && (
+          <div className="flex items-center gap-2 ml-auto">
+            <Checkbox
+              id="filter-read"
+              checked={filterRead}
+              onCheckedChange={(checked) => setFilterRead(checked as boolean)}
+            />
+            <label htmlFor="filter-read" className="text-sm text-muted-foreground">
+              Filter articles already read
+            </label>
+          </div>
+        )}
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div className="h-full">
           <TableOfContents 
-            articles={localArticles} 
+            articles={localArticles}
             onArticleClick={scrollToArticle}
+            readArticles={readArticles}
           />
         </div>
         
-        {localArticles.map((article) => (
-          <DraggableArticle
-            key={article.id}
-            article={article}
-            isLoggedIn={isLoggedIn}
-            isDragging={isDragging}
-            draggedItemId={draggedItem?.id || null}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            ref={(el) => {
-              if (el) articleRefs.current.set(article.id, el);
-              return el;
-            }}
-          />
-        ))}
+        {getFilteredArticles().map((item) => {
+          if (React.isValidElement(item)) return item;
+          
+          const article = item as Article;
+          return (
+            <DraggableArticle
+              key={article.id}
+              article={article}
+              isLoggedIn={isLoggedIn}
+              isDragging={isDragging}
+              draggedItemId={draggedItem?.id || null}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              isRead={readArticles[article.id]}
+              onReadChange={toggleRead}
+              ref={(el) => {
+                if (el) articleRefs.current.set(article.id, el);
+                return el;
+              }}
+            />
+          );
+        })}
       </div>
       
       {hasChanges && (

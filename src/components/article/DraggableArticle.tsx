@@ -8,6 +8,8 @@ interface DraggableArticleProps {
   isLoggedIn: boolean;
   isDragging: boolean;
   draggedItemId: string | null;
+  isRead?: boolean;
+  onReadChange?: (articleId: string) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -20,6 +22,8 @@ const DraggableArticle = ({
   isLoggedIn,
   isDragging,
   draggedItemId,
+  isRead,
+  onReadChange,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -45,7 +49,11 @@ const DraggableArticle = ({
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>
         )}
-        <ArticleCard article={article} />
+        <ArticleCard 
+          article={article} 
+          isRead={isRead}
+          onReadChange={onReadChange}
+        />
       </div>
     </div>
   );
