@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
@@ -76,7 +75,6 @@ const Index = () => {
     fetchArticles();
   }, []);
 
-  // Effect to restore scroll position when returning from article detail
   useEffect(() => {
     const restoreScrollPosition = async () => {
       const lastViewedArticleId = sessionStorage.getItem('lastViewedArticleId');
@@ -145,6 +143,23 @@ const Index = () => {
     };
     
     uploadLogo();
+  }, []);
+
+  useEffect(() => {
+    const savedScrollPosition = localStorage.getItem('articleListScrollPosition');
+    if (savedScrollPosition) {
+      window.scrollTo({
+        top: parseInt(savedScrollPosition),
+        behavior: 'instant'
+      });
+    }
+    
+    const handleScroll = () => {
+      localStorage.setItem('articleListScrollPosition', window.scrollY.toString());
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const MaintenancePage = () => (
