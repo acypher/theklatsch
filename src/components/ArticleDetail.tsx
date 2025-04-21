@@ -13,7 +13,7 @@ import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
 import { initGifController } from '@/utils/gifController';
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();

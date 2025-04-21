@@ -10,6 +10,7 @@ import ArticleCardMeta from "./article/ArticleCardMeta";
 import ArticleCardFooter from "./article/ArticleCardFooter";
 import ReadCheckbox from "./article/ReadCheckbox";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ArticleCardProps {
   article: Article;

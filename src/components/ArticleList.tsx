@@ -12,6 +12,7 @@ import { useArticleReads } from "@/hooks/use-article-reads";
 import { useAuth } from "@/contexts/AuthContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import * as React from "react";
 
 interface ArticleListProps {
   articles: Article[];
