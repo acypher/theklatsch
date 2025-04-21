@@ -22,7 +22,11 @@ interface ArticleListProps {
 }
 
 const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = false }: ArticleListProps) => {
-  const [filterRead, setFilterRead] = useState(false);
+  const [filterRead, setFilterRead] = useState(() => {
+    const savedPreference = localStorage.getItem('filterReadArticles');
+    return savedPreference ? savedPreference === 'true' : false;
+  });
+  
   const { readArticles, toggleRead, loading: readStatesLoading } = useArticleReads();
   const { isAuthenticated } = useAuth();
   
@@ -52,6 +56,10 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     };
   }, [articles]);
 
+  useEffect(() => {
+    localStorage.setItem('filterReadArticles', filterRead.toString());
+  }, [filterRead]);
+
   if (loading || readStatesLoading) {
     return <LoadingState />;
   }
@@ -66,7 +74,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     const read = localArticles.filter(article => readArticles[article.id]);
     const unread = localArticles.filter(article => !readArticles[article.id]);
     
-    return [...unread, <Separator className="my-8" key="separator" />, ...read];
+    return [...unread, <Separator className="my-8 relative z-10" key="separator" />, ...read];
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: Article) => {
