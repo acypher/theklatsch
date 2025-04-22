@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +9,8 @@ import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { updateSpecificArticle } from "@/lib/data/updateSpecificArticle";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import TableOfContents from "@/components/TableOfContents";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -21,6 +22,11 @@ const Index = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [issueWasFixed, setIssueWasFixed] = useState(false);
   const articleListRef = useRef<HTMLDivElement>(null);
+  const [filterRead, setFilterRead] = useState(false);
+  const { isAuthenticated } = useAuth();
+  
+  // Fetch read articles for the logged-in user
+  const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -41,6 +47,30 @@ const Index = () => {
     };
   }, []);
   
+  useEffect(() => {
+    const fetchReadArticles = async () => {
+      if (!isAuthenticated) {
+        setReadArticles(new Set());
+        return;
+      }
+      
+      try {
+        const { data } = await supabase
+          .from('article_reads')
+          .select('article_id')
+          .eq('read', true);
+        
+        if (data) {
+          setReadArticles(new Set(data.map(item => item.article_id)));
+        }
+      } catch (error) {
+        console.error('Error fetching read articles:', error);
+      }
+    };
+    
+    fetchReadArticles();
+  }, [isAuthenticated]);
+
   useEffect(() => {
     const loadCurrentIssue = async () => {
       const issueData = await checkAndFixDisplayIssue();
@@ -172,11 +202,19 @@ const Index = () => {
     </div>
   );
 
+  const filteredArticles = useMemo(() => {
+    if (!filterRead || !isAuthenticated) return articles;
+    return articles.filter(article => !readArticles.has(article.id));
+  }, [articles, filterRead, readArticles, isAuthenticated]);
+
   return (
     <div className="min-h-screen">
       <Navbar 
         onLogoClick={() => setShowMaintenancePage(false)} 
         currentIssue={currentIssue}
+        showReadFilter={true}
+        filterEnabled={filterRead}
+        onFilterToggle={setFilterRead}
       />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
@@ -197,10 +235,17 @@ const Index = () => {
           <>
             <div ref={articleListRef}>
               <ArticleList 
-                articles={articles} 
+                articles={filteredArticles} 
                 loading={loading}
               />
             </div>
+            
+            <TableOfContents
+              articles={articles}
+              onArticleClick={scrollToArticle}
+              readArticles={readArticles}
+              hideRead={filterRead}
+            />
             
             <div className="mt-16 mb-8 flex flex-col items-center">
               <img 

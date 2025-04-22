@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,9 +12,17 @@ interface TableOfContentsProps {
   articles: Article[];
   onArticleClick: (articleId: string) => void;
   className?: string;
+  readArticles?: Set<string>;
+  hideRead?: boolean;
 }
 
-const TableOfContents = ({ articles, onArticleClick, className }: TableOfContentsProps) => {
+const TableOfContents = ({ 
+  articles, 
+  onArticleClick, 
+  className,
+  readArticles = new Set(),
+  hideRead = false
+}: TableOfContentsProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [maxHeight, setMaxHeight] = useState<number>(400);
   const [recommendations, setRecommendations] = useState<string>("");
@@ -23,27 +30,21 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
   const isMobile = useIsMobile();
   
   useEffect(() => {
-    // Calculate max height based on viewport width
     const calculateMaxHeight = () => {
       const viewportWidth = window.innerWidth;
-      // Limit max height to 600px on large screens
       const maxAllowedHeight = 600;
       const minHeight = 250;
       
-      // For large screens (>1200px), fix at max allowed height
       if (viewportWidth >= 1200) {
         return maxAllowedHeight;
       }
       
-      // For smaller screens, calculate based on viewport width
       const calculatedHeight = Math.floor(viewportWidth / 2);
       return Math.min(Math.max(calculatedHeight, minHeight), maxAllowedHeight);
     };
     
-    // Set initial height
     setMaxHeight(calculateMaxHeight());
     
-    // Update on resize
     const handleResize = () => {
       setMaxHeight(calculateMaxHeight());
     };
@@ -53,7 +54,6 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
   }, []);
   
   useEffect(() => {
-    // Fetch recommendations
     const fetchRecommendations = async () => {
       setLoading(true);
       try {
@@ -113,9 +113,8 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
     }
   };
 
-  // Calculate remaining height for article list
   const recommendationsHeight = recommendations ? 120 : 0;
-  const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60); // Added padding buffer
+  const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60);
 
   return (
     <Card className={`h-full max-h-[600px] flex flex-col ${className || ""}`}>
@@ -137,6 +136,8 @@ const TableOfContents = ({ articles, onArticleClick, className }: TableOfContent
                 className={`cursor-pointer transition-colors ${
                   activeItem === article.id
                     ? "text-primary font-medium"
+                    : readArticles.has(article.id) && !hideRead
+                    ? "text-muted-foreground/50 hover:text-muted-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >

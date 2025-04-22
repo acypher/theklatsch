@@ -14,13 +14,23 @@ import {
 import { useEffect, useState } from "react";
 import { Issue, getAvailableIssues, setCurrentIssue } from "@/lib/data/issue/availableIssues";
 import { toast } from "sonner";
+import ReadFilter from "./article/ReadFilter";
 
 interface NavbarProps {
   onLogoClick?: () => void;
   currentIssue?: string;
+  showReadFilter?: boolean;
+  filterEnabled?: boolean;
+  onFilterToggle?: (enabled: boolean) => void;
 }
 
-const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
+const Navbar = ({ 
+  onLogoClick, 
+  currentIssue, 
+  showReadFilter = false,
+  filterEnabled = false,
+  onFilterToggle 
+}: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
@@ -130,6 +140,12 @@ const Navbar = ({ onLogoClick, currentIssue }: NavbarProps) => {
         </div>
         
         <div className="flex items-center gap-4">
+          {showReadFilter && user && onFilterToggle && (
+            <ReadFilter 
+              enabled={filterEnabled} 
+              onToggle={onFilterToggle}
+            />
+          )}
           {user ? (
             <>
               <Button asChild variant="default">
