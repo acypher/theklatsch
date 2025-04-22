@@ -14,7 +14,7 @@ const ReadCheckbox = ({ articleId }: ReadCheckboxProps) => {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="absolute top-2 right-2 z-10">
+    <div className="absolute top-2 right-2 z-10 w-4 h-4 flex items-center justify-center">
       <Checkbox 
         checked={isRead}
         disabled={loading}
