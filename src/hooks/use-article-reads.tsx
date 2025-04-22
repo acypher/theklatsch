@@ -41,7 +41,7 @@ export const useArticleReads = () => {
   }, [isAuthenticated]);
   
   const toggleRead = async (articleId: string, isRead?: boolean) => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) return null;
     
     try {
       // Use the passed value if provided, otherwise toggle the current state

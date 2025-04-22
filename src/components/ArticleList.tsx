@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -171,6 +170,8 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
         top: y,
         behavior: 'smooth'
       });
+    } else {
+      console.log(`Article element with ID ${articleId} not found in refs`);
     }
   };
 
@@ -180,12 +181,11 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   };
 
   const handleReadChange = async (articleId: string, isRead?: boolean) => {
+    console.log(`Toggling read state for article ${articleId} to ${isRead}`);
     const newState = await toggleRead(articleId, isRead);
+    console.log(`New read state for article ${articleId}: ${newState}`);
     
-    // If we're filtering read articles and we just marked an article as read or unread,
-    // we need to re-render the list
     if (filterRead && isAuthenticated && newState !== null) {
-      // Force re-render by creating a new array
       setLocalArticles([...localArticles]);
     }
   };
@@ -249,6 +249,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
               onReadChange={handleReadChange}
               ref={(el) => {
                 if (el) articleRefs.current.set(article.id, el);
+                else articleRefs.current.delete(article.id);
               }}
             />
           );

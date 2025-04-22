@@ -1,4 +1,5 @@
 
+import { forwardRef } from "react";
 import { Article } from "@/lib/types";
 import { GripVertical } from "lucide-react";
 import ArticleCard from "../ArticleCard";
@@ -14,10 +15,9 @@ interface DraggableArticleProps {
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
-  ref?: (el: HTMLDivElement | null) => void;
 }
 
-const DraggableArticle = ({ 
+const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({ 
   article,
   isLoggedIn,
   isDragging,
@@ -28,8 +28,7 @@ const DraggableArticle = ({
   onDragEnd,
   onDragOver,
   onDrop,
-  ref
-}: DraggableArticleProps) => {
+}, ref) => {
   return (
     <div
       id={`article-${article.id}`}
@@ -57,6 +56,8 @@ const DraggableArticle = ({
       </div>
     </div>
   );
-};
+});
+
+DraggableArticle.displayName = "DraggableArticle";
 
 export default DraggableArticle;
