@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export const useArticleReads = () => {
   const [readArticles, setReadArticles] = useState<Record<string, boolean>>({});
@@ -40,18 +41,15 @@ export const useArticleReads = () => {
     fetchReadStates();
   }, [isAuthenticated]);
   
-  const toggleRead = async (articleId: string, isRead?: boolean) => {
+  const toggleRead = async (articleId: string, isRead: boolean) => {
     if (!isAuthenticated) return null;
     
     try {
-      // Use the passed value if provided, otherwise toggle the current state
-      const newState = isRead !== undefined ? isRead : !readArticles[articleId];
-      
       const { error } = await supabase
         .from('article_reads')
         .upsert({ 
           article_id: articleId, 
-          read: newState,
+          read: isRead,
           user_id: (await supabase.auth.getUser()).data.user?.id 
         });
         
@@ -60,12 +58,13 @@ export const useArticleReads = () => {
       // Update local state immediately for UI responsiveness
       setReadArticles(prev => ({
         ...prev,
-        [articleId]: newState
+        [articleId]: isRead
       }));
       
-      return newState; // Return the new state for consumers to use
+      return isRead; // Return the new state for consumers to use
     } catch (error) {
       console.error('Error toggling read state:', error);
+      toast.error("Failed to update read status");
       return null;
     }
   };
