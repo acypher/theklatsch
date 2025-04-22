@@ -39,11 +39,12 @@ export const useArticleReads = () => {
     fetchReadStates();
   }, [isAuthenticated]);
   
-  const toggleRead = async (articleId: string) => {
+  const toggleRead = async (articleId: string, isRead?: boolean) => {
     if (!isAuthenticated) return;
     
     try {
-      const newState = !readArticles[articleId];
+      // Use the passed value if provided, otherwise toggle the current state
+      const newState = isRead !== undefined ? isRead : !readArticles[articleId];
       
       const { error } = await supabase
         .from('article_reads')

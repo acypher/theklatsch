@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -237,7 +238,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
               onReadChange={toggleRead}
               ref={(el) => {
                 if (el) articleRefs.current.set(article.id, el);
-                return el;
               }}
             />
           );

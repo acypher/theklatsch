@@ -9,7 +9,7 @@ interface DraggableArticleProps {
   isDragging: boolean;
   draggedItemId: string | null;
   isRead?: boolean;
-  onReadChange?: (articleId: string) => void;
+  onReadChange?: (articleId: string, isRead?: boolean) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;

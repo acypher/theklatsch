@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -15,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface ArticleCardProps {
   article: Article;
   isRead?: boolean;
-  onReadChange?: (articleId: string) => void;
+  onReadChange?: (articleId: string, isRead?: boolean) => void;
 }
 
 const ArticleCard = ({ article, isRead = false, onReadChange }: ArticleCardProps) => {
@@ -107,7 +108,7 @@ const ArticleCard = ({ article, isRead = false, onReadChange }: ArticleCardProps
       {isAuthenticated && (
         <ReadCheckbox
           isRead={isRead}
-          onChange={() => onReadChange?.(article.id)}
+          onChange={() => onReadChange?.(article.id, !isRead)}
         />
       )}
       <CardHeader className="p-0">
