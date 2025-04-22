@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -107,8 +106,8 @@ const ArticleCard = ({ article, isRead = false, onReadChange }: ArticleCardProps
     <Card className="h-full flex flex-col relative hover:shadow-md transition-shadow article-card" data-article-id={article.id}>
       {isAuthenticated && (
         <ReadCheckbox
-          isRead={isRead}
-          onChange={() => onReadChange?.(article.id, !isRead)}
+          articleId={article.id}
+          initialState={isRead}
         />
       )}
       <CardHeader className="p-0">
