@@ -1,4 +1,3 @@
-
 import { forwardRef } from "react";
 import { Article } from "@/lib/types";
 import { GripVertical } from "lucide-react";
@@ -44,12 +43,13 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
     >
       <div className={`relative ${isLoggedIn ? "hover:ring-2 hover:ring-primary/30 rounded-lg" : ""}`}>
         {isLoggedIn && (
-          <div className="absolute top-2 left-2 bg-background/90 rounded-full p-1 shadow-sm">
-            <GripVertical className="h-4 w-4 text-muted-foreground" />
-          </div>
+          <ReadCheckbox 
+            articleId={article.id}
+            initialState={isRead}
+          />
         )}
         <ArticleCard 
-          article={article} 
+          article={article}
           isRead={isRead}
           onReadChange={onReadChange}
         />
