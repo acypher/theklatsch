@@ -25,7 +25,6 @@ const Index = () => {
   const [filterRead, setFilterRead] = useState(false);
   const { isAuthenticated } = useAuth();
   
-  // Fetch read articles for the logged-in user
   const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
   
   useEffect(() => {
@@ -106,18 +105,30 @@ const Index = () => {
     fetchArticles();
   }, []);
 
-  // Effect to restore scroll position when returning from article detail
+  const scrollToArticle = (articleId: string) => {
+    if (articleListRef.current) {
+      const articleElement = document.getElementById(`article-${articleId}`);
+      if (articleElement) {
+        const yOffset = -100;
+        const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        
+        window.scrollTo({
+          top: y,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     const restoreScrollPosition = async () => {
       const lastViewedArticleId = sessionStorage.getItem('lastViewedArticleId');
       
       if (lastViewedArticleId && articles.length > 0 && articleListRef.current) {
-        // Wait for article list to render
         await new Promise(resolve => setTimeout(resolve, 100));
         
         const articleElement = document.getElementById(`article-${lastViewedArticleId}`);
         if (articleElement) {
-          // Scroll to article with a small offset from the top
           const yOffset = -50;
           const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
           
@@ -126,7 +137,6 @@ const Index = () => {
             behavior: 'auto'
           });
           
-          // Remove the stored ID after using it
           sessionStorage.removeItem('lastViewedArticleId');
         }
       }
