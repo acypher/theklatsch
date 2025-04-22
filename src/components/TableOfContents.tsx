@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -130,29 +131,32 @@ const TableOfContents = ({
           style={{ height: articlesListHeight }}
         >
           <ul className="space-y-2">
-            {articles.map((article, index) => (
-              <li 
-                key={article.id}
-                className={`cursor-pointer transition-colors ${
-                  activeItem === article.id
-                    ? "text-primary font-medium"
-                    : readArticles.has(article.id) && !hideRead
-                    ? "text-muted-foreground/50 hover:text-muted-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <button
-                  className="text-left w-full text-sm flex items-start gap-2"
-                  onClick={() => handleItemClick(article.id)}
-                  aria-current={activeItem === article.id ? "true" : undefined}
+            {articles.map((article, index) => {
+              const isArticleRead = readArticles.has(article.id);
+              return (
+                <li 
+                  key={article.id}
+                  className={`cursor-pointer transition-colors ${
+                    activeItem === article.id
+                      ? "text-primary font-medium"
+                      : isArticleRead 
+                      ? "text-muted-foreground/50 hover:text-muted-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  <span className="font-medium text-muted-foreground min-w-6">
-                    {index + 1}.
-                  </span>
-                  <span>{article.title}</span>
-                </button>
-              </li>
-            ))}
+                  <button
+                    className="text-left w-full text-sm flex items-start gap-2"
+                    onClick={() => handleItemClick(article.id)}
+                    aria-current={activeItem === article.id ? "true" : undefined}
+                  >
+                    <span className="font-medium text-muted-foreground min-w-6">
+                      {index + 1}.
+                    </span>
+                    <span>{article.title}</span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </ScrollArea>
         
