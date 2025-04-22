@@ -179,6 +179,17 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     setHasChanges(false);
   };
 
+  const handleReadChange = async (articleId: string, isRead?: boolean) => {
+    const newState = await toggleRead(articleId, isRead);
+    
+    // If we're filtering read articles and we just marked an article as read or unread,
+    // we need to re-render the list
+    if (filterRead && isAuthenticated && newState !== null) {
+      // Force re-render by creating a new array
+      setLocalArticles([...localArticles]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-4">
@@ -235,7 +246,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               isRead={readArticles[article.id]}
-              onReadChange={toggleRead}
+              onReadChange={handleReadChange}
               ref={(el) => {
                 if (el) articleRefs.current.set(article.id, el);
               }}

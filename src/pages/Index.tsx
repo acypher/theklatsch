@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
@@ -97,11 +98,21 @@ const Index = () => {
           // Remove the stored ID after using it
           sessionStorage.removeItem('lastViewedArticleId');
         }
+      } else {
+        // If no specific article to scroll to, restore general scroll position
+        const savedScrollPosition = localStorage.getItem('articleListScrollPosition');
+        if (savedScrollPosition) {
+          window.scrollTo({
+            top: parseInt(savedScrollPosition),
+            behavior: 'instant' // Use instant to avoid animation
+          });
+        }
       }
     };
     
     if (articles.length > 0) {
-      restoreScrollPosition();
+      // Slight delay to ensure DOM is ready
+      setTimeout(restoreScrollPosition, 100);
     }
   }, [articles]);
   
@@ -146,20 +157,30 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    const savedScrollPosition = localStorage.getItem('articleListScrollPosition');
-    if (savedScrollPosition) {
-      window.scrollTo({
-        top: parseInt(savedScrollPosition),
-        behavior: 'instant'
-      });
-    }
-    
-    const handleScroll = () => {
+    // Set up scroll position saving
+    const handleBeforeUnload = () => {
       localStorage.setItem('articleListScrollPosition', window.scrollY.toString());
     };
+
+    // Save scroll position when scrolling
+    const handleScroll = () => {
+      // Use debounce to avoid excessive writes
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        localStorage.setItem('articleListScrollPosition', window.scrollY.toString());
+      }, 100);
+    };
+    
+    let scrollTimeout: ReturnType<typeof setTimeout>;
     
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+    };
   }, []);
 
   const MaintenancePage = () => (

@@ -17,6 +17,7 @@ export const useArticleReads = () => {
       }
       
       try {
+        setLoading(true);
         const { data, error } = await supabase
           .from('article_reads')
           .select('article_id, read');
@@ -56,12 +57,16 @@ export const useArticleReads = () => {
         
       if (error) throw error;
       
+      // Update local state immediately for UI responsiveness
       setReadArticles(prev => ({
         ...prev,
         [articleId]: newState
       }));
+      
+      return newState; // Return the new state for consumers to use
     } catch (error) {
       console.error('Error toggling read state:', error);
+      return null;
     }
   };
   
