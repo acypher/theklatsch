@@ -13,7 +13,6 @@ import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
 import { initGifController } from '@/utils/gifController';
-import { supabase } from "@/integrations/supabase/client";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,6 +49,7 @@ const ArticleDetail = () => {
 
   useEffect(() => {
     if (article?.imageUrl?.toLowerCase().endsWith('.gif')) {
+      // Initialize the GIF controller when the article loads
       const initGif = async () => {
         try {
           await initGifController();
@@ -61,26 +61,6 @@ const ArticleDetail = () => {
       initGif();
     }
   }, [article]);
-
-  useEffect(() => {
-    const markAsRead = async () => {
-      if (!isAuthenticated || !article) return;
-      
-      try {
-        await supabase
-          .from('article_reads')
-          .upsert({ 
-            article_id: article.id,
-            read: true,
-            user_id: (await supabase.auth.getUser()).data.user?.id 
-          });
-      } catch (error) {
-        console.error('Error marking article as read:', error);
-      }
-    };
-    
-    markAsRead();
-  }, [article, isAuthenticated]);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -109,6 +89,7 @@ const ArticleDetail = () => {
   };
 
   const handleNavigateBack = () => {
+    // Save the current article ID to session storage before navigating
     if (article) {
       sessionStorage.setItem('lastViewedArticleId', article.id);
     }
@@ -184,6 +165,7 @@ const ArticleDetail = () => {
             onBackClick={handleNavigateBack}
           />
 
+          {/* Delete confirmation dialog */}
           <DeleteConfirmationDialog 
             isOpen={isDeleteDialogOpen}
             title={article.title}

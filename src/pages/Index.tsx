@@ -76,6 +76,7 @@ const Index = () => {
     fetchArticles();
   }, []);
 
+  // Effect to restore scroll position when returning from article detail
   useEffect(() => {
     const restoreScrollPosition = async () => {
       const lastViewedArticleId = sessionStorage.getItem('lastViewedArticleId');
@@ -98,21 +99,11 @@ const Index = () => {
           // Remove the stored ID after using it
           sessionStorage.removeItem('lastViewedArticleId');
         }
-      } else {
-        // If no specific article to scroll to, restore general scroll position
-        const savedScrollPosition = localStorage.getItem('articleListScrollPosition');
-        if (savedScrollPosition) {
-          window.scrollTo({
-            top: parseInt(savedScrollPosition),
-            behavior: 'instant' // Use instant to avoid animation
-          });
-        }
       }
     };
     
     if (articles.length > 0) {
-      // Slight delay to ensure DOM is ready
-      setTimeout(restoreScrollPosition, 100);
+      restoreScrollPosition();
     }
   }, [articles]);
   
@@ -154,33 +145,6 @@ const Index = () => {
     };
     
     uploadLogo();
-  }, []);
-
-  useEffect(() => {
-    // Set up scroll position saving
-    const handleBeforeUnload = () => {
-      localStorage.setItem('articleListScrollPosition', window.scrollY.toString());
-    };
-
-    // Save scroll position when scrolling
-    const handleScroll = () => {
-      // Use debounce to avoid excessive writes
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        localStorage.setItem('articleListScrollPosition', window.scrollY.toString());
-      }, 100);
-    };
-    
-    let scrollTimeout: ReturnType<typeof setTimeout>;
-    
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-    };
   }, []);
 
   const MaintenancePage = () => (
