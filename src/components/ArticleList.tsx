@@ -74,7 +74,18 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     const read = localArticles.filter(article => readArticles[article.id]);
     const unread = localArticles.filter(article => !readArticles[article.id]);
     
-    return [...unread, <Separator className="my-8 relative z-10" key="separator" />, ...read];
+    return [...unread, 
+      <React.Fragment key="read-separator">
+        <div className="col-span-full relative my-8">
+          <Separator className="relative z-10" />
+          <div className="text-center -mt-3">
+            <span className="bg-background px-4 text-muted-foreground text-sm">
+              Already read
+            </span>
+          </div>
+        </div>
+      </React.Fragment>, 
+      ...read];
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: Article) => {
@@ -186,6 +197,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     console.log(`New read state for article ${articleId}: ${newState}`);
     
     if (filterRead && isAuthenticated && newState !== null) {
+      // Force re-render to reposition the articles according to read status
       setLocalArticles([...localArticles]);
     }
   };
