@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -10,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ArticleCardHeader from "./article/ArticleCardHeader";
 import ArticleCardMeta from "./article/ArticleCardMeta";
 import ArticleCardFooter from "./article/ArticleCardFooter";
+import ReadCheckbox from './article/ReadCheckbox';
 
 interface ArticleCardProps {
   article: Article;
@@ -99,7 +99,9 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card" data-article-id={article.id}>
+    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={article.id}>
+      <ReadCheckbox articleId={article.id} />
+      
       <CardHeader className="p-0">
         <ArticleCardHeader 
           articleId={article.id}

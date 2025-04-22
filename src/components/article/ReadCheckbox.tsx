@@ -1,0 +1,31 @@
+
+import { Checkbox } from "@/components/ui/checkbox";
+import { useArticleReads } from "@/hooks/useArticleReads";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface ReadCheckboxProps {
+  articleId: string;
+}
+
+const ReadCheckbox = ({ articleId }: ReadCheckboxProps) => {
+  const { isAuthenticated } = useAuth();
+  const { isRead, loading, toggleReadState } = useArticleReads(articleId);
+
+  if (!isAuthenticated) return null;
+
+  return (
+    <div className="absolute top-2 right-2 z-10">
+      <Checkbox 
+        checked={isRead}
+        disabled={loading}
+        onCheckedChange={(checked) => {
+          if (typeof checked === 'boolean') {
+            toggleReadState();
+          }
+        }}
+      />
+    </div>
+  );
+};
+
+export default ReadCheckbox;
