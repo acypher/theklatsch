@@ -2,15 +2,14 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
-import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import MaintenancePage from "@/components/maintenance/MaintenancePage";
+import { useLogoUpload } from "@/hooks/useLogoUpload";
 
 const Index = () => {
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -18,9 +17,9 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [issueWasFixed, setIssueWasFixed] = useState(false);
-  const articleListRef = useRef<HTMLDivElement>(null);
   const [filterRead, setFilterRead] = useState(false);
   const { isAuthenticated } = useAuth();
+  const logoUrl = useLogoUpload();
   
   const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
   
@@ -85,7 +84,7 @@ const Index = () => {
     
     loadMaintenanceMode();
   }, []);
-  
+
   const fetchArticles = async () => {
     setLoading(true);
     try {
@@ -101,113 +100,6 @@ const Index = () => {
   useEffect(() => {
     fetchArticles();
   }, []);
-
-  const scrollToArticle = (articleId: string) => {
-    if (articleListRef.current) {
-      const articleElement = document.getElementById(`article-${articleId}`);
-      if (articleElement) {
-        const yOffset = -100;
-        const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        
-        window.scrollTo({
-          top: y,
-          behavior: 'smooth'
-        });
-      }
-    }
-  };
-
-  useEffect(() => {
-    const restoreScrollPosition = async () => {
-      const lastViewedArticleId = sessionStorage.getItem('lastViewedArticleId');
-      
-      if (lastViewedArticleId && articles.length > 0 && articleListRef.current) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        const articleElement = document.getElementById(`article-${lastViewedArticleId}`);
-        if (articleElement) {
-          const yOffset = -50;
-          const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          
-          window.scrollTo({
-            top: y,
-            behavior: 'auto'
-          });
-          
-          sessionStorage.removeItem('lastViewedArticleId');
-        }
-      }
-    };
-    
-    if (articles.length > 0) {
-      restoreScrollPosition();
-    }
-  }, [articles]);
-  
-  useEffect(() => {
-    const uploadLogo = async () => {
-      try {
-        const { data: existingFiles } = await supabase
-          .storage
-          .from('logos')
-          .list();
-        
-        const logoExists = existingFiles?.some(file => file.name === 'klatsch-logo.png');
-        
-        if (!logoExists) {
-          const response = await fetch('/klatsch-logo.png');
-          const blob = await response.blob();
-          
-          const { error } = await supabase
-            .storage
-            .from('logos')
-            .upload('klatsch-logo.png', blob);
-            
-          if (error) {
-            console.error('Error uploading logo:', error);
-          }
-        }
-        
-        const { data: logoData } = supabase
-          .storage
-          .from('logos')
-          .getPublicUrl('klatsch-logo.png');
-        
-        if (logoData) {
-          setLogoUrl(logoData.publicUrl);
-        }
-      } catch (error) {
-        console.error('Error with logo:', error);
-      }
-    };
-    
-    uploadLogo();
-  }, []);
-
-  const MaintenancePage = () => (
-    <div className="flex flex-col items-center justify-center py-12">
-      <div className="max-w-3xl mx-auto text-center">
-        <div className="mb-6 flex justify-center">
-          <AlertTriangle className="h-16 w-16 text-amber-500" />
-        </div>
-        
-        <h2 className="text-3xl font-bold mb-6">Lovable Trouble</h2>
-        
-        <div className="flex justify-center mb-8">
-          <img 
-            src="/lovable-uploads/a99bdae2-b16b-477b-87c2-37edc603881f.png" 
-            alt="Person confused looking at computer with errors" 
-            className="max-w-full h-auto rounded-lg shadow-lg"
-          />
-        </div>
-        
-        <p className="text-lg text-muted-foreground mt-6">
-          We're currently experiencing some technical difficulties. 
-          Our team is working hard to resolve the issue.
-        </p>
-      </div>
-    </div>
-  );
 
   const filteredArticles = useMemo(() => {
     if (!filterRead || !isAuthenticated) return articles;
@@ -240,7 +132,7 @@ const Index = () => {
         
         {showMaintenancePage ? <MaintenancePage /> : (
           <>
-            <div ref={articleListRef}>
+            <div>
               <ArticleList 
                 articles={filteredArticles} 
                 loading={loading}
