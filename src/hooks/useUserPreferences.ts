@@ -7,11 +7,11 @@ import { toast } from 'sonner';
 export const useUserPreferences = () => {
   const [hideRead, setHideRead] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchPreferences = async () => {
-      if (!user) {
+      if (!isAuthenticated || !user) {
         setHideRead(false);
         setLoading(false);
         return;
@@ -35,10 +35,16 @@ export const useUserPreferences = () => {
     };
 
     fetchPreferences();
-  }, [user]);
+  }, [user, isAuthenticated]);
 
   const updateHideRead = async (value: boolean) => {
-    if (!user) return;
+    // Update local state immediately for better UX
+    setHideRead(value);
+    
+    // If user is not authenticated, we can't save to database but we can still use local state
+    if (!isAuthenticated || !user) {
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -50,10 +56,12 @@ export const useUserPreferences = () => {
         });
 
       if (error) throw error;
-
-      setHideRead(value);
+      
+      // Success toast is optional since the UI already updated
     } catch (error) {
       console.error('Error updating preferences:', error);
+      // Revert the state if the server update fails
+      setHideRead(!value);
       toast.error('Failed to update preferences');
     }
   };
