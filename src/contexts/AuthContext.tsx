@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -50,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single();
+        .maybeSingle(); // Using maybeSingle instead of single
 
       if (error) {
         console.error("Error fetching profile:", error);
@@ -71,19 +72,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
         if (currentSession?.user) {
-          fetchProfile(currentSession.user.id);
+          // Use setTimeout to prevent potential deadlocks
+          setTimeout(() => {
+            fetchProfile(currentSession.user.id);
+          }, 0);
         } else {
           setProfile(null);
         }
       }
     );
 
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -99,40 +105,57 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (!error && data.session) {
-      navigate("/");
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (!error && data.session) {
+        navigate("/");
+      }
+      
+      return { data: data.session, error };
+    } catch (error) {
+      console.error("Error during sign in:", error);
+      return { data: null, error: error as Error };
     }
-    
-    return { data: data.session, error };
   };
 
   const signUp = async (email: string, password: string, username: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+          },
         },
-        emailRedirectTo: undefined,
-      },
-    });
-    
-    if (!error && data.session) {
-      navigate("/");
+      });
+      
+      if (!error && data.session) {
+        navigate("/");
+      }
+      
+      return { data: data.session, error };
+    } catch (error) {
+      console.error("Error during sign up:", error);
+      return { data: null, error: error as Error };
     }
-    
-    return { data: data.session, error };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Failed to sign out");
+    }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -150,10 +173,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .update(updates)
         .eq("id", user.id)
         .select()
-        .single();
+        .maybeSingle(); // Using maybeSingle instead of single
 
       if (error) {
         throw error;
+      }
+
+      if (!data) {
+        throw new Error("Failed to update profile");
       }
 
       const updatedProfile: Profile = {

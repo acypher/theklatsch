@@ -8,6 +8,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import EditableMarkdown from "./EditableMarkdown";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -28,7 +29,9 @@ const TableOfContents = ({
   const [maxHeight, setMaxHeight] = useState<number>(400);
   const [recommendations, setRecommendations] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const isMobile = useIsMobile();
+  const { isAuthenticated, user } = useAuth();
   
   useEffect(() => {
     const calculateMaxHeight = () => {
@@ -62,7 +65,7 @@ const TableOfContents = ({
           .from('vars')
           .select('value')
           .eq('key', 'recommendations')
-          .single();
+          .maybeSingle();
         
         if (error) {
           console.error('Error fetching recommendations:', error);
@@ -88,7 +91,17 @@ const TableOfContents = ({
   };
   
   const handleSaveRecommendations = async (content: string) => {
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to edit recommendations");
+      return;
+    }
+    
     try {
+      setIsSaving(true);
+      
+      // Add throttling to prevent rapid repeated submissions
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       const { error } = await supabase
         .from('vars')
         .upsert(
@@ -111,6 +124,8 @@ const TableOfContents = ({
     } catch (error) {
       console.error('Error saving recommendations:', error);
       throw error;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -167,6 +182,7 @@ const TableOfContents = ({
                 content={recommendations} 
                 onSave={handleSaveRecommendations} 
                 placeholder="Add recommendations here..."
+                disabled={isSaving || !isAuthenticated}
               />
             </ScrollArea>
           </div>

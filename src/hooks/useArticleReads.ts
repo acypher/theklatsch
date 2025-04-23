@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export const useArticleReads = (articleId: string) => {
   const { user } = useAuth();
@@ -21,15 +22,17 @@ export const useArticleReads = (articleId: string) => {
           .select('read')
           .eq('user_id', user.id)
           .eq('article_id', articleId)
-          .single();
+          .maybeSingle(); // Using maybeSingle instead of single to avoid errors
 
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           console.error('Error fetching read state:', error);
+          setIsRead(false);
+        } else {
+          setIsRead(data?.read ?? false);
         }
-
-        setIsRead(data?.read ?? false);
       } catch (error) {
         console.error('Unexpected error:', error);
+        setIsRead(false);
       } finally {
         setLoading(false);
       }
@@ -39,25 +42,32 @@ export const useArticleReads = (articleId: string) => {
   }, [user, articleId]);
 
   const toggleReadState = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.error("You must be logged in to mark articles as read");
+      return;
+    }
 
     try {
       const newReadState = !isRead;
+      setIsRead(newReadState); // Optimistic update
+      
       const { error } = await supabase
         .from('article_reads')
         .upsert({
           user_id: user.id,
           article_id: articleId,
-          read: newReadState
+          read: newReadState,
+          updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id, article_id'
         });
 
       if (error) {
+        // Revert optimistic update on error
+        setIsRead(!newReadState);
+        toast.error("Failed to update read status");
         throw error;
       }
-
-      setIsRead(newReadState);
     } catch (error) {
       console.error('Error updating read state:', error);
     }
