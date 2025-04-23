@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles } from "@/lib/data";
@@ -9,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import MaintenancePage from "@/components/maintenance/MaintenancePage";
 import { useLogoUpload } from "@/hooks/useLogoUpload";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
-import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -69,18 +67,9 @@ const Index = () => {
 
   useEffect(() => {
     const loadCurrentIssue = async () => {
-      try {
-        const issueData = await getCurrentIssue();
-        if (issueData && typeof issueData === 'object' && 'text' in issueData) {
-          setCurrentIssue(issueData.text);
-          setIssueWasFixed(false);
-        } else {
-          setCurrentIssue("April 2025");
-        }
-      } catch (error) {
-        console.error("Error loading current issue:", error);
-        setCurrentIssue("April 2025");
-      }
+      const issueData = await checkAndFixDisplayIssue();
+      setCurrentIssue(issueData.text);
+      setIssueWasFixed(issueData.wasFixed);
     };
     
     loadCurrentIssue();
