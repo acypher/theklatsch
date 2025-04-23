@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -138,8 +139,14 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
 
   const scrollToArticle = (articleId: string) => {
     const articleElement = articleRefs.current.get(articleId);
+    
     if (articleElement) {
-      const yOffset = -100; 
+      // Get the navbar height for offset calculation
+      const navbar = document.querySelector('nav');
+      const navbarHeight = navbar ? navbar.offsetHeight : 0;
+      const extraPadding = 20; // Add some additional padding
+      const yOffset = -(navbarHeight + extraPadding);
+      
       const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
       
       window.scrollTo({
@@ -153,6 +160,11 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     setLocalArticles(articles);
     setHasChanges(false);
   };
+
+  // Filter articles for display if hideRead is true
+  const displayArticles = hideRead 
+    ? localArticles.filter(article => !readArticles.has(article.id))
+    : localArticles;
 
   return (
     <div className="space-y-6">
@@ -181,7 +193,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
           />
         </div>
         
-        {localArticles.map((article) => (
+        {displayArticles.map((article) => (
           <DraggableArticle
             key={article.id}
             article={article}
@@ -194,7 +206,6 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
             onDrop={handleDrop}
             ref={(el) => {
               if (el) articleRefs.current.set(article.id, el);
-              return el;
             }}
           />
         ))}
