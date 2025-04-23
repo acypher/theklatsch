@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 export const useUserPreferences = () => {
   const [hideRead, setHideRead] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -38,6 +39,11 @@ export const useUserPreferences = () => {
   }, [user, isAuthenticated]);
 
   const updateHideRead = async (value: boolean) => {
+    if (updating) return; // Prevent multiple simultaneous updates
+    
+    // Store the previous value in case we need to revert
+    const previousValue = hideRead;
+    
     // Update local state immediately for better UX
     setHideRead(value);
     
@@ -47,6 +53,7 @@ export const useUserPreferences = () => {
     }
 
     try {
+      setUpdating(true);
       const { error } = await supabase
         .from('user_preferences')
         .upsert({
@@ -61,10 +68,12 @@ export const useUserPreferences = () => {
     } catch (error) {
       console.error('Error updating preferences:', error);
       // Revert the state if the server update fails
-      setHideRead(!value);
+      setHideRead(previousValue);
       toast.error('Failed to update preferences');
+    } finally {
+      setUpdating(false);
     }
   };
 
-  return { hideRead, loading, updateHideRead };
+  return { hideRead, loading, updating, updateHideRead };
 };
