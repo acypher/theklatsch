@@ -9,7 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import MaintenancePage from "@/components/maintenance/MaintenancePage";
 import { useLogoUpload } from "@/hooks/useLogoUpload";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
-import { supabase } from "@/integrations/supabase/client"; // Add this import
+import { supabase } from "@/integrations/supabase/client";
+import { checkAndFixDisplayIssue } from "@/lib/data/issue/currentIssue"; // Add this import
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
