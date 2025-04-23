@@ -7,11 +7,11 @@ import { toast } from 'sonner';
 export const useUserPreferences = () => {
   const [hideRead, setHideRead] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchPreferences = async () => {
-      if (!isAuthenticated || !user) {
+      if (!user) {
         setHideRead(false);
         setLoading(false);
         return;
@@ -35,15 +35,10 @@ export const useUserPreferences = () => {
     };
 
     fetchPreferences();
-  }, [user, isAuthenticated]);
+  }, [user]);
 
   const updateHideRead = async (value: boolean) => {
-    if (!isAuthenticated || !user) {
-      // If user is not authenticated, just update the local state
-      // but don't try to save to the database
-      setHideRead(value);
-      return;
-    }
+    if (!user) return;
 
     try {
       const { error } = await supabase
