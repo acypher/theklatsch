@@ -4,6 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+// Create a global event system to notify subscribers when read status changes
+export const articleReadEvents = {
+  listeners: new Set<() => void>(),
+  subscribe(callback: () => void) {
+    this.listeners.add(callback);
+    return () => {
+      this.listeners.delete(callback);
+    };
+  },
+  notify() {
+    this.listeners.forEach(callback => callback());
+  }
+};
+
 export const useArticleReads = (articleId: string) => {
   const { user } = useAuth();
   const [isRead, setIsRead] = useState(false);
@@ -68,6 +82,10 @@ export const useArticleReads = (articleId: string) => {
         toast.error("Failed to update read status");
         throw error;
       }
+      
+      // Notify all subscribers that read status has changed
+      articleReadEvents.notify();
+      
     } catch (error) {
       console.error('Error updating read state:', error);
     }

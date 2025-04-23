@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,6 +9,7 @@ import EditableMarkdown from "./EditableMarkdown";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { articleReadEvents } from "@/hooks/useArticleReads";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -29,8 +31,47 @@ const TableOfContents = ({
   const [recommendations, setRecommendations] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [localReadArticles, setLocalReadArticles] = useState<Set<string>>(readArticles);
   const isMobile = useIsMobile();
   const { isAuthenticated, user } = useAuth();
+  
+  // Initialize local read articles from props
+  useEffect(() => {
+    setLocalReadArticles(new Set(readArticles));
+  }, [readArticles]);
+  
+  // Subscribe to read events
+  useEffect(() => {
+    // Subscribe to article read events to update the UI immediately
+    const unsubscribe = articleReadEvents.subscribe(() => {
+      // Refresh read articles when an article is marked as read/unread
+      const fetchReadArticles = async () => {
+        if (!isAuthenticated) {
+          setLocalReadArticles(new Set());
+          return;
+        }
+        
+        try {
+          const { data } = await supabase
+            .from('article_reads')
+            .select('article_id')
+            .eq('read', true);
+          
+          if (data) {
+            setLocalReadArticles(new Set(data.map(item => item.article_id)));
+          }
+        } catch (error) {
+          console.error('Error fetching read articles:', error);
+        }
+      };
+      
+      fetchReadArticles();
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [isAuthenticated]);
   
   useEffect(() => {
     const calculateMaxHeight = () => {
@@ -149,7 +190,8 @@ const TableOfContents = ({
         >
           <ul className="space-y-2">
             {displayArticles.map((article, index) => {
-              const isArticleRead = readArticles.has(article.id);
+              // Use local read articles state for real-time updates
+              const isArticleRead = localReadArticles.has(article.id);
               return (
                 <li 
                   key={article.id}
