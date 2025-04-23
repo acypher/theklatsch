@@ -86,21 +86,36 @@ const Index = () => {
     loadMaintenanceMode();
   }, []);
   
-  useEffect(() => {
-    const fetchArticles = async () => {
-      setLoading(true);
-      try {
-        const articlesData = await getAllArticles();
-        setArticles(articlesData);
-      } catch (error) {
-        console.error("Error fetching articles:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchArticles = async () => {
+    setLoading(true);
+    try {
+      const articlesData = await getAllArticles();
+      setArticles(articlesData);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchArticles();
   }, []);
+
+  const scrollToArticle = (articleId: string) => {
+    if (articleListRef.current) {
+      const articleElement = document.getElementById(`article-${articleId}`);
+      if (articleElement) {
+        const yOffset = -100;
+        const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        
+        window.scrollTo({
+          top: y,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     const restoreScrollPosition = async () => {
@@ -128,7 +143,7 @@ const Index = () => {
       restoreScrollPosition();
     }
   }, [articles]);
-
+  
   useEffect(() => {
     const uploadLogo = async () => {
       try {

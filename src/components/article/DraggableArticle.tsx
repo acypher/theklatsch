@@ -1,7 +1,6 @@
 
-import React, { forwardRef, ForwardedRef } from "react";
-import { Card } from "@/components/ui/card";
 import { Article } from "@/lib/types";
+import { GripVertical } from "lucide-react";
 import ArticleCard from "../ArticleCard";
 
 interface DraggableArticleProps {
@@ -12,37 +11,44 @@ interface DraggableArticleProps {
   onDragStart: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
+  ref?: (el: HTMLDivElement | null) => void;
 }
 
-const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(
-  (
-    { article, isLoggedIn, isDragging, draggedItemId, onDragStart, onDragEnd, onDragOver, onDrop }, 
-    ref
-  ) => {
-    return (
-      <div
-        ref={ref}
-        id={`article-${article.id}`}
-        className={`transition-transform ${
-          isDragging && draggedItemId === article.id ? "z-10" : ""
-        }`}
-        draggable={isLoggedIn}
-        onDragStart={(e) => onDragStart(e, article)}
-        onDragEnd={onDragEnd}
-        onDragOver={onDragOver}
-        onDrop={(e) => onDrop(e, article)}
-        data-article-id={article.id}
-      >
-        <Card className="h-full hover:shadow-md transition-shadow">
-          <ArticleCard article={article} />
-        </Card>
+const DraggableArticle = ({ 
+  article,
+  isLoggedIn,
+  isDragging,
+  draggedItemId,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
+  ref
+}: DraggableArticleProps) => {
+  return (
+    <div
+      id={`article-${article.id}`}
+      ref={ref}
+      draggable={isLoggedIn}
+      onDragStart={(e) => onDragStart(e, article)}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, article)}
+      className={`transition-all duration-200 ${
+        isLoggedIn ? "cursor-grab active:cursor-grabbing" : ""
+      } ${isDragging && draggedItemId === article.id ? "opacity-50" : "opacity-100"}`}
+    >
+      <div className={`relative ${isLoggedIn ? "hover:ring-2 hover:ring-primary/30 rounded-lg" : ""}`}>
+        {isLoggedIn && (
+          <div className="absolute top-2 left-2 bg-background/90 rounded-full p-1 shadow-sm">
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
+        <ArticleCard article={article} />
       </div>
-    );
-  }
-);
-
-// Add display name for React DevTools
-DraggableArticle.displayName = "DraggableArticle";
+    </div>
+  );
+};
 
 export default DraggableArticle;
