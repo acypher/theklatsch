@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
-import { supabase } from "@/integrations/supabase/client";
+import { getCurrentIssue, getAllArticles } from "@/lib/data";
 import ArticleList from "@/components/ArticleList";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { useAuth } from "@/contexts/AuthContext";
 import MaintenancePage from "@/components/maintenance/MaintenancePage";
 import { useLogoUpload } from "@/hooks/useLogoUpload";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -17,12 +17,11 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [issueWasFixed, setIssueWasFixed] = useState(false);
-  const [filterRead, setFilterRead] = useState(false);
   const { isAuthenticated } = useAuth();
   const logoUrl = useLogoUpload();
-  
+  const { hideRead, updateHideRead } = useUserPreferences();
   const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
-  
+
   useEffect(() => {
     const checkAuth = async () => {
       setCheckingAuth(true);
@@ -101,19 +100,14 @@ const Index = () => {
     fetchArticles();
   }, []);
 
-  const filteredArticles = useMemo(() => {
-    if (!filterRead || !isAuthenticated) return articles;
-    return articles.filter(article => !readArticles.has(article.id));
-  }, [articles, filterRead, readArticles, isAuthenticated]);
-
   return (
     <div className="min-h-screen">
       <Navbar 
         onLogoClick={() => setShowMaintenancePage(false)} 
         currentIssue={currentIssue}
         showReadFilter={true}
-        filterEnabled={filterRead}
-        onFilterToggle={setFilterRead}
+        filterEnabled={hideRead}
+        onFilterToggle={updateHideRead}
       />
       <main className="container mx-auto px-4 py-8">
         <header className="text-center mb-12">
@@ -134,10 +128,10 @@ const Index = () => {
           <>
             <div>
               <ArticleList 
-                articles={filteredArticles} 
+                articles={articles} 
                 loading={loading}
                 readArticles={readArticles}
-                hideRead={filterRead}
+                hideRead={hideRead}
               />
             </div>
             
