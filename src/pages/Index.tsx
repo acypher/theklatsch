@@ -70,9 +70,13 @@ const Index = () => {
   useEffect(() => {
     const loadCurrentIssue = async () => {
       try {
-        const issue = await getCurrentIssue();
-        setCurrentIssue(issue || "April 2025");
-        setIssueWasFixed(false);
+        const issueData = await getCurrentIssue();
+        if (issueData && typeof issueData === 'object' && 'text' in issueData) {
+          setCurrentIssue(issueData.text);
+          setIssueWasFixed(false);
+        } else {
+          setCurrentIssue("April 2025");
+        }
       } catch (error) {
         console.error("Error loading current issue:", error);
         setCurrentIssue("April 2025");
