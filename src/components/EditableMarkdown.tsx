@@ -13,9 +13,10 @@ interface EditableMarkdownProps {
   content: string;
   onSave: (content: string) => Promise<void>;
   placeholder?: string;
+  disabled?: boolean;
 }
 
-const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations here...' }: EditableMarkdownProps) => {
+const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations here...', disabled = false }: EditableMarkdownProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
   const [isSaving, setIsSaving] = useState(false);
@@ -39,7 +40,7 @@ const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations 
 
   return (
     <div className="relative pt-4 border-t border-border">
-      {isAuthenticated && (
+      {isAuthenticated && !disabled && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
