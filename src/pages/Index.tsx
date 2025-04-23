@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles } from "@/lib/data";
@@ -8,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import MaintenancePage from "@/components/maintenance/MaintenancePage";
 import { useLogoUpload } from "@/hooks/useLogoUpload";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { supabase } from "@/integrations/supabase/client"; // Add this import
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -25,9 +27,14 @@ const Index = () => {
   useEffect(() => {
     const checkAuth = async () => {
       setCheckingAuth(true);
-      const { data } = await supabase.auth.getSession();
-      setIsAdmin(!!data.session);
-      setCheckingAuth(false);
+      try {
+        const { data } = await supabase.auth.getSession();
+        setIsAdmin(!!data.session);
+        setCheckingAuth(false);
+      } catch (error) {
+        console.error("Error checking auth:", error);
+        setCheckingAuth(false);
+      }
     };
     
     checkAuth();
