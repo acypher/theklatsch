@@ -139,11 +139,12 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   const scrollToArticle = (articleId: string) => {
     const articleElement = articleRefs.current.get(articleId);
     if (articleElement) {
-      const yOffset = -100; 
-      const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      const headerHeight = 80; // Account for fixed header/navbar
+      const elementPosition = articleElement.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
       
       window.scrollTo({
-        top: y,
+        top: offsetPosition,
         behavior: 'smooth'
       });
     }
