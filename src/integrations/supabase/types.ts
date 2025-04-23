@@ -181,27 +181,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_preferences: {
-        Row: {
-          hide_read_articles: boolean
-          id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          hide_read_articles?: boolean
-          id?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          hide_read_articles?: boolean
-          id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       vars: {
         Row: {
           created_at: string
