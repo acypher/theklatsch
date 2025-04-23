@@ -129,6 +129,11 @@ const TableOfContents = ({
     }
   };
 
+  // Filter articles if hideRead is true
+  const displayArticles = hideRead 
+    ? articles.filter(article => !readArticles.has(article.id))
+    : articles;
+
   const recommendationsHeight = recommendations ? 120 : 0;
   const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60);
 
@@ -146,7 +151,7 @@ const TableOfContents = ({
           style={{ height: articlesListHeight }}
         >
           <ul className="space-y-2">
-            {articles.map((article, index) => {
+            {displayArticles.map((article, index) => {
               const isArticleRead = readArticles.has(article.id);
               return (
                 <li 
@@ -156,7 +161,7 @@ const TableOfContents = ({
                       ? "text-primary font-medium"
                       : isArticleRead 
                       ? "text-muted-foreground/50 hover:text-muted-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-foreground hover:text-primary"
                   }`}
                 >
                   <button
