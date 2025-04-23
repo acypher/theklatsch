@@ -44,7 +44,7 @@ const ArticlesGrid = ({
         <TableOfContents 
           articles={articles} // Always pass full article list to ToC
           onArticleClick={onArticleClick}
-          readArticles={readArticles}
+          readArticles={readArticles} // Pass correct read status information
           hideRead={false} // Never hide articles in ToC
         />
       </div>
