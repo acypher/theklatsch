@@ -15,18 +15,9 @@ interface ArticleListProps {
   selectedKeyword?: string | null;
   onKeywordClear?: () => void;
   loading?: boolean;
-  readArticles?: Set<string>;
-  hideRead?: boolean;
 }
 
-const ArticleList = ({ 
-  articles, 
-  selectedKeyword, 
-  onKeywordClear, 
-  loading = false,
-  readArticles = new Set(),
-  hideRead = false
-}: ArticleListProps) => {
+const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = false }: ArticleListProps) => {
   const [draggedItem, setDraggedItem] = useState<Article | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -184,8 +175,6 @@ const ArticleList = ({
           <TableOfContents 
             articles={localArticles} 
             onArticleClick={scrollToArticle}
-            readArticles={readArticles}
-            hideRead={hideRead}
           />
         </div>
         
