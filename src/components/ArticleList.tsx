@@ -137,26 +137,31 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   };
 
   const scrollToArticle = (articleId: string) => {
-    const articleElement = articleRefs.current.get(articleId);
+    console.log("Attempting to scroll to article:", articleId);
+    console.log("Article refs:", Array.from(articleRefs.current.keys()));
+    
+    const articleElement = document.getElementById(`article-${articleId}`);
+    
     if (articleElement) {
+      console.log("Found article element by ID:", articleId);
       const headerOffset = 100; // Account for fixed header/navbar
       const elementPosition = articleElement.getBoundingClientRect().top;
-      const offsetPosition = window.pageYOffset + elementPosition - headerOffset;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
       
-      console.log(`Scrolling to article ${articleId}:`, {
+      console.log("Scrolling details:", {
         element: articleElement,
-        elementPosition,
+        elementTop: elementPosition,
         offsetPosition,
-        pageYOffset: window.pageYOffset
+        windowScrollY: window.scrollY,
+        headerOffset
       });
       
       window.scrollTo({
-        top: offsetPosition,
+        top: window.scrollY + elementPosition - headerOffset,
         behavior: 'smooth'
       });
     } else {
-      console.log(`Article element with ID ${articleId} not found in refs`);
-      console.log('Available refs:', Array.from(articleRefs.current.keys()));
+      console.error(`Article element with ID article-${articleId} not found in DOM`);
     }
   };
 
@@ -204,7 +209,10 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             ref={(el) => {
-              if (el) articleRefs.current.set(article.id, el);
+              if (el) {
+                articleRefs.current.set(article.id, el);
+                console.log(`Set ref for article ${article.id}`);
+              }
               else articleRefs.current.delete(article.id);
             }}
           />
