@@ -2,14 +2,11 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, Image } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import ArticleList from "@/components/ArticleList";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
-import { updateSpecificArticle } from "@/lib/data/updateSpecificArticle";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import TableOfContents from "@/components/TableOfContents";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
@@ -247,15 +244,10 @@ const Index = () => {
               <ArticleList 
                 articles={filteredArticles} 
                 loading={loading}
+                readArticles={readArticles}
+                hideRead={filterRead}
               />
             </div>
-            
-            <TableOfContents
-              articles={articles}
-              onArticleClick={scrollToArticle}
-              readArticles={readArticles}
-              hideRead={filterRead}
-            />
             
             <div className="mt-16 mb-8 flex flex-col items-center">
               <img 

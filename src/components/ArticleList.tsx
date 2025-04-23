@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -15,9 +14,11 @@ interface ArticleListProps {
   selectedKeyword?: string | null;
   onKeywordClear?: () => void;
   loading?: boolean;
+  readArticles?: Set<string>;
+  hideRead?: boolean;
 }
 
-const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = false }: ArticleListProps) => {
+const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = false, readArticles = new Set(), hideRead = false }: ArticleListProps) => {
   const [draggedItem, setDraggedItem] = useState<Article | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -175,6 +176,8 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
           <TableOfContents 
             articles={localArticles} 
             onArticleClick={scrollToArticle}
+            readArticles={readArticles}
+            hideRead={hideRead}
           />
         </div>
         
