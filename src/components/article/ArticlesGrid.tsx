@@ -32,19 +32,24 @@ const ArticlesGrid = ({
   hideRead
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  
+  // Filter articles if hideRead is true, but only for the grid view
+  const displayArticles = hideRead 
+    ? articles.filter(article => !readArticles.has(article.id))
+    : articles;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div className="h-full">
         <TableOfContents 
-          articles={articles} 
+          articles={articles}  {/* Pass all articles to ToC regardless of hideRead */}
           onArticleClick={onArticleClick}
           readArticles={readArticles}
-          hideRead={hideRead}
+          hideRead={false}  {/* Always show all articles in ToC */}
         />
       </div>
       
-      {articles.map((article) => (
+      {displayArticles.map((article) => (
         <DraggableArticle
           key={article.id}
           article={article}

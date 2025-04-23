@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -130,10 +129,7 @@ const TableOfContents = ({
     }
   };
 
-  // Filter articles if hideRead is true
-  const displayArticles = hideRead 
-    ? articles.filter(article => !readArticles.has(article.id))
-    : articles;
+  const displayArticles = articles;
 
   const recommendationsHeight = recommendations ? 120 : 0;
   const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60);
