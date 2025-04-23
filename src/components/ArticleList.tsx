@@ -139,14 +139,24 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   const scrollToArticle = (articleId: string) => {
     const articleElement = articleRefs.current.get(articleId);
     if (articleElement) {
-      const headerHeight = 80; // Account for fixed header/navbar
+      const headerOffset = 100; // Account for fixed header/navbar
       const elementPosition = articleElement.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+      const offsetPosition = window.pageYOffset + elementPosition - headerOffset;
+      
+      console.log(`Scrolling to article ${articleId}:`, {
+        element: articleElement,
+        elementPosition,
+        offsetPosition,
+        pageYOffset: window.pageYOffset
+      });
       
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
       });
+    } else {
+      console.log(`Article element with ID ${articleId} not found in refs`);
+      console.log('Available refs:', Array.from(articleRefs.current.keys()));
     }
   };
 
@@ -195,7 +205,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
             onDrop={handleDrop}
             ref={(el) => {
               if (el) articleRefs.current.set(article.id, el);
-              return el;
+              else articleRefs.current.delete(article.id);
             }}
           />
         ))}
