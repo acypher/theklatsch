@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -169,7 +168,7 @@ const TableOfContents = ({
                     onClick={() => handleItemClick(article.id)}
                     aria-current={activeItem === article.id ? "true" : undefined}
                   >
-                    <span className="font-medium text-muted-foreground min-w-6">
+                    <span className={`font-medium min-w-6 ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
                       {index + 1}.
                     </span>
                     <span>{article.title}</span>
