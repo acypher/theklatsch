@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
     },
     build: {
-      sourcemap: isProd ? 'hidden' : true, // Generate source maps in dev, hide in prod
+      sourcemap: true, // Always generate complete source maps
       rollupOptions: {
         // Basic output configuration
         output: {
@@ -24,7 +24,11 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
-      react(),
+      react({
+        devtools: true,
+        // Enable full source maps for React components
+        tsDecorators: true,
+      }),
       mode === 'development' &&
       componentTagger(),
     ].filter(Boolean),
