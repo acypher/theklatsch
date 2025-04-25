@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
     },
     build: {
-      sourcemap: !isProd, // Only enable sourcemaps for development
+      sourcemap: true, // Always generate source maps for better debugging
       rollupOptions: {
         // Basic output configuration
         output: {
