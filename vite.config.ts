@@ -25,8 +25,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react({
-        devtools: true,
-        // Enable full source maps for React components
+        // Use known options for the React plugin
         tsDecorators: true,
       }),
       mode === 'development' &&
@@ -39,3 +38,4 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
+
