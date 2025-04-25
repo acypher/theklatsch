@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -8,6 +7,10 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => {
   console.log('Build mode:', mode);
   console.log('Source map enabled:', mode === 'production' ? true : true);
+  console.log('Sourcemap configuration:', {
+    sourcemapMode: mode === 'production' ? 'production' : 'development',
+    sourcemapEnabled: true
+  });
 
   return {
     server: {
@@ -15,7 +18,8 @@ export default defineConfig(({ mode }) => {
       port: 8080,
     },
     build: {
-      sourcemap: true, // Enable source maps for both development and production
+      sourcemap: true, // Explicitly enable source maps for both development and production
+      sourcemapExcludeSources: false, // Ensure sources are not excluded
     },
     plugins: [
       react(),
