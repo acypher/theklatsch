@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -9,6 +8,7 @@ import DraggableArticle from "./article/DraggableArticle";
 import LoadingState from "./article/LoadingState";
 import NoArticlesFound from "./article/NoArticlesFound";
 import UnsavedChangesPrompt from "./article/UnsavedChangesPrompt";
+import ArticleCard from "./ArticleCard";
 
 interface ArticleListProps {
   articles: Article[];
@@ -25,10 +25,12 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [localReadArticles, setLocalReadArticles] = useState<Set<string>>(readArticles);
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   
   useEffect(() => {
     setLocalArticles(articles);
+    setLocalReadArticles(readArticles);
     
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -44,7 +46,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [articles]);
+  }, [articles, readArticles]);
 
   if (loading) {
     return <LoadingState />;
@@ -141,10 +143,9 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     const articleElement = articleRefs.current.get(articleId);
     
     if (articleElement) {
-      // Get the navbar height for offset calculation
       const navbar = document.querySelector('nav');
       const navbarHeight = navbar ? navbar.offsetHeight : 0;
-      const extraPadding = 20; // Add some additional padding
+      const extraPadding = 20;
       const yOffset = -(navbarHeight + extraPadding);
       
       const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -161,12 +162,23 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     setHasChanges(false);
   };
 
-  // Filter articles for display if hideRead is true
+  const handleReadStateChange = (articleId: string, isRead: boolean) => {
+    console.log(`Article ${articleId} read state changed to ${isRead} in ArticleList`);
+    if (isRead) {
+      const newReadArticles = new Set(localReadArticles);
+      newReadArticles.add(articleId);
+      setLocalReadArticles(newReadArticles);
+    } else {
+      const newReadArticles = new Set(localReadArticles);
+      newReadArticles.delete(articleId);
+      setLocalReadArticles(newReadArticles);
+    }
+  };
+
   const displayArticles = hideRead 
-    ? localArticles.filter(article => !readArticles.has(article.id))
+    ? localArticles.filter(article => !localReadArticles.has(article.id))
     : localArticles;
 
-  // Check if there are no articles to display after filtering
   const noArticlesAfterFilter = hideRead && displayArticles.length === 0 && localArticles.length > 0;
 
   return (
@@ -197,25 +209,16 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
           <TableOfContents 
             articles={localArticles} 
             onArticleClick={scrollToArticle}
-            readArticles={readArticles}
+            readArticles={localReadArticles}
             hideRead={hideRead}
           />
         </div>
         
         {displayArticles.map((article) => (
-          <DraggableArticle
+          <ArticleCard
             key={article.id}
             article={article}
-            isLoggedIn={isLoggedIn}
-            isDragging={isDragging}
-            draggedItemId={draggedItem?.id || null}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            ref={(el) => {
-              if (el) articleRefs.current.set(article.id, el);
-            }}
+            onReadStateChange={handleReadStateChange}
           />
         ))}
       </div>
