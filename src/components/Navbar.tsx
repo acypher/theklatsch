@@ -40,19 +40,32 @@ const Navbar = ({
   const [issues, setIssues] = useState<Issue[]>([]);
   const [backIssues, setBackIssues] = useState<BackIssue[]>([]);
   const [loading, setLoading] = useState(false);
+  const [issuesLoaded, setIssuesLoaded] = useState(false);
   
   useEffect(() => {
-    const loadIssues = async () => {
-      const availableIssues = await getAvailableIssues();
-      setIssues(availableIssues);
+    // Only fetch issues if they haven't been loaded yet
+    if (!issuesLoaded) {
+      const loadIssues = async () => {
+        try {
+          const availableIssues = await getAvailableIssues();
+          setIssues(availableIssues);
+          
+          const backIssuesData = await getBackIssues();
+          console.log("Back issues loaded in Navbar:", backIssuesData);
+          setBackIssues(backIssuesData);
+          
+          // Mark issues as loaded to prevent infinite loop
+          setIssuesLoaded(true);
+        } catch (error) {
+          console.error("Error loading issues:", error);
+          // Still mark as loaded to prevent infinite retries
+          setIssuesLoaded(true);
+        }
+      };
       
-      const backIssuesData = await getBackIssues();
-      console.log("Back issues loaded in Navbar:", backIssuesData);
-      setBackIssues(backIssuesData);
-    };
-    
-    loadIssues();
-  }, []);
+      loadIssues();
+    }
+  }, [issuesLoaded]); // Only depend on issuesLoaded state
   
   const getUserInitials = () => {
     if (!user) return "?";

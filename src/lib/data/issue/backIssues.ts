@@ -21,8 +21,13 @@ export const getBackIssues = async (): Promise<BackIssue[]> => {
       return [];
     }
     
+    // Log the data for debugging purposes
     console.log("Back issues from database:", data);
-    return data || [];
+    
+    // Filter out items with missing required fields to avoid issues
+    return data ? data.filter(issue => 
+      issue && issue.display_issue && issue.url
+    ) : [];
   } catch (error) {
     console.error("Unexpected error fetching back issues:", error);
     toast.error("Failed to load back issues");
