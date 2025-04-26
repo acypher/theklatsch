@@ -21,6 +21,7 @@ export const getBackIssues = async (): Promise<BackIssue[]> => {
       return [];
     }
     
+    console.log("Back issues from database:", data);
     return data.filter(issue => issue.display_issue && issue.url) || [];
   } catch (error) {
     console.error("Unexpected error fetching back issues:", error);

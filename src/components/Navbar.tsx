@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 import { Issue, getAvailableIssues, setCurrentIssue } from "@/lib/data/issue/availableIssues";
-import { BackIssue, getBackIssues, getLatestIssue } from "@/lib/data/issue/backIssues";
+import { BackIssue, getBackIssues } from "@/lib/data/issue/backIssues";
+import { getLatestIssueText } from "@/lib/data/issue";
 import { toast } from "sonner";
 import ReadFilter from "./article/ReadFilter";
 
@@ -45,6 +46,7 @@ const Navbar = ({
       setIssues(availableIssues);
       
       const backIssuesData = await getBackIssues();
+      console.log("Back issues loaded:", backIssuesData);
       setBackIssues(backIssuesData);
     };
     
@@ -101,7 +103,7 @@ const Navbar = ({
 
   const handleBackIssueSelect = async (backIssue: BackIssue) => {
     try {
-      const latestIssue = await getLatestIssue();
+      const latestIssue = await getLatestIssueText();
       const success = await setCurrentIssue(latestIssue);
       
       if (success && backIssue.url) {
