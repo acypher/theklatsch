@@ -9,9 +9,10 @@ export const useArticleReads = (articleId: string) => {
   const [isRead, setIsRead] = useState(false);
   const [loading, setLoading] = useState(true);
   const prevReadState = useRef(false);
+  const isMounted = useRef(true);
 
   const fetchReadState = useCallback(async () => {
-    if (!user) {
+    if (!user || !isMounted.current) {
       setLoading(false);
       return;
     }
@@ -26,27 +27,35 @@ export const useArticleReads = (articleId: string) => {
 
       if (error) {
         console.error('Error fetching read state:', error);
-        setIsRead(false);
+        if (isMounted.current) setIsRead(false);
       } else {
         const readState = data?.read ?? false;
-        // Only update state if it's different to prevent unnecessary renders
-        if (readState !== prevReadState.current) {
-          console.log(`Article ${articleId} read state from DB:`, readState);
-          setIsRead(readState);
+        // Only update state if it's different and component is mounted
+        if (readState !== prevReadState.current && isMounted.current) {
           prevReadState.current = readState;
+          setIsRead(readState);
         }
       }
     } catch (error) {
       console.error('Unexpected error:', error);
-      setIsRead(false);
+      if (isMounted.current) setIsRead(false);
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   }, [user, articleId]);
 
   useEffect(() => {
+    isMounted.current = true;
+    
     fetchReadState();
 
+    // Clean up function
+    return () => {
+      isMounted.current = false;
+    };
+  }, [fetchReadState]);
+
+  useEffect(() => {
     // Only set up subscription if user exists
     if (!user) return;
 
@@ -60,14 +69,15 @@ export const useArticleReads = (articleId: string) => {
         filter: `article_id=eq.${articleId}`,
       }, (payload) => {
         // Check if the payload has a new property and it has the required fields
+        if (!isMounted.current) return;
+        
         if (user && payload.new && typeof payload.new === 'object' && 'user_id' in payload.new && 'read' in payload.new) {
           if (payload.new.user_id === user.id) {
             const newReadState = Boolean(payload.new.read);
             // Only update state if it's different to prevent unnecessary renders
             if (newReadState !== prevReadState.current) {
-              console.log(`Received real-time update for article ${articleId}:`, payload.new);
-              setIsRead(newReadState);
               prevReadState.current = newReadState;
+              setIsRead(newReadState);
             }
           }
         }
@@ -77,7 +87,7 @@ export const useArticleReads = (articleId: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchReadState, articleId, user]);
+  }, [articleId, user]);
 
   const toggleReadState = async () => {
     if (!user) {
@@ -87,12 +97,11 @@ export const useArticleReads = (articleId: string) => {
 
     try {
       const newReadState = !isRead;
-      console.log(`Toggling read state for article ${articleId} to:`, newReadState);
       
       // Only update local state if it's different from the current value
       if (newReadState !== prevReadState.current) {
-        setIsRead(newReadState);
         prevReadState.current = newReadState;
+        setIsRead(newReadState);
       }
       
       const { error } = await supabase
@@ -108,8 +117,8 @@ export const useArticleReads = (articleId: string) => {
 
       if (error) {
         // Revert optimistic update on error
-        setIsRead(!newReadState);
         prevReadState.current = !newReadState;
+        setIsRead(!newReadState);
         toast.error("Failed to update read status");
         console.error('Error updating read state:', error);
       }
