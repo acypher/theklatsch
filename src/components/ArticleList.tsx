@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -140,7 +141,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   };
 
   const scrollToArticle = (articleId: string) => {
-    const articleElement = articleRefs.current.get(articleId);
+    const articleElement = document.getElementById(`article-${articleId}`);
     
     if (articleElement) {
       const navbar = document.querySelector('nav');
@@ -215,11 +216,12 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
         </div>
         
         {displayArticles.map((article) => (
-          <ArticleCard
-            key={article.id}
-            article={article}
-            onReadStateChange={handleReadStateChange}
-          />
+          <div key={article.id} id={`article-${article.id}`}>
+            <ArticleCard
+              article={article}
+              onReadStateChange={handleReadStateChange}
+            />
+          </div>
         ))}
       </div>
       
