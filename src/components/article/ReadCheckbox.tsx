@@ -2,7 +2,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useArticleReads } from "@/hooks/useArticleReads";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface ReadCheckboxProps {
   articleId: string;
@@ -12,12 +12,13 @@ interface ReadCheckboxProps {
 const ReadCheckbox = ({ articleId, onReadStateChange }: ReadCheckboxProps) => {
   const { isAuthenticated } = useAuth();
   const { isRead, loading, toggleReadState } = useArticleReads(articleId);
+  const prevIsRead = useRef<boolean | null>(null);
   
   useEffect(() => {
-    // When the read state changes, notify the parent component
-    if (onReadStateChange) {
+    // When the read state changes and it's different from previous, notify the parent component
+    if (onReadStateChange && prevIsRead.current !== isRead) {
       onReadStateChange(isRead);
-      console.log(`Notifying parent that article ${articleId} read state changed to:`, isRead);
+      prevIsRead.current = isRead;
     }
   }, [isRead, onReadStateChange, articleId]);
 
@@ -28,10 +29,7 @@ const ReadCheckbox = ({ articleId, onReadStateChange }: ReadCheckboxProps) => {
       <Checkbox 
         checked={isRead}
         disabled={loading}
-        onCheckedChange={() => {
-          console.log(`Toggling read state for article ${articleId} from:`, isRead);
-          toggleReadState();
-        }}
+        onCheckedChange={() => toggleReadState()}
       />
     </div>
   );

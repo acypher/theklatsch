@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -31,7 +30,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   
   useEffect(() => {
     setLocalArticles(articles);
-    setLocalReadArticles(readArticles);
+    setLocalReadArticles(new Set(readArticles));
     
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -164,16 +163,20 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   };
 
   const handleReadStateChange = (articleId: string, isRead: boolean) => {
-    console.log(`Article ${articleId} read state changed to ${isRead} in ArticleList`);
-    if (isRead) {
-      const newReadArticles = new Set(localReadArticles);
-      newReadArticles.add(articleId);
-      setLocalReadArticles(newReadArticles);
-    } else {
-      const newReadArticles = new Set(localReadArticles);
-      newReadArticles.delete(articleId);
-      setLocalReadArticles(newReadArticles);
+    if (isRead === localReadArticles.has(articleId)) {
+      return;
     }
+    
+    console.log(`Article ${articleId} read state changed to ${isRead} in ArticleList`);
+    const newReadArticles = new Set(localReadArticles);
+    
+    if (isRead) {
+      newReadArticles.add(articleId);
+    } else {
+      newReadArticles.delete(articleId);
+    }
+    
+    setLocalReadArticles(newReadArticles);
   };
 
   const displayArticles = hideRead 
@@ -219,7 +222,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
           <div key={article.id} id={`article-${article.id}`}>
             <ArticleCard
               article={article}
-              onReadStateChange={handleReadStateChange}
+              onReadStateChange={(isRead) => handleReadStateChange(article.id, isRead)}
             />
           </div>
         ))}

@@ -13,7 +13,7 @@ import ReadCheckbox from './article/ReadCheckbox';
 
 interface ArticleCardProps {
   article: Article;
-  onReadStateChange?: (articleId: string, isRead: boolean) => void;
+  onReadStateChange?: (isRead: boolean) => void;
 }
 
 const ArticleCard = ({ article, onReadStateChange }: ArticleCardProps) => {
@@ -101,7 +101,7 @@ const ArticleCard = ({ article, onReadStateChange }: ArticleCardProps) => {
 
   const handleReadStateChange = (isRead: boolean) => {
     if (onReadStateChange) {
-      onReadStateChange(article.id, isRead);
+      onReadStateChange(isRead);
     }
   };
 
