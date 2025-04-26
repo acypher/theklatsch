@@ -16,6 +16,7 @@ export const useArticleReads = (articleId: string) => {
     }
 
     try {
+      console.log(`Fetching read state for article ${articleId} and user ${user.id}`);
       const { data, error } = await supabase
         .from('article_reads')
         .select('read')
@@ -27,7 +28,9 @@ export const useArticleReads = (articleId: string) => {
         console.error('Error fetching read state:', error);
         setIsRead(false);
       } else {
-        setIsRead(data?.read ?? false);
+        const readState = data?.read ?? false;
+        console.log(`Article ${articleId} read state from DB:`, readState);
+        setIsRead(readState);
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -52,6 +55,7 @@ export const useArticleReads = (articleId: string) => {
         // Check if the payload has a new property and it has the required fields
         if (user && payload.new && typeof payload.new === 'object' && 'user_id' in payload.new && 'read' in payload.new) {
           if (payload.new.user_id === user.id) {
+            console.log(`Received real-time update for article ${articleId}:`, payload.new);
             setIsRead(Boolean(payload.new.read));
           }
         }
@@ -71,7 +75,10 @@ export const useArticleReads = (articleId: string) => {
 
     try {
       const newReadState = !isRead;
-      setIsRead(newReadState); // Optimistic update
+      console.log(`Toggling read state for article ${articleId} to:`, newReadState);
+      
+      // Optimistic update
+      setIsRead(newReadState);
       
       const { error } = await supabase
         .from('article_reads')
@@ -88,8 +95,9 @@ export const useArticleReads = (articleId: string) => {
         // Revert optimistic update on error
         setIsRead(!newReadState);
         toast.error("Failed to update read status");
-        throw error;
+        console.error('Error updating read state:', error);
       } else {
+        console.log(`Successfully updated read state in DB for article ${articleId} to:`, newReadState);
         // Force a refresh of the read state from the server
         fetchReadState();
       }

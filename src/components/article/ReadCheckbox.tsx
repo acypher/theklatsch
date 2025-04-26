@@ -17,8 +17,9 @@ const ReadCheckbox = ({ articleId, onReadStateChange }: ReadCheckboxProps) => {
     // When the read state changes, notify the parent component
     if (onReadStateChange) {
       onReadStateChange(isRead);
+      console.log(`Notifying parent that article ${articleId} read state changed to:`, isRead);
     }
-  }, [isRead, onReadStateChange]);
+  }, [isRead, onReadStateChange, articleId]);
 
   if (!isAuthenticated) return null;
 
@@ -27,10 +28,9 @@ const ReadCheckbox = ({ articleId, onReadStateChange }: ReadCheckboxProps) => {
       <Checkbox 
         checked={isRead}
         disabled={loading}
-        onCheckedChange={(checked) => {
-          if (typeof checked === 'boolean') {
-            toggleReadState();
-          }
+        onCheckedChange={() => {
+          console.log(`Toggling read state for article ${articleId} from:`, isRead);
+          toggleReadState();
         }}
       />
     </div>
