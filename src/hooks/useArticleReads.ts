@@ -49,9 +49,11 @@ export const useArticleReads = (articleId: string) => {
         table: 'article_reads',
         filter: `article_id=eq.${articleId}`,
       }, (payload) => {
-        // If this is for the current user, update the state
-        if (user && payload.new && payload.new.user_id === user.id) {
-          setIsRead(payload.new.read);
+        // Check if the payload has a new property and it has the required fields
+        if (user && payload.new && typeof payload.new === 'object' && 'user_id' in payload.new && 'read' in payload.new) {
+          if (payload.new.user_id === user.id) {
+            setIsRead(Boolean(payload.new.read));
+          }
         }
       })
       .subscribe();
