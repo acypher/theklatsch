@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, ChevronDown, User } from "lucide-react";
@@ -9,10 +10,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+  DropdownMenuLabel 
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 import { Issue, getAvailableIssues, setCurrentIssue } from "@/lib/data/issue/availableIssues";
+import { BackIssue, getBackIssues, getLatestIssue } from "@/lib/data/issue/backIssues";
 import { toast } from "sonner";
 import ReadFilter from "./article/ReadFilter";
 
@@ -33,12 +37,16 @@ const Navbar = ({
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
   const [issues, setIssues] = useState<Issue[]>([]);
+  const [backIssues, setBackIssues] = useState<BackIssue[]>([]);
   const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     const loadIssues = async () => {
       const availableIssues = await getAvailableIssues();
       setIssues(availableIssues);
+      
+      const backIssuesData = await getBackIssues();
+      setBackIssues(backIssuesData);
     };
     
     loadIssues();
@@ -97,6 +105,23 @@ const Navbar = ({
     }
   };
 
+  const handleBackIssueSelect = async (backIssue: BackIssue) => {
+    try {
+      // 1. Set the current issue text to the latest issue value
+      const latestIssue = await getLatestIssue();
+      const success = await setCurrentIssue(latestIssue);
+      
+      if (success && backIssue.url) {
+        // 2 & 3. Open the back issue URL in a new tab and switch to it
+        window.open(backIssue.url, '_blank')?.focus();
+        toast.success(`Opening ${backIssue.display_issue}`);
+      }
+    } catch (error) {
+      console.error("Error handling back issue selection:", error);
+      toast.error("Failed to open back issue");
+    }
+  };
+
   return (
     <nav className="border-b shadow-sm py-4">
       <div className="container mx-auto px-4 flex justify-between items-center">
@@ -120,18 +145,39 @@ const Navbar = ({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56 bg-background">
-                  {issues.length > 0 ? (
-                    issues.map((issue) => (
-                      <DropdownMenuItem
-                        key={`${issue.month}-${issue.year}`}
-                        className="cursor-pointer"
-                        onClick={() => handleIssueChange(issue.text)}
-                      >
-                        {issue.text}
-                      </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <DropdownMenuItem disabled>No issues available</DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Current Issues</DropdownMenuLabel>
+                    {issues.length > 0 ? (
+                      issues.map((issue) => (
+                        <DropdownMenuItem
+                          key={`${issue.month}-${issue.year}`}
+                          className="cursor-pointer"
+                          onClick={() => handleIssueChange(issue.text)}
+                        >
+                          {issue.text}
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <DropdownMenuItem disabled>No issues available</DropdownMenuItem>
+                    )}
+                  </DropdownMenuGroup>
+                  
+                  {backIssues.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel>Back Issues</DropdownMenuLabel>
+                        {backIssues.map((backIssue) => (
+                          <DropdownMenuItem
+                            key={`back-${backIssue.id}`}
+                            className="cursor-pointer"
+                            onClick={() => handleBackIssueSelect(backIssue)}
+                          >
+                            {backIssue.display_issue}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuGroup>
+                    </>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>

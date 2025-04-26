@@ -3,3 +3,4 @@
 export * from './currentIssue';
 export * from './latestIssue';
 export * from './availableIssues';
+export * from './backIssues';

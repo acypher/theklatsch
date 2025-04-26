@@ -95,6 +95,27 @@ export type Database = {
         }
         Relationships: []
       }
+      back_issues: {
+        Row: {
+          created_at: string
+          display_issue: string | null
+          id: number
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_issue?: string | null
+          id?: number
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_issue?: string | null
+          id?: number
+          url?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           article_id: string
