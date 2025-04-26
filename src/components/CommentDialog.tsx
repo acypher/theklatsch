@@ -152,6 +152,9 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
       toast.success("Comment added successfully");
       fetchComments();
       setShowCommentForm(false); // Collapse the form after successful submission
+      
+      // Ensure the body is scrollable after dialog closes
+      document.body.style.overflow = '';
     } catch (error: any) {
       console.error("Error adding comment:", error);
       toast.error(`Failed to add comment: ${error?.message || "Unknown error"}`);
@@ -181,8 +184,20 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col">
+    <Dialog 
+      open={isOpen} 
+      onOpenChange={(open) => {
+        if (!open) {
+          // Ensure the body is scrollable when the dialog closes
+          document.body.style.overflow = '';
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] flex flex-col" onInteractOutside={(e) => {
+        // Prevent clicks outside from locking scrolling
+        e.preventDefault();
+      }}>
         <DialogHeader>
           <DialogTitle className="text-xl">Comments for "{articleTitle}"</DialogTitle>
         </DialogHeader>
