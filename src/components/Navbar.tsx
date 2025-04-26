@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, ChevronDown, User } from "lucide-react";
@@ -59,7 +58,6 @@ const Navbar = ({
     console.log('Profile object:', profile);
     console.log('Email address:', user.email);
     
-    // Use display_name from profile if available
     if (profile?.display_name) {
       const nameParts = profile.display_name.split(" ");
       if (nameParts.length >= 2) {
@@ -68,14 +66,11 @@ const Navbar = ({
       return profile.display_name.substring(0, 2).toUpperCase();
     }
     
-    // Fallback to email if no display name
     if (user.email) {
-      // If email contains a dot, use first letter of each part before the @ symbol
       const emailParts = user.email.split('@')[0].split('.');
       if (emailParts.length >= 2) {
         return `${emailParts[0][0]}${emailParts[1][0]}`.toUpperCase();
       }
-      // Otherwise use first two letters of email
       return user.email.substring(0, 2).toUpperCase();
     }
     
@@ -95,7 +90,6 @@ const Navbar = ({
       const success = await setCurrentIssue(issueText);
       if (success) {
         toast.success(`Switched to ${issueText}`);
-        // Reload the page to reflect the change
         window.location.reload();
       }
     } catch (error) {
@@ -107,12 +101,10 @@ const Navbar = ({
 
   const handleBackIssueSelect = async (backIssue: BackIssue) => {
     try {
-      // 1. Set the current issue text to the latest issue value
       const latestIssue = await getLatestIssue();
       const success = await setCurrentIssue(latestIssue);
       
       if (success && backIssue.url) {
-        // 2 & 3. Open the back issue URL in a new tab and switch to it
         window.open(backIssue.url, '_blank')?.focus();
         toast.success(`Opening ${backIssue.display_issue}`);
       }
