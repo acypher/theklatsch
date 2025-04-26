@@ -13,10 +13,9 @@ import ReadCheckbox from './article/ReadCheckbox';
 
 interface ArticleCardProps {
   article: Article;
-  onReadStateChange?: (isRead: boolean) => void;
 }
 
-const ArticleCard = ({ article, onReadStateChange }: ArticleCardProps) => {
+const ArticleCard = ({ article }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,15 +98,9 @@ const ArticleCard = ({ article, onReadStateChange }: ArticleCardProps) => {
     h6: ({ node, ...props }: any) => <h6 className="m-0 p-0 text-xl font-semibold" {...props} />,
   };
 
-  const handleReadStateChange = (isRead: boolean) => {
-    if (onReadStateChange) {
-      onReadStateChange(isRead);
-    }
-  };
-
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={article.id}>
-      <ReadCheckbox articleId={article.id} onReadStateChange={handleReadStateChange} />
+      <ReadCheckbox articleId={article.id} />
       
       <CardHeader className="p-0">
         <ArticleCardHeader 

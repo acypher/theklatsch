@@ -51,20 +51,13 @@ const Index = () => {
       }
       
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('article_reads')
           .select('article_id')
           .eq('read', true);
         
-        if (error) {
-          console.error('Error fetching read articles:', error);
-          return;
-        }
-        
         if (data) {
-          const readIds = new Set(data.map(item => item.article_id));
-          console.log('Read articles count:', readIds.size);
-          setReadArticles(readIds);
+          setReadArticles(new Set(data.map(item => item.article_id)));
         }
       } catch (error) {
         console.error('Error fetching read articles:', error);
@@ -72,24 +65,7 @@ const Index = () => {
     };
     
     fetchReadArticles();
-    
-    if (isAuthenticated) {
-      const channel = supabase
-        .channel('article_reads_changes')
-        .on('postgres_changes', {
-          event: '*',
-          schema: 'public',
-          table: 'article_reads'
-        }, () => {
-          fetchReadArticles();
-        })
-        .subscribe();
-        
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [isAuthenticated, filterRead]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const loadCurrentIssue = async () => {
@@ -243,7 +219,7 @@ const Index = () => {
       <Navbar 
         onLogoClick={() => setShowMaintenancePage(false)} 
         currentIssue={currentIssue}
-        showReadFilter={isAuthenticated}
+        showReadFilter={true}
         filterEnabled={filterRead}
         onFilterToggle={setFilterRead}
       />

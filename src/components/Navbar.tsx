@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, ChevronDown, User } from "lucide-react";
@@ -10,14 +9,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuGroup,
-  DropdownMenuLabel 
+  DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 import { Issue, getAvailableIssues, setCurrentIssue } from "@/lib/data/issue/availableIssues";
-import { BackIssue, getBackIssues } from "@/lib/data/issue/backIssues";
-import { getLatestIssueText } from "@/lib/data/issue";
 import { toast } from "sonner";
 import ReadFilter from "./article/ReadFilter";
 
@@ -38,34 +33,16 @@ const Navbar = ({
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
   const [issues, setIssues] = useState<Issue[]>([]);
-  const [backIssues, setBackIssues] = useState<BackIssue[]>([]);
   const [loading, setLoading] = useState(false);
-  const [issuesLoaded, setIssuesLoaded] = useState(false);
   
   useEffect(() => {
-    // Only fetch issues if they haven't been loaded yet
-    if (!issuesLoaded) {
-      const loadIssues = async () => {
-        try {
-          const availableIssues = await getAvailableIssues();
-          setIssues(availableIssues);
-          
-          const backIssuesData = await getBackIssues();
-          console.log("Back issues loaded in Navbar:", backIssuesData);
-          setBackIssues(backIssuesData);
-          
-          // Mark issues as loaded to prevent infinite loop
-          setIssuesLoaded(true);
-        } catch (error) {
-          console.error("Error loading issues:", error);
-          // Still mark as loaded to prevent infinite retries
-          setIssuesLoaded(true);
-        }
-      };
-      
-      loadIssues();
-    }
-  }, [issuesLoaded]); // Only depend on issuesLoaded state
+    const loadIssues = async () => {
+      const availableIssues = await getAvailableIssues();
+      setIssues(availableIssues);
+    };
+    
+    loadIssues();
+  }, []);
   
   const getUserInitials = () => {
     if (!user) return "?";
@@ -74,6 +51,7 @@ const Navbar = ({
     console.log('Profile object:', profile);
     console.log('Email address:', user.email);
     
+    // Use display_name from profile if available
     if (profile?.display_name) {
       const nameParts = profile.display_name.split(" ");
       if (nameParts.length >= 2) {
@@ -82,11 +60,14 @@ const Navbar = ({
       return profile.display_name.substring(0, 2).toUpperCase();
     }
     
+    // Fallback to email if no display name
     if (user.email) {
+      // If email contains a dot, use first letter of each part before the @ symbol
       const emailParts = user.email.split('@')[0].split('.');
       if (emailParts.length >= 2) {
         return `${emailParts[0][0]}${emailParts[1][0]}`.toUpperCase();
       }
+      // Otherwise use first two letters of email
       return user.email.substring(0, 2).toUpperCase();
     }
     
@@ -106,31 +87,13 @@ const Navbar = ({
       const success = await setCurrentIssue(issueText);
       if (success) {
         toast.success(`Switched to ${issueText}`);
+        // Reload the page to reflect the change
         window.location.reload();
       }
     } catch (error) {
       console.error("Error changing issue:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleBackIssueSelect = async (backIssue: BackIssue) => {
-    try {
-      console.log("Selected back issue:", backIssue);
-      const latestIssue = await getLatestIssueText();
-      const success = await setCurrentIssue(latestIssue);
-      
-      if (success && backIssue.url) {
-        window.open(backIssue.url, '_blank')?.focus();
-        toast.success(`Opening ${backIssue.display_issue}`);
-      } else {
-        console.error("Failed to handle back issue or URL is missing:", backIssue);
-        toast.error("Failed to open back issue");
-      }
-    } catch (error) {
-      console.error("Error handling back issue selection:", error);
-      toast.error("Failed to open back issue");
     }
   };
 
@@ -157,39 +120,18 @@ const Navbar = ({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56 bg-background">
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel>Current Issues</DropdownMenuLabel>
-                    {issues.length > 0 ? (
-                      issues.map((issue) => (
-                        <DropdownMenuItem
-                          key={`${issue.month}-${issue.year}`}
-                          className="cursor-pointer"
-                          onClick={() => handleIssueChange(issue.text)}
-                        >
-                          {issue.text}
-                        </DropdownMenuItem>
-                      ))
-                    ) : (
-                      <DropdownMenuItem disabled>No issues available</DropdownMenuItem>
-                    )}
-                  </DropdownMenuGroup>
-                  
-                  {backIssues.length > 0 && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuLabel>Back Issues</DropdownMenuLabel>
-                        {backIssues.map((backIssue) => (
-                          <DropdownMenuItem
-                            key={`back-${backIssue.id}`}
-                            className="cursor-pointer"
-                            onClick={() => handleBackIssueSelect(backIssue)}
-                          >
-                            {backIssue.display_issue}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuGroup>
-                    </>
+                  {issues.length > 0 ? (
+                    issues.map((issue) => (
+                      <DropdownMenuItem
+                        key={`${issue.month}-${issue.year}`}
+                        className="cursor-pointer"
+                        onClick={() => handleIssueChange(issue.text)}
+                      >
+                        {issue.text}
+                      </DropdownMenuItem>
+                    ))
+                  ) : (
+                    <DropdownMenuItem disabled>No issues available</DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>

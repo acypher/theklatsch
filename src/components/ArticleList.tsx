@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Article } from "@/lib/types";
 import TableOfContents from "./TableOfContents";
@@ -8,7 +9,6 @@ import DraggableArticle from "./article/DraggableArticle";
 import LoadingState from "./article/LoadingState";
 import NoArticlesFound from "./article/NoArticlesFound";
 import UnsavedChangesPrompt from "./article/UnsavedChangesPrompt";
-import ArticleCard from "./ArticleCard";
 
 interface ArticleListProps {
   articles: Article[];
@@ -25,12 +25,10 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
-  const [localReadArticles, setLocalReadArticles] = useState<Set<string>>(readArticles);
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   
   useEffect(() => {
     setLocalArticles(articles);
-    setLocalReadArticles(new Set(readArticles));
     
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -46,7 +44,7 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [articles, readArticles]);
+  }, [articles]);
 
   if (loading) {
     return <LoadingState />;
@@ -140,12 +138,13 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
   };
 
   const scrollToArticle = (articleId: string) => {
-    const articleElement = document.getElementById(`article-${articleId}`);
+    const articleElement = articleRefs.current.get(articleId);
     
     if (articleElement) {
+      // Get the navbar height for offset calculation
       const navbar = document.querySelector('nav');
       const navbarHeight = navbar ? navbar.offsetHeight : 0;
-      const extraPadding = 20;
+      const extraPadding = 20; // Add some additional padding
       const yOffset = -(navbarHeight + extraPadding);
       
       const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -162,28 +161,10 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     setHasChanges(false);
   };
 
-  const handleReadStateChange = (articleId: string, isRead: boolean) => {
-    if (isRead === localReadArticles.has(articleId)) {
-      return;
-    }
-    
-    console.log(`Article ${articleId} read state changed to ${isRead} in ArticleList`);
-    const newReadArticles = new Set(localReadArticles);
-    
-    if (isRead) {
-      newReadArticles.add(articleId);
-    } else {
-      newReadArticles.delete(articleId);
-    }
-    
-    setLocalReadArticles(newReadArticles);
-  };
-
+  // Filter articles for display if hideRead is true
   const displayArticles = hideRead 
-    ? localArticles.filter(article => !localReadArticles.has(article.id))
+    ? localArticles.filter(article => !readArticles.has(article.id))
     : localArticles;
-
-  const noArticlesAfterFilter = hideRead && displayArticles.length === 0 && localArticles.length > 0;
 
   return (
     <div className="space-y-6">
@@ -202,29 +183,31 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
         </div>
       )}
       
-      {noArticlesAfterFilter && (
-        <div className="text-center p-6 bg-muted/30 rounded-lg">
-          <p className="text-muted-foreground">All articles have been read. Disable the filter to see all articles.</p>
-        </div>
-      )}
-      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <div className="h-full">
           <TableOfContents 
             articles={localArticles} 
             onArticleClick={scrollToArticle}
-            readArticles={localReadArticles}
+            readArticles={readArticles}
             hideRead={hideRead}
           />
         </div>
         
         {displayArticles.map((article) => (
-          <div key={article.id} id={`article-${article.id}`}>
-            <ArticleCard
-              article={article}
-              onReadStateChange={(isRead) => handleReadStateChange(article.id, isRead)}
-            />
-          </div>
+          <DraggableArticle
+            key={article.id}
+            article={article}
+            isLoggedIn={isLoggedIn}
+            isDragging={isDragging}
+            draggedItemId={draggedItem?.id || null}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            ref={(el) => {
+              if (el) articleRefs.current.set(article.id, el);
+            }}
+          />
         ))}
       </div>
       
