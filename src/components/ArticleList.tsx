@@ -166,6 +166,9 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
     ? localArticles.filter(article => !readArticles.has(article.id))
     : localArticles;
 
+  // Check if there are no articles to display after filtering
+  const noArticlesAfterFilter = hideRead && displayArticles.length === 0 && localArticles.length > 0;
+
   return (
     <div className="space-y-6">
       {selectedKeyword && (
@@ -180,6 +183,12 @@ const ArticleList = ({ articles, selectedKeyword, onKeywordClear, loading = fals
               ×
             </button>
           </span>
+        </div>
+      )}
+      
+      {noArticlesAfterFilter && (
+        <div className="text-center p-6 bg-muted/30 rounded-lg">
+          <p className="text-muted-foreground">All articles have been read. Disable the filter to see all articles.</p>
         </div>
       )}
       

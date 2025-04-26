@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -9,37 +9,57 @@ export const useArticleReads = (articleId: string) => {
   const [isRead, setIsRead] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchReadState = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+  const fetchReadState = useCallback(async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const { data, error } = await supabase
-          .from('article_reads')
-          .select('read')
-          .eq('user_id', user.id)
-          .eq('article_id', articleId)
-          .maybeSingle(); // Using maybeSingle instead of single to avoid errors
+    try {
+      const { data, error } = await supabase
+        .from('article_reads')
+        .select('read')
+        .eq('user_id', user.id)
+        .eq('article_id', articleId)
+        .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching read state:', error);
-          setIsRead(false);
-        } else {
-          setIsRead(data?.read ?? false);
-        }
-      } catch (error) {
-        console.error('Unexpected error:', error);
+      if (error) {
+        console.error('Error fetching read state:', error);
         setIsRead(false);
-      } finally {
-        setLoading(false);
+      } else {
+        setIsRead(data?.read ?? false);
       }
-    };
-
-    fetchReadState();
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      setIsRead(false);
+    } finally {
+      setLoading(false);
+    }
   }, [user, articleId]);
+
+  useEffect(() => {
+    fetchReadState();
+
+    // Set up a subscription to listen for changes to this specific article read state
+    const channel = supabase
+      .channel(`article_read_${articleId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'article_reads',
+        filter: `article_id=eq.${articleId}`,
+      }, (payload) => {
+        // If this is for the current user, update the state
+        if (user && payload.new && payload.new.user_id === user.id) {
+          setIsRead(payload.new.read);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchReadState, articleId, user]);
 
   const toggleReadState = async () => {
     if (!user) {
@@ -67,6 +87,9 @@ export const useArticleReads = (articleId: string) => {
         setIsRead(!newReadState);
         toast.error("Failed to update read status");
         throw error;
+      } else {
+        // Force a refresh of the read state from the server
+        fetchReadState();
       }
     } catch (error) {
       console.error('Error updating read state:', error);

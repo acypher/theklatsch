@@ -14,6 +14,7 @@ const ReadFilter = ({ enabled, onToggle }: ReadFilterProps) => {
         checked={enabled}
         onCheckedChange={(checked) => {
           if (typeof checked === 'boolean') {
+            console.log('Toggling read filter to:', checked);
             onToggle(checked);
           }
         }}
