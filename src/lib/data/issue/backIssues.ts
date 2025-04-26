@@ -22,7 +22,7 @@ export const getBackIssues = async (): Promise<BackIssue[]> => {
     }
     
     console.log("Back issues from database:", data);
-    return data.filter(issue => issue.display_issue && issue.url) || [];
+    return data || [];
   } catch (error) {
     console.error("Unexpected error fetching back issues:", error);
     toast.error("Failed to load back issues");

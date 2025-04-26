@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, ChevronDown, User } from "lucide-react";
@@ -46,7 +47,7 @@ const Navbar = ({
       setIssues(availableIssues);
       
       const backIssuesData = await getBackIssues();
-      console.log("Back issues loaded:", backIssuesData);
+      console.log("Back issues loaded in Navbar:", backIssuesData);
       setBackIssues(backIssuesData);
     };
     
@@ -103,12 +104,16 @@ const Navbar = ({
 
   const handleBackIssueSelect = async (backIssue: BackIssue) => {
     try {
+      console.log("Selected back issue:", backIssue);
       const latestIssue = await getLatestIssueText();
       const success = await setCurrentIssue(latestIssue);
       
       if (success && backIssue.url) {
         window.open(backIssue.url, '_blank')?.focus();
         toast.success(`Opening ${backIssue.display_issue}`);
+      } else {
+        console.error("Failed to handle back issue or URL is missing:", backIssue);
+        toast.error("Failed to open back issue");
       }
     } catch (error) {
       console.error("Error handling back issue selection:", error);
