@@ -4,6 +4,7 @@ CREATE OR REPLACE FUNCTION get_var_value(var_key TEXT)
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     var_value TEXT;
@@ -21,6 +22,7 @@ CREATE OR REPLACE FUNCTION set_var_value(var_key TEXT, var_value TEXT)
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
     UPDATE vars
@@ -41,6 +43,7 @@ CREATE OR REPLACE FUNCTION ensure_display_issue()
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
     current_issue TEXT;
