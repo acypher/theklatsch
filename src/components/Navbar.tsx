@@ -178,6 +178,36 @@ const Navbar = ({
               </DropdownMenu>
             )}
           </Link>
+          
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button 
+                  id="archivesButton" 
+                  className="text-base font-semibold text-muted-foreground ml-2 flex items-center"
+                  disabled={loadingArchives}
+                >
+                  Archives
+                  <ChevronDown className="h-4 w-4 ml-1" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-background">
+                {backIssues.length > 0 ? (
+                  backIssues.map((issue) => (
+                    <DropdownMenuItem
+                      key={issue.id}
+                      className="cursor-pointer"
+                      onClick={() => handleArchiveClick(issue.url)}
+                    >
+                      {issue.display_issue || `Archive ${issue.id}`}
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <DropdownMenuItem disabled>No archives available</DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         
         <div className="flex items-center gap-4">
@@ -236,35 +266,6 @@ const Navbar = ({
                 Sign In
               </Link>
             </Button>
-          )}
-          {user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button 
-                  id="archivesButton" 
-                  className="text-2xl font-bold text-primary ml-2 flex items-center"
-                  disabled={loadingArchives}
-                >
-                  Archives
-                  <ChevronDown className="h-5 w-5 ml-1" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-background">
-                {backIssues.length > 0 ? (
-                  backIssues.map((issue) => (
-                    <DropdownMenuItem
-                      key={issue.id}
-                      className="cursor-pointer"
-                      onClick={() => handleArchiveClick(issue.url)}
-                    >
-                      {issue.display_issue || `Archive ${issue.id}`}
-                    </DropdownMenuItem>
-                  ))
-                ) : (
-                  <DropdownMenuItem disabled>No archives available</DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
           )}
         </div>
       </div>
