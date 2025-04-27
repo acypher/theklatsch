@@ -1,4 +1,5 @@
 
+
 -- Function to get a value from the vars table
 CREATE OR REPLACE FUNCTION get_var_value(var_key TEXT)
 RETURNS TEXT
@@ -70,3 +71,4 @@ BEGIN
     RETURN current_issue;
 END;
 $$;
+
