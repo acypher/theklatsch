@@ -11,6 +11,8 @@ const ReadCheckbox = ({ articleId }: ReadCheckboxProps) => {
   const { isAuthenticated } = useAuth();
   const { isRead, loading, toggleReadState } = useArticleReads(articleId);
 
+  console.log(`ReadCheckbox render - articleId: ${articleId}, isRead: ${isRead}`);
+
   if (!isAuthenticated) return null;
 
   return (
@@ -19,6 +21,7 @@ const ReadCheckbox = ({ articleId }: ReadCheckboxProps) => {
         checked={isRead}
         disabled={loading}
         onCheckedChange={(checked) => {
+          console.log(`Checkbox clicked - articleId: ${articleId}, new state: ${checked}`);
           if (typeof checked === 'boolean') {
             toggleReadState();
           }

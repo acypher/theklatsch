@@ -24,6 +24,8 @@ export const useArticleReads = (articleId: string) => {
           .eq('article_id', articleId)
           .maybeSingle();
 
+        console.log(`Fetched read state - articleId: ${articleId}, data:`, data);
+
         if (isMounted.current && !error) {
           setIsRead(data?.read ?? false);
           initialFetchDone.current = true;
@@ -54,6 +56,8 @@ export const useArticleReads = (articleId: string) => {
       const newReadState = !isRead;
       setIsRead(newReadState); // Optimistic update
 
+      console.log(`Toggling read state - articleId: ${articleId}, new state: ${newReadState}`);
+
       const { error } = await supabase
         .from('article_reads')
         .upsert({
@@ -70,6 +74,8 @@ export const useArticleReads = (articleId: string) => {
         toast.error("Failed to update read status");
         throw error;
       }
+
+      console.log(`Successfully updated read state in database - articleId: ${articleId}, state: ${newReadState}`);
     } catch (error) {
       console.error('Error updating read state:', error);
     }
