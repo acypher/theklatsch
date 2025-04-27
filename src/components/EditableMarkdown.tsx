@@ -3,11 +3,10 @@ import { useState } from 'react';
 import { Pencil } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import MarkdownEditor from './article/MarkdownEditor';
-import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { useAuth } from '@/contexts/AuthContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import MarkdownDialog from './markdown/MarkdownDialog';
 
 interface EditableMarkdownProps {
   content: string;
@@ -16,7 +15,12 @@ interface EditableMarkdownProps {
   disabled?: boolean;
 }
 
-const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations here...', disabled = false }: EditableMarkdownProps) => {
+const EditableMarkdown = ({ 
+  content, 
+  onSave, 
+  placeholder = 'Add recommendations here...', 
+  disabled = false 
+}: EditableMarkdownProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
   const [isSaving, setIsSaving] = useState(false);
@@ -76,36 +80,15 @@ const EditableMarkdown = ({ content, onSave, placeholder = 'Add recommendations 
         </p>
       ) : null}
 
-      <Dialog open={isEditing} onOpenChange={(open) => !isSaving && setIsEditing(open)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Edit Recommendations</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <MarkdownEditor 
-              value={editContent} 
-              onChange={setEditContent} 
-              placeholder={placeholder}
-              height={200}
-            />
-            <div className="flex justify-end gap-2 mt-4">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsEditing(false)} 
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSave} 
-                disabled={isSaving}
-              >
-                {isSaving ? 'Saving...' : 'Save'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <MarkdownDialog 
+        isOpen={isEditing}
+        onOpenChange={setIsEditing}
+        content={editContent}
+        onSave={handleSave}
+        onChange={setEditContent}
+        isSaving={isSaving}
+        placeholder={placeholder}
+      />
     </div>
   );
 };
