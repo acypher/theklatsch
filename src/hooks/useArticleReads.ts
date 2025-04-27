@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -8,37 +8,40 @@ export const useArticleReads = (articleId: string) => {
   const { user } = useAuth();
   const [isRead, setIsRead] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isMounted = useRef(true);
+  const initialFetchDone = useRef(false);
 
   useEffect(() => {
     const fetchReadState = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+      if (!user || !isMounted.current || initialFetchDone.current) return;
 
       try {
+        setLoading(true);
         const { data, error } = await supabase
           .from('article_reads')
           .select('read')
           .eq('user_id', user.id)
           .eq('article_id', articleId)
-          .maybeSingle(); // Using maybeSingle instead of single to avoid errors
+          .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching read state:', error);
-          setIsRead(false);
-        } else {
+        if (isMounted.current && !error) {
           setIsRead(data?.read ?? false);
+          initialFetchDone.current = true;
         }
       } catch (error) {
         console.error('Unexpected error:', error);
-        setIsRead(false);
       } finally {
-        setLoading(false);
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
     };
 
     fetchReadState();
+
+    return () => {
+      isMounted.current = false;
+    };
   }, [user, articleId]);
 
   const toggleReadState = async () => {
@@ -50,7 +53,7 @@ export const useArticleReads = (articleId: string) => {
     try {
       const newReadState = !isRead;
       setIsRead(newReadState); // Optimistic update
-      
+
       const { error } = await supabase
         .from('article_reads')
         .upsert({
@@ -63,8 +66,7 @@ export const useArticleReads = (articleId: string) => {
         });
 
       if (error) {
-        // Revert optimistic update on error
-        setIsRead(!newReadState);
+        setIsRead(!newReadState); // Revert optimistic update
         toast.error("Failed to update read status");
         throw error;
       }

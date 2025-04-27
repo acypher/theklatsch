@@ -171,7 +171,7 @@ const TableOfContents = ({
                     <span className={`font-medium min-w-6 ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
                       {index + 1}.
                     </span>
-                    <span>{article.title}</span>
+                    <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>
                   </button>
                 </li>
               );
