@@ -1,14 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Article } from "@/lib/types";
 import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import EditableMarkdown from "./EditableMarkdown";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
-import { READ_STATE_CHANGED_EVENT } from "@/hooks/useArticleReads";
+import { useRecommendations } from "@/hooks/useRecommendations";
+import { useContentsHeight } from "@/hooks/useContentsHeight";
+import ArticlesList from "./table-of-contents/ArticlesList";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -25,109 +24,9 @@ const TableOfContents = ({
   readArticles = new Set(),
   hideRead = false
 }: TableOfContentsProps) => {
-  const [activeItem, setActiveItem] = useState<string | null>(null);
-  const [maxHeight, setMaxHeight] = useState<number>(400);
-  const [recommendations, setRecommendations] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const isMobile = useIsMobile();
-  const { isAuthenticated, user } = useAuth();
-  
-  useEffect(() => {
-    const calculateMaxHeight = () => {
-      const viewportWidth = window.innerWidth;
-      const maxAllowedHeight = 600;
-      const minHeight = 250;
-      
-      if (viewportWidth >= 1200) {
-        return maxAllowedHeight;
-      }
-      
-      const calculatedHeight = Math.floor(viewportWidth / 2);
-      return Math.min(Math.max(calculatedHeight, minHeight), maxAllowedHeight);
-    };
-    
-    setMaxHeight(calculateMaxHeight());
-    
-    const handleResize = () => {
-      setMaxHeight(calculateMaxHeight());
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  useEffect(() => {
-    const fetchRecommendations = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('vars')
-          .select('value')
-          .eq('key', 'recommendations')
-          .maybeSingle();
-        
-        if (error) {
-          console.error('Error fetching recommendations:', error);
-          return;
-        }
-        
-        if (data) {
-          setRecommendations(data.value || '');
-        }
-      } catch (error) {
-        console.error('Error fetching recommendations:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchRecommendations();
-  }, []);
-  
-  const handleItemClick = (articleId: string) => {
-    setActiveItem(articleId);
-    onArticleClick(articleId);
-  };
-  
-  const handleSaveRecommendations = async (content: string) => {
-    if (!isAuthenticated) {
-      toast.error("You must be logged in to edit recommendations");
-      return;
-    }
-    
-    try {
-      setIsSaving(true);
-      
-      // Add throttling to prevent rapid repeated submissions
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const { error } = await supabase
-        .from('vars')
-        .upsert(
-          { 
-            key: 'recommendations', 
-            value: content,
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: 'key' }
-        );
-      
-      if (error) {
-        console.error('Error saving recommendations:', error);
-        toast.error('Failed to save recommendations');
-        throw error;
-      }
-      
-      setRecommendations(content);
-      toast.success('Recommendations saved successfully');
-    } catch (error) {
-      console.error('Error saving recommendations:', error);
-      throw error;
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const maxHeight = useContentsHeight();
+  const { recommendations, loading, isSaving, handleSaveRecommendations } = useRecommendations();
 
   // Filter articles if hideRead is true
   const displayArticles = hideRead 
@@ -150,34 +49,11 @@ const TableOfContents = ({
           className="pr-4"
           style={{ height: articlesListHeight }}
         >
-          <ul className="space-y-2">
-            {displayArticles.map((article, index) => {
-              const isArticleRead = readArticles.has(article.id);
-              return (
-                <li 
-                  key={article.id}
-                  className={`cursor-pointer transition-colors ${
-                    activeItem === article.id
-                      ? "text-primary font-medium"
-                      : isArticleRead 
-                      ? "text-muted-foreground/50 hover:text-muted-foreground"
-                      : "text-foreground hover:text-primary"
-                  }`}
-                >
-                  <button
-                    className="text-left w-full text-sm flex items-start gap-2"
-                    onClick={() => handleItemClick(article.id)}
-                    aria-current={activeItem === article.id ? "true" : undefined}
-                  >
-                    <span className={`font-medium min-w-6 ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
-                      {index + 1}.
-                    </span>
-                    <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <ArticlesList 
+            articles={displayArticles}
+            readArticles={readArticles}
+            onArticleClick={onArticleClick}
+          />
         </ScrollArea>
         
         {!loading && (
@@ -187,7 +63,7 @@ const TableOfContents = ({
                 content={recommendations} 
                 onSave={handleSaveRecommendations} 
                 placeholder="Add recommendations here..."
-                disabled={isSaving || !isAuthenticated}
+                disabled={isSaving}
               />
             </ScrollArea>
           </div>
