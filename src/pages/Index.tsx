@@ -65,6 +65,30 @@ const Index = () => {
     };
     
     fetchReadArticles();
+
+    const subscription = supabase
+      .channel('article_reads')
+      .on('postgres_changes', 
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'article_reads' 
+        }, 
+        (payload) => {
+          if (payload.new.read) {
+            setReadArticles(prev => {
+              const updated = new Set(prev);
+              updated.add(payload.new.article_id);
+              return updated;
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [isAuthenticated]);
 
   useEffect(() => {
