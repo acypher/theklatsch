@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogOut, LogIn, ChevronDown, User } from "lucide-react";
@@ -11,10 +12,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
-import { useEffect, useState } from "react";
 import { Issue, getAvailableIssues, setCurrentIssue } from "@/lib/data/issue/availableIssues";
 import { toast } from "sonner";
 import ReadFilter from "./article/ReadFilter";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavbarProps {
   onLogoClick?: () => void;
@@ -22,6 +23,12 @@ interface NavbarProps {
   showReadFilter?: boolean;
   filterEnabled?: boolean;
   onFilterToggle?: (enabled: boolean) => void;
+}
+
+interface BackIssue {
+  id: number;
+  display_issue: string | null;
+  url: string | null;
 }
 
 const Navbar = ({ 
@@ -34,6 +41,8 @@ const Navbar = ({
   const { user, profile, signOut } = useAuth();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
+  const [backIssues, setBackIssues] = useState<BackIssue[]>([]);
+  const [loadingArchives, setLoadingArchives] = useState(false);
   
   useEffect(() => {
     const loadIssues = async () => {
@@ -94,6 +103,38 @@ const Navbar = ({
       console.error("Error changing issue:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchBackIssues = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('back_issues')
+          .select('id, display_issue, url')
+          .order('id', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        setBackIssues(data || []);
+      } catch (error) {
+        console.error("Error fetching back issues:", error);
+        toast.error("Failed to load archives");
+      }
+    };
+
+    if (user) {
+      fetchBackIssues();
+    }
+  }, [user]);
+
+  const handleArchiveClick = (url: string | null) => {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      toast.warning("No URL available for this archive");
     }
   };
 
@@ -195,6 +236,35 @@ const Navbar = ({
                 Sign In
               </Link>
             </Button>
+          )}
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button 
+                  id="archivesButton" 
+                  className="text-2xl font-bold text-primary ml-2 flex items-center"
+                  disabled={loadingArchives}
+                >
+                  Archives
+                  <ChevronDown className="h-5 w-5 ml-1" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-background">
+                {backIssues.length > 0 ? (
+                  backIssues.map((issue) => (
+                    <DropdownMenuItem
+                      key={issue.id}
+                      className="cursor-pointer"
+                      onClick={() => handleArchiveClick(issue.url)}
+                    >
+                      {issue.display_issue || `Archive ${issue.id}`}
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <DropdownMenuItem disabled>No archives available</DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
