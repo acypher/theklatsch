@@ -5,7 +5,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-type Profile = {
+export type Profile = {
   id: string;
   username: string | null;
   display_name: string | null;
