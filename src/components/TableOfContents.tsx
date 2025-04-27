@@ -8,6 +8,7 @@ import EditableMarkdown from "./EditableMarkdown";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { READ_STATE_CHANGED_EVENT } from "@/hooks/useArticleReads";
 
 interface TableOfContentsProps {
   articles: Article[];

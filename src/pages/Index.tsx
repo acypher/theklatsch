@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
@@ -8,6 +9,7 @@ import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { READ_STATE_CHANGED_EVENT } from "@/hooks/useArticleReads";
 
 const Index = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -66,28 +68,33 @@ const Index = () => {
     
     fetchReadArticles();
 
-    const subscription = supabase
-      .channel('article_reads')
-      .on('postgres_changes', 
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'article_reads' 
-        }, 
-        (payload) => {
-          if (payload.new.read) {
-            setReadArticles(prev => {
-              const updated = new Set(prev);
-              updated.add(payload.new.article_id);
-              return updated;
-            });
-          }
+    // Listen for read state change events
+    const handleReadStateChange = (e: CustomEvent) => {
+      const { articleId, read } = e.detail;
+      
+      setReadArticles(prevReadArticles => {
+        const updatedReadArticles = new Set(prevReadArticles);
+        
+        if (read) {
+          updatedReadArticles.add(articleId);
+        } else {
+          updatedReadArticles.delete(articleId);
         }
-      )
-      .subscribe();
+        
+        return updatedReadArticles;
+      });
+    };
+
+    window.addEventListener(
+      READ_STATE_CHANGED_EVENT, 
+      handleReadStateChange as EventListener
+    );
 
     return () => {
-      subscription.unsubscribe();
+      window.removeEventListener(
+        READ_STATE_CHANGED_EVENT, 
+        handleReadStateChange as EventListener
+      );
     };
   }, [isAuthenticated]);
 

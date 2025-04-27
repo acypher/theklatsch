@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+// Create a custom event for read state changes
+export const READ_STATE_CHANGED_EVENT = 'article-read-state-changed';
+
 export const useArticleReads = (articleId: string) => {
   const { user } = useAuth();
   const [isRead, setIsRead] = useState(false);
@@ -58,6 +61,13 @@ export const useArticleReads = (articleId: string) => {
 
       console.log(`Toggling read state - articleId: ${articleId}, new state: ${newReadState}`);
 
+      // Dispatch custom event to notify other components of the change
+      window.dispatchEvent(
+        new CustomEvent(READ_STATE_CHANGED_EVENT, {
+          detail: { articleId, read: newReadState }
+        })
+      );
+
       const { error } = await supabase
         .from('article_reads')
         .upsert({
@@ -72,6 +82,14 @@ export const useArticleReads = (articleId: string) => {
       if (error) {
         setIsRead(!newReadState); // Revert optimistic update
         toast.error("Failed to update read status");
+        
+        // Dispatch event again with the reverted state
+        window.dispatchEvent(
+          new CustomEvent(READ_STATE_CHANGED_EVENT, {
+            detail: { articleId, read: !newReadState }
+          })
+        );
+        
         throw error;
       }
 
