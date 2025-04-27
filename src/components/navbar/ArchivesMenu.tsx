@@ -21,6 +21,9 @@ interface ArchivesMenuProps {
 }
 
 const ArchivesMenu = ({ backIssues, loadingArchives, onArchiveClick }: ArchivesMenuProps) => {
+  // Sort the backIssues array in ascending order (oldest first)
+  const sortedBackIssues = [...backIssues].sort((a, b) => a.id - b.id);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -34,8 +37,8 @@ const ArchivesMenu = ({ backIssues, loadingArchives, onArchiveClick }: ArchivesM
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56 bg-background">
-        {backIssues.length > 0 ? (
-          backIssues.map((issue) => (
+        {sortedBackIssues.length > 0 ? (
+          sortedBackIssues.map((issue) => (
             <DropdownMenuItem
               key={issue.id}
               className="cursor-pointer"
