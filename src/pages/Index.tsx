@@ -16,11 +16,10 @@ const Index = () => {
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
-  const [filterRead, setFilterRead] = useState(false);
   const articleListRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
   
-  const readArticles = useReadArticles(isAuthenticated);
+  const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated);
 
   useEffect(() => {
     const loadCurrentIssue = async () => {
@@ -57,9 +56,9 @@ const Index = () => {
   }, []);
 
   const filteredArticles = React.useMemo(() => {
-    if (!filterRead || !isAuthenticated) return articles;
+    if (!filterEnabled || !isAuthenticated) return articles;
     return articles.filter(article => !readArticles.has(article.id));
-  }, [articles, filterRead, readArticles, isAuthenticated]);
+  }, [articles, filterEnabled, readArticles, isAuthenticated]);
 
   return (
     <div className="min-h-screen">
@@ -67,8 +66,8 @@ const Index = () => {
         onLogoClick={() => setShowMaintenancePage(false)} 
         currentIssue={currentIssue}
         showReadFilter={true}
-        filterEnabled={filterRead}
-        onFilterToggle={setFilterRead}
+        filterEnabled={filterEnabled}
+        onFilterToggle={setFilterEnabled}
       />
       <main className="container mx-auto px-4 py-8">
         <HomeLogo />
@@ -82,7 +81,7 @@ const Index = () => {
                 articles={filteredArticles} 
                 loading={loading}
                 readArticles={readArticles}
-                hideRead={filterRead}
+                hideRead={filterEnabled}
               />
             </div>
             <StorefrontImage />

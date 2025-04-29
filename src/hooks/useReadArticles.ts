@@ -3,8 +3,21 @@ import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { READ_STATE_CHANGED_EVENT } from '@/hooks/useArticleReads';
 
+// Local storage key for read filter preference
+const FILTER_READ_STORAGE_KEY = 'klatsch-filter-read-articles';
+
 export const useReadArticles = (isAuthenticated: boolean) => {
   const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
+  const [filterEnabled, setFilterEnabled] = useState<boolean>(() => {
+    // Initialize from localStorage on component mount
+    const stored = localStorage.getItem(FILTER_READ_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : false;
+  });
+  
+  // Persist filter preference whenever it changes
+  useEffect(() => {
+    localStorage.setItem(FILTER_READ_STORAGE_KEY, JSON.stringify(filterEnabled));
+  }, [filterEnabled]);
   
   useEffect(() => {
     const fetchReadArticles = async () => {
@@ -58,5 +71,6 @@ export const useReadArticles = (isAuthenticated: boolean) => {
     };
   }, [isAuthenticated]);
 
-  return readArticles;
+  return { readArticles, filterEnabled, setFilterEnabled };
 };
+

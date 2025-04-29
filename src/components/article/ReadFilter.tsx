@@ -1,5 +1,5 @@
 
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 
 interface ReadFilterProps {
   enabled: boolean;
@@ -9,14 +9,10 @@ interface ReadFilterProps {
 const ReadFilter = ({ enabled, onToggle }: ReadFilterProps) => {
   return (
     <div className="flex items-center gap-2">
-      <Checkbox
+      <Switch
         id="read-filter"
         checked={enabled}
-        onCheckedChange={(checked) => {
-          if (typeof checked === 'boolean') {
-            onToggle(checked);
-          }
-        }}
+        onCheckedChange={onToggle}
       />
       <label 
         htmlFor="read-filter" 
