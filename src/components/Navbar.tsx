@@ -95,6 +95,7 @@ const Navbar = ({
 
   useEffect(() => {
     const fetchBackIssues = async () => {
+      setLoadingArchives(true);
       try {
         const { data, error } = await supabase
           .from('back_issues')
@@ -106,13 +107,13 @@ const Navbar = ({
       } catch (error) {
         console.error("Error fetching back issues:", error);
         toast.error("Failed to load archives");
+      } finally {
+        setLoadingArchives(false);
       }
     };
 
-    if (user) {
-      fetchBackIssues();
-    }
-  }, [user]);
+    fetchBackIssues();
+  }, []); // Removed the user dependency to load archives for all users
 
   return (
     <nav className="border-b shadow-sm py-4">
@@ -134,13 +135,12 @@ const Navbar = ({
             )}
           </Link>
           
-          {user && (
-            <ArchivesMenu
-              backIssues={backIssues}
-              loadingArchives={loadingArchives}
-              onArchiveClick={handleArchiveClick}
-            />
-          )}
+          {/* Removed the user condition to show archives to all users */}
+          <ArchivesMenu
+            backIssues={backIssues}
+            loadingArchives={loadingArchives}
+            onArchiveClick={handleArchiveClick}
+          />
         </div>
         
         <div className="flex items-center gap-4">

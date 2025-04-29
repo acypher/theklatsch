@@ -37,7 +37,9 @@ const ArchivesMenu = ({ backIssues, loadingArchives, onArchiveClick }: ArchivesM
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56 bg-background">
-        {sortedBackIssues.length > 0 ? (
+        {loadingArchives ? (
+          <DropdownMenuItem disabled>Loading archives...</DropdownMenuItem>
+        ) : sortedBackIssues.length > 0 ? (
           sortedBackIssues.map((issue) => (
             <DropdownMenuItem
               key={issue.id}
