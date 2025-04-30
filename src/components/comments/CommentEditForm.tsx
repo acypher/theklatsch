@@ -25,10 +25,7 @@ const CommentEditForm: React.FC<CommentEditFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (content.trim() === '') {
-      setError("Comment cannot be empty");
-      return;
-    }
+    // Removed the empty comment validation to allow empty comments
     
     if (content === initialContent) {
       onCancel(); // No changes made, just cancel
@@ -82,7 +79,7 @@ const CommentEditForm: React.FC<CommentEditFormProps> = ({
         </Button>
         <Button 
           type="submit"
-          disabled={isSubmitting || content.trim() === ''}
+          disabled={isSubmitting}
         >
           {isSubmitting ? (
             <>

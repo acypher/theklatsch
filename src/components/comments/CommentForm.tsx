@@ -22,7 +22,7 @@ const CommentForm = ({ articleId, onSubmitSuccess, onCancel }: CommentFormProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    // Removed the check for empty comments to allow them
     if (!user) {
       toast.error("You must be logged in to post a comment");
       return;
@@ -37,7 +37,7 @@ const CommentForm = ({ articleId, onSubmitSuccess, onCancel }: CommentFormProps)
       
       const insertPromise = supabase.from("comments").insert({
         article_id: articleId,
-        content: newComment.trim(),
+        content: newComment, // Allow empty content
         author_name: authorName.trim() || "Anonymous",
         author_email: authorEmail.trim() || null,
         user_id: user.id // Store the user ID to enable editing
@@ -115,7 +115,7 @@ const CommentForm = ({ articleId, onSubmitSuccess, onCancel }: CommentFormProps)
         <Button 
           type="submit" 
           className="flex-1" 
-          disabled={isSubmitting || !newComment.trim()}
+          disabled={isSubmitting}
         >
           {isSubmitting ? (
             <>
