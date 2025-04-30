@@ -91,11 +91,30 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     if (!user) return { success: false, error: "You must be logged in to edit a comment" };
     
     try {
+      // First, check if the user owns the comment
+      const { data: commentData, error: fetchError } = await supabase
+        .from("comments")
+        .select("user_id")
+        .eq("id", commentId)
+        .single();
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      if (!commentData || commentData.user_id !== user.id) {
+        console.error("Authorization failed: User does not own this comment", {
+          commentUserId: commentData?.user_id,
+          currentUserId: user.id
+        });
+        return { success: false, error: "You are not authorized to edit this comment" };
+      }
+      
+      // If authorized, proceed with the update
       const { data, error } = await supabase
         .from("comments")
         .update({ content: newContent })
         .eq("id", commentId)
-        .eq("user_id", user.id)
         .select();
       
       if (error) throw error;
@@ -110,8 +129,7 @@ export const useComments = (articleId: string, isOpen: boolean) => {
         
         return { success: true };
       } else {
-        // If no rows were updated, the user doesn't own the comment
-        return { success: false, error: "You are not authorized to edit this comment" };
+        return { success: false, error: "Failed to update comment" };
       }
     } catch (error: any) {
       console.error("Error editing comment:", error);

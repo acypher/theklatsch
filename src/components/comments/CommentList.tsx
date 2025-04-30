@@ -58,9 +58,8 @@ const CommentList = ({
 
   const handleSaveEdit = async (commentId: string, content: string) => {
     const result = await onEditComment(commentId, content);
-    if (result.success) {
-      toast.success("Comment updated successfully");
-      setEditingCommentId(null);
+    if (!result.success && result.error) {
+      toast.error(result.error);
     }
     return result;
   };
