@@ -96,15 +96,21 @@ export const useComments = (articleId: string, isOpen: boolean) => {
         .from("comments")
         .select("user_id")
         .eq("id", commentId)
-        .single();
+        .maybeSingle();  // Using maybeSingle instead of single to prevent errors
       
       if (fetchError) {
+        console.error("Error fetching comment for authorization check:", fetchError);
         throw fetchError;
       }
       
-      if (!commentData || commentData.user_id !== user.id) {
+      if (!commentData) {
+        console.error("Comment not found:", commentId);
+        return { success: false, error: "Comment not found" };
+      }
+      
+      if (commentData.user_id !== user.id) {
         console.error("Authorization failed: User does not own this comment", {
-          commentUserId: commentData?.user_id,
+          commentUserId: commentData.user_id,
           currentUserId: user.id
         });
         return { success: false, error: "You are not authorized to edit this comment" };
