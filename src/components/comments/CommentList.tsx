@@ -57,15 +57,23 @@ const CommentList = ({
   };
 
   const handleSaveEdit = async (commentId: string, content: string) => {
-    const result = await onEditComment(commentId, content);
-    if (result.success) {
-      // Clear editing state when successful
-      setEditingCommentId(null);
-      toast.success("Comment updated successfully");
-    } else if (result.error) {
-      toast.error(result.error);
+    try {
+      const result = await onEditComment(commentId, content);
+      
+      if (result.success) {
+        // Clear editing state when successful
+        setEditingCommentId(null);
+        toast.success("Comment updated successfully");
+      } else if (result.error) {
+        toast.error(result.error);
+      }
+      
+      return result;
+    } catch (error: any) {
+      const errorMessage = error?.message || "An unexpected error occurred";
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     }
-    return result;
   };
   
   if (isLoading) {

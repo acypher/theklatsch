@@ -117,26 +117,24 @@ export const useComments = (articleId: string, isOpen: boolean) => {
       }
       
       // If authorized, proceed with the update
-      const { data, error } = await supabase
+      const { error: updateError } = await supabase
         .from("comments")
         .update({ content: newContent })
-        .eq("id", commentId)
-        .select();
+        .eq("id", commentId);
       
-      if (error) throw error;
-      
-      if (data && data.length > 0) {
-        // Update the comment in the local state
-        setComments(prevComments => 
-          prevComments.map(comment => 
-            comment.id === commentId ? { ...comment, content: newContent } : comment
-          )
-        );
-        
-        return { success: true };
-      } else {
-        return { success: false, error: "Failed to update comment" };
+      if (updateError) {
+        console.error("Error updating comment:", updateError);
+        throw updateError;
       }
+      
+      // Update the comment in the local state
+      setComments(prevComments => 
+        prevComments.map(comment => 
+          comment.id === commentId ? { ...comment, content: newContent } : comment
+        )
+      );
+      
+      return { success: true };
     } catch (error: any) {
       console.error("Error editing comment:", error);
       return { success: false, error: error?.message || "Failed to edit comment" };
