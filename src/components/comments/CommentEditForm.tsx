@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface CommentEditFormProps {
   commentId: string;
@@ -24,18 +25,36 @@ const CommentEditForm: React.FC<CommentEditFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (content.trim() === '') {
+      setError("Comment cannot be empty");
+      return;
+    }
+    
+    if (content === initialContent) {
+      onCancel(); // No changes made, just cancel
+      return;
+    }
+    
     setIsSubmitting(true);
     setError(null);
     
-    const result = await onSave(commentId, content);
-    
-    if (!result.success) {
-      setError(result.error || "Failed to save comment");
-    } else {
-      onCancel(); // Close edit mode on success
+    try {
+      const result = await onSave(commentId, content);
+      
+      if (!result.success) {
+        setError(result.error || "Failed to save comment");
+        toast.error(result.error || "Failed to save comment");
+      } else {
+        toast.success("Comment updated successfully");
+        onCancel(); // Close edit mode on success
+      }
+    } catch (err) {
+      console.error("Error saving comment:", err);
+      setError("An unexpected error occurred");
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   return (
@@ -63,7 +82,7 @@ const CommentEditForm: React.FC<CommentEditFormProps> = ({
         </Button>
         <Button 
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || content.trim() === ''}
         >
           {isSubmitting ? (
             <>

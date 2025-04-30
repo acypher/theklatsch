@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -90,21 +91,28 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     if (!user) return { success: false, error: "You must be logged in to edit a comment" };
     
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("comments")
         .update({ content: newContent })
-        .eq("id", commentId);
+        .eq("id", commentId)
+        .eq("user_id", user.id)
+        .select();
       
       if (error) throw error;
       
-      // Update the comment in the local state
-      setComments(prevComments => 
-        prevComments.map(comment => 
-          comment.id === commentId ? { ...comment, content: newContent } : comment
-        )
-      );
-      
-      return { success: true };
+      if (data && data.length > 0) {
+        // Update the comment in the local state
+        setComments(prevComments => 
+          prevComments.map(comment => 
+            comment.id === commentId ? { ...comment, content: newContent } : comment
+          )
+        );
+        
+        return { success: true };
+      } else {
+        // If no rows were updated, the user doesn't own the comment
+        return { success: false, error: "You are not authorized to edit this comment" };
+      }
     } catch (error: any) {
       console.error("Error editing comment:", error);
       return { success: false, error: error?.message || "Failed to edit comment" };
