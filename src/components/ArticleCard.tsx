@@ -5,7 +5,7 @@ import { Article } from "@/lib/types";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useState, useEffect } from "react";
-import CommentDialog from "./CommentDialog";
+import CommentDialog from "./comments/CommentDialog";
 import { supabase } from "@/integrations/supabase/client";
 import ArticleCardHeader from "./article/ArticleCardHeader";
 import ArticleCardMeta from "./article/ArticleCardMeta";
