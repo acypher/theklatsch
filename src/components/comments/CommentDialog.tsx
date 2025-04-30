@@ -26,8 +26,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     comments, 
     isLoading, 
     fetchError, 
-    fetchComments,
-    editComment 
+    fetchComments 
   } = useComments(articleId, isOpen);
 
   const handleLoginRedirect = () => {
@@ -38,15 +37,6 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const handleSubmitSuccess = () => {
     fetchComments();
     setShowCommentForm(false);
-  };
-
-  const handleEditComment = async (commentId: string, content: string) => {
-    const result = await editComment(commentId, content);
-    if (result.success) {
-      // We don't need to manually refresh comments here
-      // as the editComment function in useComments.ts already updates the local state
-    }
-    return result;
   };
 
   return (
@@ -97,7 +87,6 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             isLoading={isLoading}
             fetchError={fetchError}
             onRetry={fetchComments}
-            onEditComment={handleEditComment}
           />
         </div>
       </DialogContent>

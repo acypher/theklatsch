@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -11,7 +10,6 @@ interface Comment {
   author_email?: string;
   created_at: string;
   article_id: string;
-  user_id?: string;
 }
 
 export const useComments = (articleId: string, isOpen: boolean) => {
@@ -86,61 +84,6 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     }
   };
 
-  // New function to edit a comment
-  const editComment = async (commentId: string, newContent: string) => {
-    if (!user) return { success: false, error: "You must be logged in to edit a comment" };
-    
-    try {
-      // First, check if the user owns the comment
-      const { data: commentData, error: fetchError } = await supabase
-        .from("comments")
-        .select("user_id")
-        .eq("id", commentId)
-        .maybeSingle();  // Using maybeSingle instead of single to prevent errors
-      
-      if (fetchError) {
-        console.error("Error fetching comment for authorization check:", fetchError);
-        throw fetchError;
-      }
-      
-      if (!commentData) {
-        console.error("Comment not found:", commentId);
-        return { success: false, error: "Comment not found" };
-      }
-      
-      if (commentData.user_id !== user.id) {
-        console.error("Authorization failed: User does not own this comment", {
-          commentUserId: commentData.user_id,
-          currentUserId: user.id
-        });
-        return { success: false, error: "You are not authorized to edit this comment" };
-      }
-      
-      // If authorized, proceed with the update
-      const { error: updateError } = await supabase
-        .from("comments")
-        .update({ content: newContent })
-        .eq("id", commentId);
-      
-      if (updateError) {
-        console.error("Error updating comment:", updateError);
-        throw updateError;
-      }
-      
-      // Update the comment in the local state
-      setComments(prevComments => 
-        prevComments.map(comment => 
-          comment.id === commentId ? { ...comment, content: newContent } : comment
-        )
-      );
-      
-      return { success: true };
-    } catch (error: any) {
-      console.error("Error editing comment:", error);
-      return { success: false, error: error?.message || "Failed to edit comment" };
-    }
-  };
-
   useEffect(() => {
     if (isOpen) {
       fetchComments();
@@ -151,7 +94,6 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     comments,
     isLoading,
     fetchError,
-    fetchComments,
-    editComment
+    fetchComments
   };
 };
