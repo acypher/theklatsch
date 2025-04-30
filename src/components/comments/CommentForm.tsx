@@ -40,6 +40,7 @@ const CommentForm = ({ articleId, onSubmitSuccess, onCancel }: CommentFormProps)
         content: newComment.trim(),
         author_name: authorName.trim() || "Anonymous",
         author_email: authorEmail.trim() || null,
+        user_id: user.id // Store the user ID to enable editing
       });
       
       // Race between insert and timeout

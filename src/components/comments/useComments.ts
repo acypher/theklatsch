@@ -10,6 +10,7 @@ interface Comment {
   author_email?: string;
   created_at: string;
   article_id: string;
+  user_id?: string;
 }
 
 export const useComments = (articleId: string, isOpen: boolean) => {
@@ -84,6 +85,32 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     }
   };
 
+  // New function to edit a comment
+  const editComment = async (commentId: string, newContent: string) => {
+    if (!user) return { success: false, error: "You must be logged in to edit a comment" };
+    
+    try {
+      const { error } = await supabase
+        .from("comments")
+        .update({ content: newContent })
+        .eq("id", commentId);
+      
+      if (error) throw error;
+      
+      // Update the comment in the local state
+      setComments(prevComments => 
+        prevComments.map(comment => 
+          comment.id === commentId ? { ...comment, content: newContent } : comment
+        )
+      );
+      
+      return { success: true };
+    } catch (error: any) {
+      console.error("Error editing comment:", error);
+      return { success: false, error: error?.message || "Failed to edit comment" };
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchComments();
@@ -94,6 +121,7 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     comments,
     isLoading,
     fetchError,
-    fetchComments
+    fetchComments,
+    editComment
   };
 };

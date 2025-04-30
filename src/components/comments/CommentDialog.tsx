@@ -26,7 +26,8 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     comments, 
     isLoading, 
     fetchError, 
-    fetchComments 
+    fetchComments,
+    editComment 
   } = useComments(articleId, isOpen);
 
   const handleLoginRedirect = () => {
@@ -87,6 +88,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             isLoading={isLoading}
             fetchError={fetchError}
             onRetry={fetchComments}
+            onEditComment={editComment}
           />
         </div>
       </DialogContent>

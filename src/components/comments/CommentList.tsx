@@ -1,10 +1,13 @@
 
-import React from "react";
-import { Loader2, MessageSquare, AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { Loader2, MessageSquare, AlertCircle, Pencil } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useAuth } from "@/contexts/AuthContext";
+import CommentEditForm from "./CommentEditForm";
+import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -13,6 +16,7 @@ interface Comment {
   author_email?: string;
   created_at: string;
   article_id: string;
+  user_id?: string;
 }
 
 interface CommentListProps {
@@ -20,9 +24,19 @@ interface CommentListProps {
   isLoading: boolean;
   fetchError: string | null;
   onRetry: () => void;
+  onEditComment: (commentId: string, content: string) => Promise<{ success: boolean; error?: string }>;
 }
 
-const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListProps) => {
+const CommentList = ({ 
+  comments, 
+  isLoading, 
+  fetchError, 
+  onRetry,
+  onEditComment 
+}: CommentListProps) => {
+  const { user } = useAuth();
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { 
       year: 'numeric', 
@@ -32,6 +46,23 @@ const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListPr
       minute: '2-digit'
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const handleEditClick = (commentId: string) => {
+    setEditingCommentId(commentId);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+  };
+
+  const handleSaveEdit = async (commentId: string, content: string) => {
+    const result = await onEditComment(commentId, content);
+    if (result.success) {
+      toast.success("Comment updated successfully");
+      setEditingCommentId(null);
+    }
+    return result;
   };
   
   if (isLoading) {
@@ -75,15 +106,38 @@ const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListPr
         <div key={comment.id} className="border rounded-lg p-3 bg-card">
           <div className="flex justify-between items-start mb-2">
             <p className="font-medium">{comment.author_name}</p>
-            <p className="text-xs text-muted-foreground">
-              {formatDate(comment.created_at)}
-            </p>
+            <div className="flex items-center gap-2">
+              {user && comment.user_id === user.id && editingCommentId !== comment.id && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => handleEditClick(comment.id)}
+                  className="h-6 w-6 p-0"
+                >
+                  <Pencil className="h-4 w-4" />
+                  <span className="sr-only">Edit comment</span>
+                </Button>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {formatDate(comment.created_at)}
+              </p>
+            </div>
           </div>
-          <div className="prose prose-sm max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {comment.content}
-            </ReactMarkdown>
-          </div>
+          
+          {editingCommentId === comment.id ? (
+            <CommentEditForm
+              commentId={comment.id}
+              initialContent={comment.content}
+              onSave={handleSaveEdit}
+              onCancel={handleCancelEdit}
+            />
+          ) : (
+            <div className="prose prose-sm max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {comment.content}
+              </ReactMarkdown>
+            </div>
+          )}
         </div>
       ))}
     </div>
