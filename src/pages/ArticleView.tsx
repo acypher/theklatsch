@@ -34,7 +34,7 @@ const ArticleView = () => {
           if (articleData) {
             setArticle(articleData);
             
-            // Update page title
+            // Update page title using the article title from h1 content
             document.title = articleData.title;
             
             // Update or create Open Graph meta tags
