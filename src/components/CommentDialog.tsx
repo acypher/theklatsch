@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MarkdownEditor from "./article/MarkdownEditor";
@@ -107,12 +106,44 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
       }
 
       setComments(data as Comment[] || []);
+      
+      // Track comment views if user is authenticated
+      if (user && data && data.length > 0) {
+        await trackCommentViews(data);
+      }
     } catch (error: any) {
       console.error("Error fetching comments:", error);
       setFetchError(error?.message || "Failed to load comments. Please try again later.");
       toast.error("Failed to load comments");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Track which comments the user has viewed
+  const trackCommentViews = async (comments: Comment[]) => {
+    if (!user) return;
+    
+    try {
+      const viewPromises = comments.map(comment => {
+        return supabase
+          .from("comment_views")
+          .upsert({
+            user_id: user.id,
+            comment_id: comment.id,
+            article_id: articleId,
+            last_viewed_at: new Date().toISOString()
+          })
+          .then(({ error }) => {
+            if (error) {
+              console.error(`Error tracking view for comment ${comment.id}:`, error);
+            }
+          });
+      });
+      
+      await Promise.all(viewPromises);
+    } catch (error) {
+      console.error("Error tracking comment views:", error);
     }
   };
 

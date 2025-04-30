@@ -116,6 +116,45 @@ export type Database = {
         }
         Relationships: []
       }
+      comment_views: {
+        Row: {
+          article_id: string
+          comment_id: string
+          id: string
+          last_viewed_at: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          comment_id: string
+          id?: string
+          last_viewed_at?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          comment_id?: string
+          id?: string
+          last_viewed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_views_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_views_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           article_id: string

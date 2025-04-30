@@ -10,6 +10,7 @@ import ArticleCardHeader from "./article/ArticleCardHeader";
 import ArticleCardMeta from "./article/ArticleCardMeta";
 import ArticleCardFooter from "./article/ArticleCardFooter";
 import ReadCheckbox from './article/ReadCheckbox';
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ArticleCardProps {
   article: Article;
@@ -18,13 +19,15 @@ interface ArticleCardProps {
 const ArticleCard = ({ article }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
+  const [viewedCommentCount, setViewedCommentCount] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const { user, isAuthenticated } = useAuth();
 
   const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
   
   useEffect(() => {
-    const fetchCommentCount = async () => {
+    const fetchCommentData = async () => {
       try {
         setIsLoading(true);
         setHasError(false);
@@ -48,6 +51,23 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         }
         
         setCommentCount(count || 0);
+        
+        // Only fetch viewed comments if user is authenticated
+        if (isAuthenticated && user) {
+          try {
+            const { data, error: viewError } = await supabase
+              .from("comment_views")
+              .select("comment_id", { count: 'exact' })
+              .eq("article_id", article.id)
+              .eq("user_id", user.id);
+              
+            if (!viewError) {
+              setViewedCommentCount(data?.length || 0);
+            }
+          } catch (viewError) {
+            console.error("Error fetching viewed comments:", viewError);
+          }
+        }
       } catch (error) {
         console.error("Error fetching comment count:", error);
         setHasError(true);
@@ -56,8 +76,8 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
       }
     };
     
-    fetchCommentCount();
-  }, [article.id]);
+    fetchCommentData();
+  }, [article.id, isAuthenticated, user]);
   
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -149,6 +169,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           isLoading={isLoading}
           hasError={hasError}
           commentCount={commentCount}
+          viewedCommentCount={isAuthenticated ? viewedCommentCount : undefined}
         />
         {showComments && (
           <CommentDialog 
