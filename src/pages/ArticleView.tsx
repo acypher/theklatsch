@@ -8,6 +8,9 @@ const ArticleView = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("May 2025");
   
   useEffect(() => {
+    // Save scroll position before navigating to article
+    sessionStorage.setItem('scrollPosition', window.scrollY.toString());
+    
     const loadCurrentIssue = async () => {
       const issueData = await getCurrentIssue();
       if (issueData?.text) {

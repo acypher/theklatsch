@@ -10,6 +10,7 @@ import { HomeLogo } from "@/components/home/HomeLogo";
 import { MaintenancePage } from "@/components/home/MaintenancePage";
 import { StorefrontImage } from "@/components/home/StorefrontImage";
 import { useReadArticles } from "@/hooks/useReadArticles";
+import { useLocation } from "react-router-dom";
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -18,6 +19,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const articleListRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
   
   const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated);
 
@@ -54,6 +56,39 @@ const Index = () => {
 
     fetchArticles();
   }, []);
+
+  // Effect to restore scroll position after article view
+  useEffect(() => {
+    const restoreScrollPosition = () => {
+      const lastViewedArticleId = sessionStorage.getItem('lastViewedArticleId');
+      
+      if (lastViewedArticleId) {
+        // Wait for articles to load and DOM to be ready
+        setTimeout(() => {
+          const articleElement = document.querySelector(`[data-article-id="${lastViewedArticleId}"]`);
+          
+          if (articleElement) {
+            const navbar = document.querySelector('nav');
+            const navbarHeight = navbar ? navbar.offsetHeight : 0;
+            const extraPadding = 20;
+            const yOffset = -(navbarHeight + extraPadding);
+            
+            const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            
+            window.scrollTo({
+              top: y,
+              behavior: 'smooth'
+            });
+            
+            // Clear the saved article ID after scrolling
+            sessionStorage.removeItem('lastViewedArticleId');
+          }
+        }, 100);
+      }
+    };
+
+    restoreScrollPosition();
+  }, [articles, location]);
 
   const filteredArticles = React.useMemo(() => {
     if (!filterEnabled || !isAuthenticated) return articles;
