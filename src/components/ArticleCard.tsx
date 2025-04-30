@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -26,56 +27,56 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
 
   const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
   
-  useEffect(() => {
-    const fetchCommentData = async () => {
-      try {
-        setIsLoading(true);
-        setHasError(false);
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Request timed out')), 8000)
-        );
-        
-        const fetchPromise = supabase
-          .from("comments")
-          .select("*", { count: 'exact', head: true })
-          .eq("article_id", article.id);
-        
-        const { count, error } = await Promise.race([
-          fetchPromise,
-          timeoutPromise.then(() => { throw new Error('Request timed out'); })
-        ]) as any;
-        
-        if (error) {
-          throw error;
-        }
-        
-        setCommentCount(count || 0);
-        
-        // Only fetch viewed comments if user is authenticated
-        if (isAuthenticated && user) {
-          try {
-            const { data, error: viewError } = await supabase
-              .from("comment_views")
-              .select("comment_id", { count: 'exact' })
-              .eq("article_id", article.id)
-              .eq("user_id", user.id);
-              
-            if (!viewError) {
-              setViewedCommentCount(data?.length || 0);
-            }
-          } catch (viewError) {
-            console.error("Error fetching viewed comments:", viewError);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching comment count:", error);
-        setHasError(true);
-      } finally {
-        setIsLoading(false);
+  const fetchCommentData = async () => {
+    try {
+      setIsLoading(true);
+      setHasError(false);
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timed out')), 8000)
+      );
+      
+      const fetchPromise = supabase
+        .from("comments")
+        .select("*", { count: 'exact', head: true })
+        .eq("article_id", article.id);
+      
+      const { count, error } = await Promise.race([
+        fetchPromise,
+        timeoutPromise.then(() => { throw new Error('Request timed out'); })
+      ]) as any;
+      
+      if (error) {
+        throw error;
       }
-    };
-    
+      
+      setCommentCount(count || 0);
+      
+      // Only fetch viewed comments if user is authenticated
+      if (isAuthenticated && user) {
+        try {
+          const { data, error: viewError } = await supabase
+            .from("comment_views")
+            .select("comment_id", { count: 'exact' })
+            .eq("article_id", article.id)
+            .eq("user_id", user.id);
+            
+          if (!viewError) {
+            setViewedCommentCount(data?.length || 0);
+          }
+        } catch (viewError) {
+          console.error("Error fetching viewed comments:", viewError);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching comment count:", error);
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
     fetchCommentData();
   }, [article.id, isAuthenticated, user]);
   
@@ -93,6 +94,12 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
       }
     }
     return url;
+  };
+
+  const handleCommentsClose = () => {
+    setShowComments(false);
+    // Refresh comment count data when dialog closes
+    fetchCommentData();
   };
 
   const customRenderers = {
@@ -176,7 +183,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             articleId={article.id} 
             articleTitle={article.title}
             isOpen={showComments}
-            onClose={() => setShowComments(false)}
+            onClose={handleCommentsClose}
           />
         )}
       </CardContent>
