@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -117,20 +116,17 @@ export const useComments = (articleId: string, isOpen: boolean) => {
         )
       );
       
-      // Show success toast notification
-      toast({
-        title: "Comment updated",
-        description: "Your comment was successfully updated",
+      // Show success toast notification using sonner toast
+      toast.success("Comment updated", {
+        description: "Your comment was successfully updated"
       });
       
       return data[0];
     } catch (error: any) {
       console.error("Error updating comment:", error);
       // Show error toast notification
-      toast({
-        title: "Update failed",
-        description: error.message || "Failed to update comment. Please try again.",
-        variant: "destructive",
+      toast.error("Update failed", {
+        description: error.message || "Failed to update comment. Please try again."
       });
       throw error;
     }
