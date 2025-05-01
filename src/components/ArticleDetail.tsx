@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -32,10 +31,6 @@ const ArticleDetail = () => {
           const fetchedArticle = await getArticleById(id);
           if (fetchedArticle) {
             setArticle(fetchedArticle);
-            
-            // Set the document title to the article title
-            // We do this here to ensure the title is updated when the component is loaded
-            document.title = fetchedArticle.title;
           } else {
             toast.error("Article not found");
             navigate("/");

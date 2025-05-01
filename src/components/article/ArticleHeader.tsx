@@ -6,7 +6,7 @@ import KeywordBadge from "../KeywordBadge";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Article } from "@/lib/types";
-import { useEffect } from "react";
+import { useState } from "react";
 
 interface ArticleHeaderProps {
   article: Article;
@@ -38,13 +38,6 @@ const ArticleHeader = ({
     // Ensure paragraphs don't interfere with other UI components
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
   };
-  
-  // Update the document title with the article title when component mounts
-  useEffect(() => {
-    if (article?.title) {
-      document.title = article.title;
-    }
-  }, [article]);
   
   return (
     <div className="mb-8">

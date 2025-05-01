@@ -26,8 +26,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     comments, 
     isLoading, 
     fetchError, 
-    fetchComments,
-    updateComment 
+    fetchComments 
   } = useComments(articleId, isOpen);
 
   const handleLoginRedirect = () => {
@@ -38,10 +37,6 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const handleSubmitSuccess = () => {
     fetchComments();
     setShowCommentForm(false);
-  };
-
-  const handleUpdateComment = async (commentId: string, newContent: string) => {
-    await updateComment(commentId, newContent);
   };
 
   return (
@@ -92,7 +87,6 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             isLoading={isLoading}
             fetchError={fetchError}
             onRetry={fetchComments}
-            onUpdateComment={handleUpdateComment}
           />
         </div>
       </DialogContent>

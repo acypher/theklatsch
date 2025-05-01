@@ -102,18 +102,19 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     fetchCommentData();
   };
 
-  // Fixed custom renderers to avoid nesting <a> tags within <a> tags
   const customRenderers = {
     a: ({ node, ...props }: any) => (
-      <span 
-        className="text-primary hover:underline cursor-pointer"
+      <a 
+        {...props} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-primary hover:underline"
         onClick={(e) => {
           e.stopPropagation();
+          e.preventDefault();
           window.open(props.href, '_blank', 'noopener,noreferrer');
         }}
-      >
-        {props.children}
-      </span>
+      />
     ),
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
     h1: ({ node, ...props }: any) => <h1 className="m-0 p-0 text-xl font-semibold" {...props} />,
@@ -140,10 +141,14 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
       <CardContent className="flex-grow pt-6">
         <Link to={`/article/${article.id}`} className="block">
           <div className="line-clamp-2 hover:text-primary transition-colors mb-2 prose-sm prose">
-            {article.title}
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={customRenderers}
+            >
+              {article.title}
+            </ReactMarkdown>
           </div>
         </Link>
-        
         <ArticleCardMeta 
           author={article.author}
           createdAt={article.createdAt}
@@ -151,7 +156,6 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           isGif={isGif}
           formatDate={formatDate}
         />
-        
         <Link to={`/article/${article.id}`} className="block">
           <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper hover:text-primary/80 transition-colors cursor-pointer">
             <ReactMarkdown 
@@ -162,7 +166,6 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             </ReactMarkdown>
           </div>
         </Link>
-        
         <ArticleCardFooter 
           keywords={article.keywords}
           onCommentsClick={(e) => {
@@ -175,7 +178,6 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           commentCount={commentCount}
           viewedCommentCount={isAuthenticated ? viewedCommentCount : undefined}
         />
-        
         {showComments && (
           <CommentDialog 
             articleId={article.id} 

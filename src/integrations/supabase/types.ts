@@ -160,28 +160,25 @@ export type Database = {
           article_id: string
           author_email: string | null
           author_name: string
-          content: string | null
+          content: string
           created_at: string
           id: string
-          user_id: string | null
         }
         Insert: {
           article_id: string
           author_email?: string | null
           author_name?: string
-          content?: string | null
+          content: string
           created_at?: string
           id?: string
-          user_id?: string | null
         }
         Update: {
           article_id?: string
           author_email?: string | null
           author_name?: string
-          content?: string | null
+          content?: string
           created_at?: string
           id?: string
-          user_id?: string | null
         }
         Relationships: [
           {

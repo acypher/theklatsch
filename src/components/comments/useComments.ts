@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
 
 interface Comment {
   id: string;
@@ -11,7 +10,6 @@ interface Comment {
   author_email?: string;
   created_at: string;
   article_id: string;
-  user_id?: string;
 }
 
 export const useComments = (articleId: string, isOpen: boolean) => {
@@ -85,38 +83,6 @@ export const useComments = (articleId: string, isOpen: boolean) => {
       console.error("Error tracking comment views:", error);
     }
   };
-  
-  // Update comment in the database
-  const updateComment = async (commentId: string, newContent: string) => {
-    try {
-      const { error } = await supabase
-        .from("comments")
-        .update({ content: newContent })
-        .eq("id", commentId);
-
-      if (error) {
-        console.error("Error updating comment:", error);
-        toast.error("Failed to update comment. Please try again.");
-        return false;
-      }
-
-      // Update local state to reflect the change
-      const updatedComments = comments.map(comment => {
-        if (comment.id === commentId) {
-          return { ...comment, content: newContent };
-        }
-        return comment;
-      });
-      
-      setComments(updatedComments);
-      toast.success("Comment updated successfully");
-      return true;
-    } catch (error) {
-      console.error("Error in updateComment:", error);
-      toast.error("An unexpected error occurred. Please try again.");
-      return false;
-    }
-  };
 
   useEffect(() => {
     if (isOpen) {
@@ -128,7 +94,6 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     comments,
     isLoading,
     fetchError,
-    fetchComments,
-    updateComment
+    fetchComments
   };
 };
