@@ -73,11 +73,14 @@ const ArticleView = () => {
       meta.setAttribute('content', content);
     };
     
+    // Get the full URL for the image
+    const fullImageUrl = new URL("/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png", window.location.origin).href;
+    
     // Set Open Graph tags
     setMetaTag('og:title', article.title);
     setMetaTag('og:description', article.description);
     setMetaTag('og:type', 'article');
-    setMetaTag('og:image', '/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png');
+    setMetaTag('og:image', fullImageUrl);
     setMetaTag('og:url', window.location.href);
   };
 
