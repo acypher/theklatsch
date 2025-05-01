@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -86,66 +85,11 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     }
   };
   
-  // Implement the update comment functionality to persist changes to the database
+  // Prepare updateComment function for future implementation
   const updateComment = async (commentId: string, newContent: string) => {
-    try {
-      // Verify the user is authenticated
-      if (!user) {
-        throw new Error("You must be logged in to update a comment");
-      }
-      
-      // First check if the comment belongs to the user
-      const { data: commentData, error: commentCheckError } = await supabase
-        .from("comments")
-        .select("*")
-        .eq("id", commentId)
-        .single();
-      
-      if (commentCheckError) {
-        throw new Error("Failed to verify comment ownership");
-      }
-      
-      if (!commentData || commentData.user_id !== user.id) {
-        throw new Error("You can only edit your own comments");
-      }
-      
-      // Update the comment in the database
-      const { data, error } = await supabase
-        .from("comments")
-        .update({ content: newContent })
-        .eq("id", commentId)
-        .select();
-        
-      if (error) {
-        console.error("Supabase update error:", error);
-        throw error;
-      }
-      
-      if (!data || data.length === 0) {
-        throw new Error("Failed to update comment");
-      }
-      
-      // Update the local comments state to reflect the change
-      setComments(currentComments => 
-        currentComments.map(comment => 
-          comment.id === commentId ? { ...comment, content: newContent } : comment
-        )
-      );
-      
-      // Show success toast notification using sonner toast
-      toast.success("Comment updated", {
-        description: "Your comment was successfully updated"
-      });
-      
-      return data[0];
-    } catch (error: any) {
-      console.error("Error updating comment:", error);
-      // Show error toast notification
-      toast.error("Update failed", {
-        description: error.message || "Failed to update comment. Please try again."
-      });
-      throw error;
-    }
+    // This will be implemented later to update the comment in the database
+    console.log("Update comment function called with:", commentId, newContent);
+    // For now, we're just returning without making any database changes
   };
 
   useEffect(() => {
