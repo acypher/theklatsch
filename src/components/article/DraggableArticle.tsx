@@ -60,6 +60,26 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(
     const isDraggedOver = draggedItemId && draggedItemId !== article.id;
     const isBeingDragged = draggedItemId === article.id;
 
+    // Function to format date
+    const formatDate = (dateString: string) => {
+      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    };
+
+    // Function to get image URL
+    const getImageUrl = (url: string) => {
+      if (url.includes('drive.google.com/file/d/')) {
+        const fileIdMatch = url.match(/\/d\/([^/]+)/);
+        if (fileIdMatch && fileIdMatch[1]) {
+          const fileId = fileIdMatch[1];
+          return `https://drive.google.com/uc?export=view&id=${fileId}`;
+        }
+      }
+      return url;
+    };
+
+    const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
+
     return (
       <>
         <Card 
@@ -81,11 +101,20 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(
           <ReadCheckbox articleId={article.id} />
           
           <ArticleCardHeader 
-            article={article} 
-            isLoggedIn={isLoggedIn} 
+            articleId={article.id}
+            imageUrl={article.imageUrl}
+            title={article.title}
+            isGif={isGif}
+            getImageUrl={getImageUrl}
           />
           
-          <ArticleCardMeta article={article} />
+          <ArticleCardMeta 
+            author={article.author}
+            createdAt={article.createdAt}
+            sourceUrl={article.sourceUrl}
+            isGif={isGif}
+            formatDate={formatDate}
+          />
           
           <div className="mt-auto p-4 pt-0">
             <ArticleCardFooter 
