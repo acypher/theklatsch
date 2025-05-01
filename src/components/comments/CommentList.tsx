@@ -23,12 +23,25 @@ interface CommentListProps {
   isLoading: boolean;
   fetchError: string | null;
   onRetry: () => void;
+  onUpdateComment?: (commentId: string, newContent: string) => Promise<void>;
 }
 
-const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListProps) => {
+const CommentList = ({ 
+  comments: initialComments, 
+  isLoading, 
+  fetchError, 
+  onRetry,
+  onUpdateComment 
+}: CommentListProps) => {
   const { user } = useAuth();
+  const [comments, setComments] = useState<Comment[]>(initialComments);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState<string>("");
+  
+  // Update local comments state when props change
+  React.useEffect(() => {
+    setComments(initialComments);
+  }, [initialComments]);
   
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { 
@@ -52,7 +65,7 @@ const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListPr
   };
   
   const handleUpdateComment = (commentId: string, newContent: string) => {
-    // In a real implementation, this would call the API to update the comment
+    // Update the local state immediately for UI feedback
     const updatedComments = comments.map(comment => {
       if (comment.id === commentId) {
         return { ...comment, content: newContent };
@@ -60,9 +73,16 @@ const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListPr
       return comment;
     });
     
-    // For now, we're just updating the UI without persisting changes
+    setComments(updatedComments);
     setEditingCommentId(null);
     setEditingContent("");
+    
+    // Call the parent's handler if provided (for database updates)
+    if (onUpdateComment) {
+      onUpdateComment(commentId, newContent).catch(error => {
+        console.error("Failed to update comment:", error);
+      });
+    }
   };
   
   if (isLoading) {

@@ -84,6 +84,13 @@ export const useComments = (articleId: string, isOpen: boolean) => {
       console.error("Error tracking comment views:", error);
     }
   };
+  
+  // Prepare updateComment function for future implementation
+  const updateComment = async (commentId: string, newContent: string) => {
+    // This will be implemented later to update the comment in the database
+    console.log("Update comment function called with:", commentId, newContent);
+    // For now, we're just returning without making any database changes
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -95,6 +102,7 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     comments,
     isLoading,
     fetchError,
-    fetchComments
+    fetchComments,
+    updateComment
   };
 };

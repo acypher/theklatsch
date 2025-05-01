@@ -26,7 +26,8 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     comments, 
     isLoading, 
     fetchError, 
-    fetchComments 
+    fetchComments,
+    updateComment 
   } = useComments(articleId, isOpen);
 
   const handleLoginRedirect = () => {
@@ -37,6 +38,14 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const handleSubmitSuccess = () => {
     fetchComments();
     setShowCommentForm(false);
+  };
+
+  const handleUpdateComment = async (commentId: string, newContent: string) => {
+    // For now, we're just updating the UI without persisting changes
+    // In a real implementation, this would call updateComment from useComments
+    console.log("Comment update requested:", commentId, newContent);
+    // We'll implement the actual update functionality later
+    // await updateComment(commentId, newContent);
   };
 
   return (
@@ -87,6 +96,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             isLoading={isLoading}
             fetchError={fetchError}
             onRetry={fetchComments}
+            onUpdateComment={handleUpdateComment}
           />
         </div>
       </DialogContent>
