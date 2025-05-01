@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface Comment {
   id: string;
-  content: string;
+  content: string | null;
   author_name: string;
   author_email?: string;
   created_at: string;
@@ -23,7 +23,7 @@ interface CommentListProps {
   isLoading: boolean;
   fetchError: string | null;
   onRetry: () => void;
-  onUpdateComment?: (commentId: string, newContent: string) => Promise<void>;
+  onUpdateComment?: (commentId: string, newContent: string | null) => Promise<void>;
 }
 
 const CommentList = ({ 
@@ -56,7 +56,7 @@ const CommentList = ({
   
   const handleEditClick = (comment: Comment) => {
     setEditingCommentId(comment.id);
-    setEditingContent(comment.content);
+    setEditingContent(comment.content || "");
   };
   
   const handleCancelEdit = () => {
@@ -66,7 +66,7 @@ const CommentList = ({
   
   const handleUpdateComment = async (commentId: string, newContent: string) => {
     if (onUpdateComment) {
-      await onUpdateComment(commentId, newContent);
+      await onUpdateComment(commentId, newContent || null);
     }
     
     setEditingCommentId(null);
@@ -140,9 +140,13 @@ const CommentList = ({
                 </div>
               </div>
               <div className="prose prose-sm max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {comment.content}
-                </ReactMarkdown>
+                {comment.content ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {comment.content}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="text-muted-foreground italic">No content</p>
+                )}
               </div>
             </>
           )}

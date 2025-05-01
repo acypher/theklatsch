@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface Comment {
   id: string;
-  content: string;
+  content: string | null;
   author_name: string;
   author_email?: string;
   created_at: string;
@@ -87,7 +87,7 @@ export const useComments = (articleId: string, isOpen: boolean) => {
   };
   
   // Update comment in the database
-  const updateComment = async (commentId: string, newContent: string) => {
+  const updateComment = async (commentId: string, newContent: string | null) => {
     if (!user) {
       toast.error("You must be logged in to update comments");
       return false;
