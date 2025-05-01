@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 interface Comment {
   id: string;
@@ -85,11 +86,54 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     }
   };
   
-  // Prepare updateComment function for future implementation
+  // Implement the update comment functionality to persist changes to the database
   const updateComment = async (commentId: string, newContent: string) => {
-    // This will be implemented later to update the comment in the database
-    console.log("Update comment function called with:", commentId, newContent);
-    // For now, we're just returning without making any database changes
+    try {
+      // Verify the user is authenticated
+      if (!user) {
+        throw new Error("You must be logged in to update a comment");
+      }
+      
+      // Update the comment in the database
+      const { data, error } = await supabase
+        .from("comments")
+        .update({ content: newContent })
+        .eq("id", commentId)
+        .eq("user_id", user.id) // Ensure the user can only update their own comments
+        .select();
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        throw new Error("Failed to update comment. You might not have permission.");
+      }
+      
+      // Update the local comments state to reflect the change
+      setComments(currentComments => 
+        currentComments.map(comment => 
+          comment.id === commentId ? { ...comment, content: newContent } : comment
+        )
+      );
+      
+      // Show success toast notification
+      toast({
+        title: "Comment updated",
+        description: "Your comment was successfully updated",
+      });
+      
+      return data[0];
+    } catch (error: any) {
+      console.error("Error updating comment:", error);
+      // Show error toast notification
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update comment. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   useEffect(() => {

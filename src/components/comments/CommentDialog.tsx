@@ -41,11 +41,13 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   };
 
   const handleUpdateComment = async (commentId: string, newContent: string) => {
-    // For now, we're just updating the UI without persisting changes
-    // In a real implementation, this would call updateComment from useComments
-    console.log("Comment update requested:", commentId, newContent);
-    // We'll implement the actual update functionality later
-    // await updateComment(commentId, newContent);
+    try {
+      // Call the updateComment function from useComments which now updates the database
+      await updateComment(commentId, newContent);
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+      // Error is already handled in the useComments hook with toast notifications
+    }
   };
 
   return (
