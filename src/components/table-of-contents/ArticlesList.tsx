@@ -6,17 +6,9 @@ interface ArticlesListProps {
   articles: Article[];
   readArticles: Set<string>;
   onArticleClick: (articleId: string) => void;
-  articlesWithUnreadComments?: Set<string>;
-  onCommentsViewed?: (articleId: string) => void;
 }
 
-const ArticlesList = ({ 
-  articles, 
-  readArticles, 
-  onArticleClick,
-  articlesWithUnreadComments = new Set(),
-  onCommentsViewed
-}: ArticlesListProps) => {
+const ArticlesList = ({ articles, readArticles, onArticleClick }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
   const handleItemClick = (articleId: string) => {
@@ -24,19 +16,10 @@ const ArticlesList = ({
     onArticleClick(articleId);
   };
 
-  const handleArticleNumberClick = (e: React.MouseEvent, articleId: string) => {
-    e.stopPropagation();
-    if (onCommentsViewed) {
-      onCommentsViewed(articleId);
-    }
-  };
-
   return (
     <ul className="space-y-2">
       {articles.map((article, index) => {
         const isArticleRead = readArticles.has(article.id);
-        const hasUnreadComments = articlesWithUnreadComments.has(article.id);
-        
         return (
           <li 
             key={article.id}
@@ -53,16 +36,7 @@ const ArticlesList = ({
               onClick={() => handleItemClick(article.id)}
               aria-current={activeItem === article.id ? "true" : undefined}
             >
-              <span 
-                className={`font-medium min-w-6 px-1.5 rounded-sm ${
-                  hasUnreadComments 
-                    ? "bg-[#FEF7CD]" 
-                    : isArticleRead 
-                    ? "text-muted-foreground/50" 
-                    : "text-muted-foreground"
-                }`}
-                onClick={(e) => handleArticleNumberClick(e, article.id)}
-              >
+              <span className={`font-medium min-w-6 ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
                 {index + 1}.
               </span>
               <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>
