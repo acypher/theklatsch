@@ -64,25 +64,13 @@ const CommentList = ({
     setEditingContent("");
   };
   
-  const handleUpdateComment = (commentId: string, newContent: string) => {
-    // Update the local state immediately for UI feedback
-    const updatedComments = comments.map(comment => {
-      if (comment.id === commentId) {
-        return { ...comment, content: newContent };
-      }
-      return comment;
-    });
+  const handleUpdateComment = async (commentId: string, newContent: string) => {
+    if (onUpdateComment) {
+      await onUpdateComment(commentId, newContent);
+    }
     
-    setComments(updatedComments);
     setEditingCommentId(null);
     setEditingContent("");
-    
-    // Call the parent's handler if provided (for database updates)
-    if (onUpdateComment) {
-      onUpdateComment(commentId, newContent).catch(error => {
-        console.error("Failed to update comment:", error);
-      });
-    }
   };
   
   if (isLoading) {

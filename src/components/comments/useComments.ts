@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 interface Comment {
   id: string;
@@ -85,11 +86,36 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     }
   };
   
-  // Prepare updateComment function for future implementation
+  // Update comment in the database
   const updateComment = async (commentId: string, newContent: string) => {
-    // This will be implemented later to update the comment in the database
-    console.log("Update comment function called with:", commentId, newContent);
-    // For now, we're just returning without making any database changes
+    try {
+      const { error } = await supabase
+        .from("comments")
+        .update({ content: newContent })
+        .eq("id", commentId);
+
+      if (error) {
+        console.error("Error updating comment:", error);
+        toast.error("Failed to update comment. Please try again.");
+        return false;
+      }
+
+      // Update local state to reflect the change
+      const updatedComments = comments.map(comment => {
+        if (comment.id === commentId) {
+          return { ...comment, content: newContent };
+        }
+        return comment;
+      });
+      
+      setComments(updatedComments);
+      toast.success("Comment updated successfully");
+      return true;
+    } catch (error) {
+      console.error("Error in updateComment:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+      return false;
+    }
   };
 
   useEffect(() => {
