@@ -26,7 +26,8 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     comments, 
     isLoading, 
     fetchError, 
-    fetchComments 
+    fetchComments,
+    updateComment 
   } = useComments(articleId, isOpen);
 
   const handleLoginRedirect = () => {
@@ -37,6 +38,16 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const handleSubmitSuccess = () => {
     fetchComments();
     setShowCommentForm(false);
+  };
+
+  const handleUpdateComment = async (commentId: string, newContent: string) => {
+    try {
+      // Call the updateComment function from useComments which now updates the database
+      await updateComment(commentId, newContent);
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+      // Error is already handled in the useComments hook with toast notifications
+    }
   };
 
   return (
@@ -87,6 +98,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             isLoading={isLoading}
             fetchError={fetchError}
             onRetry={fetchComments}
+            onUpdateComment={handleUpdateComment}
           />
         </div>
       </DialogContent>

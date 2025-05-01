@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -10,6 +10,7 @@ interface Comment {
   author_email?: string;
   created_at: string;
   article_id: string;
+  user_id?: string;
 }
 
 export const useComments = (articleId: string, isOpen: boolean) => {
@@ -83,6 +84,53 @@ export const useComments = (articleId: string, isOpen: boolean) => {
       console.error("Error tracking comment views:", error);
     }
   };
+  
+  // Implement the update comment functionality to persist changes to the database
+  const updateComment = async (commentId: string, newContent: string) => {
+    try {
+      // Verify the user is authenticated
+      if (!user) {
+        throw new Error("You must be logged in to update a comment");
+      }
+      
+      // Update the comment in the database
+      const { data, error } = await supabase
+        .from("comments")
+        .update({ content: newContent })
+        .eq("id", commentId)
+        .eq("user_id", user.id) // Ensure the user can only update their own comments
+        .select();
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        throw new Error("Failed to update comment. You might not have permission.");
+      }
+      
+      // Update the local comments state to reflect the change
+      setComments(currentComments => 
+        currentComments.map(comment => 
+          comment.id === commentId ? { ...comment, content: newContent } : comment
+        )
+      );
+      
+      // Show success toast notification using sonner toast
+      toast.success("Comment updated", {
+        description: "Your comment was successfully updated"
+      });
+      
+      return data[0];
+    } catch (error: any) {
+      console.error("Error updating comment:", error);
+      // Show error toast notification
+      toast.error("Update failed", {
+        description: error.message || "Failed to update comment. Please try again."
+      });
+      throw error;
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -94,6 +142,7 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     comments,
     isLoading,
     fetchError,
-    fetchComments
+    fetchComments,
+    updateComment
   };
 };

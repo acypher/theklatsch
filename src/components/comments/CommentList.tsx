@@ -1,10 +1,12 @@
 
-import React from "react";
-import { Loader2, MessageSquare, AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { Loader2, MessageSquare, AlertCircle, Pencil } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import CommentEditForm from "./CommentEditForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Comment {
   id: string;
@@ -13,6 +15,7 @@ interface Comment {
   author_email?: string;
   created_at: string;
   article_id: string;
+  user_id?: string;
 }
 
 interface CommentListProps {
@@ -20,9 +23,26 @@ interface CommentListProps {
   isLoading: boolean;
   fetchError: string | null;
   onRetry: () => void;
+  onUpdateComment?: (commentId: string, newContent: string) => Promise<void>;
 }
 
-const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListProps) => {
+const CommentList = ({ 
+  comments: initialComments, 
+  isLoading, 
+  fetchError, 
+  onRetry,
+  onUpdateComment 
+}: CommentListProps) => {
+  const { user } = useAuth();
+  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState<string>("");
+  
+  // Update local comments state when props change
+  React.useEffect(() => {
+    setComments(initialComments);
+  }, [initialComments]);
+  
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { 
       year: 'numeric', 
@@ -32,6 +52,37 @@ const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListPr
       minute: '2-digit'
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+  
+  const handleEditClick = (comment: Comment) => {
+    setEditingCommentId(comment.id);
+    setEditingContent(comment.content);
+  };
+  
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingContent("");
+  };
+  
+  const handleUpdateComment = (commentId: string, newContent: string) => {
+    // Update the local state immediately for UI feedback
+    const updatedComments = comments.map(comment => {
+      if (comment.id === commentId) {
+        return { ...comment, content: newContent };
+      }
+      return comment;
+    });
+    
+    setComments(updatedComments);
+    setEditingCommentId(null);
+    setEditingContent("");
+    
+    // Call the parent's handler if provided (for database updates)
+    if (onUpdateComment) {
+      onUpdateComment(commentId, newContent).catch(error => {
+        console.error("Failed to update comment:", error);
+      });
+    }
   };
   
   if (isLoading) {
@@ -73,17 +124,40 @@ const CommentList = ({ comments, isLoading, fetchError, onRetry }: CommentListPr
     <div className="space-y-4">
       {comments.map((comment) => (
         <div key={comment.id} className="border rounded-lg p-3 bg-card">
-          <div className="flex justify-between items-start mb-2">
-            <p className="font-medium">{comment.author_name}</p>
-            <p className="text-xs text-muted-foreground">
-              {formatDate(comment.created_at)}
-            </p>
-          </div>
-          <div className="prose prose-sm max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {comment.content}
-            </ReactMarkdown>
-          </div>
+          {editingCommentId === comment.id ? (
+            <CommentEditForm 
+              initialContent={editingContent}
+              onCancel={handleCancelEdit}
+              onUpdate={(newContent) => handleUpdateComment(comment.id, newContent)}
+            />
+          ) : (
+            <>
+              <div className="flex justify-between items-start mb-2">
+                <p className="font-medium">{comment.author_name}</p>
+                <div className="flex items-center gap-2">
+                  {user && user.id === comment.user_id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => handleEditClick(comment)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      <span className="sr-only">Edit comment</span>
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {formatDate(comment.created_at)}
+                  </p>
+                </div>
+              </div>
+              <div className="prose prose-sm max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {comment.content}
+                </ReactMarkdown>
+              </div>
+            </>
+          )}
         </div>
       ))}
     </div>

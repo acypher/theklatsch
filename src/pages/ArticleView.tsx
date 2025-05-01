@@ -1,11 +1,16 @@
 
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ArticleDetail from "@/components/ArticleDetail";
 import { getCurrentIssue } from "@/lib/data/issue/currentIssue";
+import { getArticleById } from "@/lib/data";
+import { Article } from "@/lib/types";
 
 const ArticleView = () => {
+  const { id } = useParams<{ id: string }>();
   const [currentIssue, setCurrentIssue] = useState<string>("May 2025");
+  const [article, setArticle] = useState<Article | null>(null);
   
   useEffect(() => {
     // Save scroll position before navigating to article
@@ -20,6 +25,64 @@ const ArticleView = () => {
     
     loadCurrentIssue();
   }, []);
+
+  useEffect(() => {
+    const fetchArticle = async () => {
+      if (id) {
+        try {
+          const articleData = await getArticleById(id);
+          if (articleData) {
+            setArticle(articleData);
+            
+            // Update page title using the article title from h1 content
+            document.title = articleData.title;
+            
+            // Update or create Open Graph meta tags
+            updateMetaTags(articleData);
+          }
+        } catch (error) {
+          console.error("Error fetching article for meta tags:", error);
+        }
+      }
+    };
+    
+    fetchArticle();
+    
+    // Clean up meta tags when unmounting
+    return () => {
+      // Reset title
+      document.title = "Tech Magazine";
+      
+      // Remove Open Graph meta tags
+      const metaTags = document.querySelectorAll('meta[property^="og:"]');
+      metaTags.forEach(tag => tag.remove());
+    };
+  }, [id]);
+
+  const updateMetaTags = (article: Article) => {
+    // Helper function to create or update meta tags
+    const setMetaTag = (property: string, content: string) => {
+      let meta = document.querySelector(`meta[property="${property}"]`);
+      
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('property', property);
+        document.head.appendChild(meta);
+      }
+      
+      meta.setAttribute('content', content);
+    };
+    
+    // Get the full URL for the image
+    const fullImageUrl = new URL("/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png", window.location.origin).href;
+    
+    // Set Open Graph tags
+    setMetaTag('og:title', article.title);
+    setMetaTag('og:description', article.description);
+    setMetaTag('og:type', 'article');
+    setMetaTag('og:image', fullImageUrl);
+    setMetaTag('og:url', window.location.href);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
