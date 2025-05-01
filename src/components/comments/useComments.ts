@@ -88,19 +88,35 @@ export const useComments = (articleId: string, isOpen: boolean) => {
   
   // Update comment in the database
   const updateComment = async (commentId: string, newContent: string) => {
+    if (!user) {
+      toast.error("You must be logged in to update comments");
+      return false;
+    }
+
     try {
-      const { error } = await supabase
+      console.log("Updating comment:", commentId, "with new content:", newContent);
+      
+      // First attempt the update
+      const { data, error } = await supabase
         .from("comments")
         .update({ content: newContent })
-        .eq("id", commentId);
+        .eq("id", commentId)
+        .select();
+
+      console.log("Update response:", { data, error });
 
       if (error) {
         console.error("Error updating comment:", error);
-        toast.error("Failed to update comment. Please try again.");
+        toast.error("Failed to update comment: " + error.message);
         return false;
       }
 
-      // Update local state to reflect the change
+      if (!data || data.length === 0) {
+        toast.error("Comment not found or you don't have permission to update it");
+        return false;
+      }
+
+      // Update was successful, update local state
       const updatedComments = comments.map(comment => {
         if (comment.id === commentId) {
           return { ...comment, content: newContent };
@@ -111,9 +127,9 @@ export const useComments = (articleId: string, isOpen: boolean) => {
       setComments(updatedComments);
       toast.success("Comment updated successfully");
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in updateComment:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred: " + (error.message || "Unknown error"));
       return false;
     }
   };
