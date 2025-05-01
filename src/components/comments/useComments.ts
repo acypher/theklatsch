@@ -10,6 +10,7 @@ interface Comment {
   author_email?: string;
   created_at: string;
   article_id: string;
+  user_id?: string;
 }
 
 export const useComments = (articleId: string, isOpen: boolean) => {
