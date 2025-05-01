@@ -10,6 +10,7 @@ interface ArticleCardFooterProps {
   hasError: boolean;
   commentCount: number;
   viewedCommentCount?: number;
+  hasUnreadComments?: boolean;
 }
 
 const ArticleCardFooter = ({
@@ -18,7 +19,8 @@ const ArticleCardFooter = ({
   isLoading,
   hasError,
   commentCount,
-  viewedCommentCount
+  viewedCommentCount,
+  hasUnreadComments = false
 }: ArticleCardFooterProps) => (
   <div className="flex justify-between items-center">
     <div className="flex flex-wrap gap-2">
@@ -30,7 +32,7 @@ const ArticleCardFooter = ({
       variant="ghost" 
       size="sm" 
       onClick={onCommentsClick}
-      className="flex items-center gap-1 text-xs"
+      className={`flex items-center gap-1 text-xs ${hasUnreadComments ? 'bg-[#FEF7CD]/50' : ''}`}
       title={hasError ? "Error loading comment count" : ""}
     >
       <MessageSquare className="h-4 w-4" />

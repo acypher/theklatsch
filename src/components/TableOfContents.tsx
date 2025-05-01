@@ -15,6 +15,8 @@ interface TableOfContentsProps {
   className?: string;
   readArticles?: Set<string>;
   hideRead?: boolean;
+  articlesWithUnreadComments?: Set<string>;
+  onCommentsViewed?: (articleId: string) => void;
 }
 
 const TableOfContents = ({ 
@@ -22,7 +24,9 @@ const TableOfContents = ({
   onArticleClick, 
   className,
   readArticles = new Set(),
-  hideRead = false
+  hideRead = false,
+  articlesWithUnreadComments = new Set(),
+  onCommentsViewed
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
@@ -53,6 +57,8 @@ const TableOfContents = ({
             articles={displayArticles}
             readArticles={readArticles}
             onArticleClick={onArticleClick}
+            articlesWithUnreadComments={articlesWithUnreadComments}
+            onCommentsViewed={onCommentsViewed}
           />
         </ScrollArea>
         

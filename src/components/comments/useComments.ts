@@ -18,6 +18,7 @@ export const useComments = (articleId: string, isOpen: boolean) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [hasUnreadComments, setHasUnreadComments] = useState(false);
   const { user } = useAuth();
 
   const fetchComments = async () => {
@@ -45,11 +46,19 @@ export const useComments = (articleId: string, isOpen: boolean) => {
         throw error;
       }
 
-      setComments(data as Comment[] || []);
+      const commentsData = data as Comment[] || [];
+      setComments(commentsData);
       
       // Track comment views if user is authenticated
-      if (user && data && data.length > 0) {
-        await trackCommentViews(data);
+      if (user && commentsData && commentsData.length > 0) {
+        const viewData = await trackCommentViews(commentsData);
+        
+        // Check if there are any unread comments
+        if (viewData && viewData.unreadCount > 0) {
+          setHasUnreadComments(true);
+        } else {
+          setHasUnreadComments(false);
+        }
       }
     } catch (error: any) {
       console.error("Error fetching comments:", error);
@@ -61,10 +70,24 @@ export const useComments = (articleId: string, isOpen: boolean) => {
 
   // Track which comments the user has viewed
   const trackCommentViews = async (comments: Comment[]) => {
-    if (!user) return;
+    if (!user) return null;
     
     try {
-      const viewPromises = comments.map(comment => {
+      let unreadCount = 0;
+      const viewPromises = comments.map(async comment => {
+        // First check if this comment has been viewed
+        const { data: existingView } = await supabase
+          .from("comment_views")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("comment_id", comment.id)
+          .maybeSingle();
+          
+        if (!existingView) {
+          unreadCount++;
+        }
+        
+        // Then update/insert the view
         return supabase
           .from("comment_views")
           .upsert({
@@ -81,8 +104,10 @@ export const useComments = (articleId: string, isOpen: boolean) => {
       });
       
       await Promise.all(viewPromises);
+      return { unreadCount };
     } catch (error) {
       console.error("Error tracking comment views:", error);
+      return null;
     }
   };
   
@@ -134,9 +159,51 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     }
   };
 
+  // Check for unread comments without opening the dialog
+  const checkUnreadComments = async () => {
+    if (!user) return;
+
+    try {
+      // Get all comments for this article
+      const { data: commentsData, error: commentsError } = await supabase
+        .from("comments")
+        .select("id")
+        .eq("article_id", articleId);
+
+      if (commentsError) throw commentsError;
+      
+      if (!commentsData || commentsData.length === 0) {
+        setHasUnreadComments(false);
+        return;
+      }
+      
+      // Get all viewed comments for this article by the current user
+      const { data: viewsData, error: viewsError } = await supabase
+        .from("comment_views")
+        .select("comment_id")
+        .eq("user_id", user.id)
+        .eq("article_id", articleId);
+        
+      if (viewsError) throw viewsError;
+      
+      // Create a set of viewed comment IDs
+      const viewedCommentIds = new Set((viewsData || []).map(view => view.comment_id));
+      
+      // Check if there are any unread comments
+      const unreadExists = commentsData.some(comment => !viewedCommentIds.has(comment.id));
+      
+      setHasUnreadComments(unreadExists);
+    } catch (error) {
+      console.error("Error checking for unread comments:", error);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchComments();
+      setHasUnreadComments(false); // Reset when dialog opens
+    } else if (user) {
+      checkUnreadComments(); // Check for unread comments when not opening the dialog
     }
   }, [isOpen, articleId, user]);
 
@@ -145,6 +212,7 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     isLoading,
     fetchError,
     fetchComments,
-    updateComment
+    updateComment,
+    hasUnreadComments
   };
 };
