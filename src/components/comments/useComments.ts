@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -93,20 +94,35 @@ export const useComments = (articleId: string, isOpen: boolean) => {
         throw new Error("You must be logged in to update a comment");
       }
       
+      // First check if the comment belongs to the user
+      const { data: commentData, error: commentCheckError } = await supabase
+        .from("comments")
+        .select("*")
+        .eq("id", commentId)
+        .single();
+      
+      if (commentCheckError) {
+        throw new Error("Failed to verify comment ownership");
+      }
+      
+      if (!commentData || commentData.user_id !== user.id) {
+        throw new Error("You can only edit your own comments");
+      }
+      
       // Update the comment in the database
       const { data, error } = await supabase
         .from("comments")
         .update({ content: newContent })
         .eq("id", commentId)
-        .eq("user_id", user.id) // Ensure the user can only update their own comments
         .select();
         
       if (error) {
+        console.error("Supabase update error:", error);
         throw error;
       }
       
       if (!data || data.length === 0) {
-        throw new Error("Failed to update comment. You might not have permission.");
+        throw new Error("Failed to update comment");
       }
       
       // Update the local comments state to reflect the change
