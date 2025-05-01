@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface Comment {
   id: string;
-  content: string | null;
+  content: string;
   author_name: string;
   author_email?: string;
   created_at: string;
@@ -87,36 +87,20 @@ export const useComments = (articleId: string, isOpen: boolean) => {
   };
   
   // Update comment in the database
-  const updateComment = async (commentId: string, newContent: string | null) => {
-    if (!user) {
-      toast.error("You must be logged in to update comments");
-      return false;
-    }
-
+  const updateComment = async (commentId: string, newContent: string) => {
     try {
-      console.log("Updating comment:", commentId, "with new content:", newContent);
-      
-      // First attempt the update
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("comments")
         .update({ content: newContent })
-        .eq("id", commentId)
-        .select();
-
-      console.log("Update response:", { data, error });
+        .eq("id", commentId);
 
       if (error) {
         console.error("Error updating comment:", error);
-        toast.error("Failed to update comment: " + error.message);
+        toast.error("Failed to update comment. Please try again.");
         return false;
       }
 
-      if (!data || data.length === 0) {
-        toast.error("Comment not found or you don't have permission to update it");
-        return false;
-      }
-
-      // Update was successful, update local state
+      // Update local state to reflect the change
       const updatedComments = comments.map(comment => {
         if (comment.id === commentId) {
           return { ...comment, content: newContent };
@@ -127,9 +111,9 @@ export const useComments = (articleId: string, isOpen: boolean) => {
       setComments(updatedComments);
       toast.success("Comment updated successfully");
       return true;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error in updateComment:", error);
-      toast.error("An unexpected error occurred: " + (error.message || "Unknown error"));
+      toast.error("An unexpected error occurred. Please try again.");
       return false;
     }
   };
