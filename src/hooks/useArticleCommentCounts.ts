@@ -11,8 +11,7 @@ interface ArticleCommentCounts {
 }
 
 // Hook to fetch comment and viewed counts for a list of article IDs
-// Now supports refresh via dependency
-export function useArticleCommentCounts(articleIds: string[], refreshTrigger = 0) {
+export function useArticleCommentCounts(articleIds: string[]) {
   const { user, isAuthenticated } = useAuth();
   const [counts, setCounts] = useState<ArticleCommentCounts>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -72,9 +71,8 @@ export function useArticleCommentCounts(articleIds: string[], refreshTrigger = 0
     }
 
     fetchCounts();
-    // Re-run if articles, auth, or refresh needed
-  }, [articleIds.join(","), isAuthenticated, user?.id, refreshTrigger]);
+    // Re-run only if user or articleIds change
+  }, [articleIds.join(","), isAuthenticated, user?.id]);
 
   return { counts, isLoading };
 }
-
