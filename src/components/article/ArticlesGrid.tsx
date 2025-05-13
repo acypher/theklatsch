@@ -1,8 +1,8 @@
-
 import { useRef } from "react";
 import { Article } from "@/lib/types";
 import DraggableArticle from "./DraggableArticle";
 import TableOfContents from "../TableOfContents";
+import { useArticleCommentCounts } from "@/hooks/useArticleCommentCounts";
 
 interface ArticlesGridProps {
   articles: Article[];
@@ -53,6 +53,10 @@ const ArticlesGrid = ({
     ? articles.filter(article => !readArticles.has(article.id))
     : articles;
 
+  // Gather all article IDs for comment count hook
+  const allArticleIds = articles.map(a => a.id);
+  const { counts: commentCounts } = useArticleCommentCounts(allArticleIds);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div className="h-full">
@@ -61,6 +65,7 @@ const ArticlesGrid = ({
           onArticleClick={scrollToArticle}
           readArticles={readArticles}
           hideRead={hideRead}
+          commentCounts={commentCounts}
         />
       </div>
       

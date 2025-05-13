@@ -160,7 +160,7 @@ export type Database = {
           article_id: string
           author_email: string | null
           author_name: string
-          content: string
+          content: string | null
           created_at: string
           id: string
           user_id: string | null
@@ -169,7 +169,7 @@ export type Database = {
           article_id: string
           author_email?: string | null
           author_name?: string
-          content: string
+          content?: string | null
           created_at?: string
           id?: string
           user_id?: string | null
@@ -178,7 +178,7 @@ export type Database = {
           article_id?: string
           author_email?: string | null
           author_name?: string
-          content?: string
+          content?: string | null
           created_at?: string
           id?: string
           user_id?: string | null

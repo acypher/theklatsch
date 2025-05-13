@@ -15,14 +15,15 @@ interface TableOfContentsProps {
   className?: string;
   readArticles?: Set<string>;
   hideRead?: boolean;
+  commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
 }
-
 const TableOfContents = ({ 
   articles, 
   onArticleClick, 
   className,
   readArticles = new Set(),
-  hideRead = false
+  hideRead = false,
+  commentCounts = {},
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
@@ -53,6 +54,7 @@ const TableOfContents = ({
             articles={displayArticles}
             readArticles={readArticles}
             onArticleClick={onArticleClick}
+            commentCounts={commentCounts}
           />
         </ScrollArea>
         

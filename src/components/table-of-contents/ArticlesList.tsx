@@ -6,9 +6,10 @@ interface ArticlesListProps {
   articles: Article[];
   readArticles: Set<string>;
   onArticleClick: (articleId: string) => void;
+  commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
 }
 
-const ArticlesList = ({ articles, readArticles, onArticleClick }: ArticlesListProps) => {
+const ArticlesList = ({ articles, readArticles, onArticleClick, commentCounts = {} }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
   const handleItemClick = (articleId: string) => {
@@ -20,6 +21,11 @@ const ArticlesList = ({ articles, readArticles, onArticleClick }: ArticlesListPr
     <ul className="space-y-2">
       {articles.map((article, index) => {
         const isArticleRead = readArticles.has(article.id);
+
+        // Check for unread comments
+        const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
+        const hasUnreadComments = counts.viewedCommentCount < counts.commentCount;
+
         return (
           <li 
             key={article.id}
@@ -36,7 +42,13 @@ const ArticlesList = ({ articles, readArticles, onArticleClick }: ArticlesListPr
               onClick={() => handleItemClick(article.id)}
               aria-current={activeItem === article.id ? "true" : undefined}
             >
-              <span className={`font-medium min-w-6 ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}>
+              <span 
+                className={`font-medium min-w-6 flex items-center justify-center relative
+                  ${hasUnreadComments ? "bg-yellow-300 text-black rounded-full px-2" : isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}
+                `}
+                style={hasUnreadComments ? { boxShadow: "0 0 0 2px #FFD600" } : {}}
+                title={hasUnreadComments ? "You have unread comments!" : undefined}
+              >
                 {index + 1}.
               </span>
               <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>
