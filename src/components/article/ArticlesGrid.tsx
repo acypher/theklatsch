@@ -1,4 +1,5 @@
-import { useRef } from "react";
+
+import { useRef, useState } from "react";
 import { Article } from "@/lib/types";
 import DraggableArticle from "./DraggableArticle";
 import TableOfContents from "../TableOfContents";
@@ -31,17 +32,30 @@ const ArticlesGrid = ({
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
+  // New state: trigger comment counts refetch
+  const [commentCountsRefreshKey, setCommentCountsRefreshKey] = useState(0);
+
+  // New state: track currently open article dialog (articleId) for comments
+  const [openCommentDialogArticleId, setOpenCommentDialogArticleId] = useState<string | null>(null);
+
+  // Display logic for articles
+  const displayArticles = hideRead 
+    ? articles.filter(article => !readArticles.has(article.id))
+    : articles;
+
+  // Gather all article IDs for comment count hook (refetch using refresh key)
+  const allArticleIds = articles.map(a => a.id);
+  const { counts: commentCounts } = useArticleCommentCounts(allArticleIds.concat(String(commentCountsRefreshKey)));
+
+  // ToC article scroll
   const scrollToArticle = (articleId: string) => {
     const articleElement = articleRefs.current.get(articleId);
-    
     if (articleElement) {
       const navbar = document.querySelector('nav');
       const navbarHeight = navbar ? navbar.offsetHeight : 0;
       const extraPadding = 20;
       const yOffset = -(navbarHeight + extraPadding);
-      
       const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      
       window.scrollTo({
         top: y,
         behavior: 'smooth'
@@ -49,13 +63,16 @@ const ArticlesGrid = ({
     }
   };
 
-  const displayArticles = hideRead 
-    ? articles.filter(article => !readArticles.has(article.id))
-    : articles;
+  // Handler for comment dialog open/close
+  const handleCommentDialogOpen = (articleId: string | null) => {
+    setOpenCommentDialogArticleId(articleId);
+  };
 
-  // Gather all article IDs for comment count hook
-  const allArticleIds = articles.map(a => a.id);
-  const { counts: commentCounts } = useArticleCommentCounts(allArticleIds);
+  const handleCommentDialogClose = () => {
+    setOpenCommentDialogArticleId(null);
+    // When dialog closes, increment refresh key to refetch comment counts
+    setCommentCountsRefreshKey(k => k + 1);
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -83,6 +100,10 @@ const ArticlesGrid = ({
           ref={(el) => {
             if (el) articleRefs.current.set(article.id, el);
           }}
+          // NEW: allow opening/closing comment dialog and trigger ToC comment refresh
+          onCommentDialogOpen={() => handleCommentDialogOpen(article.id)}
+          onCommentDialogClose={handleCommentDialogClose}
+          isCommentDialogOpen={openCommentDialogArticleId === article.id}
         />
       ))}
     </div>
@@ -90,3 +111,4 @@ const ArticlesGrid = ({
 };
 
 export default ArticlesGrid;
+
