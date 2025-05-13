@@ -43,10 +43,22 @@ const ArticlesList = ({ articles, readArticles, onArticleClick, commentCounts = 
               aria-current={activeItem === article.id ? "true" : undefined}
             >
               <span 
-                className={`font-medium min-w-6 flex items-center justify-center relative
-                  ${hasUnreadComments ? "bg-yellow-300 text-black rounded-full px-2" : isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}
+                className={`
+                  font-medium min-w-6 flex items-center justify-center relative
+                  ${hasUnreadComments ? "" : isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}
                 `}
-                style={hasUnreadComments ? { boxShadow: "0 0 0 2px #FFD600" } : {}}
+                style={
+                  hasUnreadComments
+                    ? {
+                        backgroundColor: "#FEF7CD",
+                        color: "#333",
+                        borderRadius: "9999px",
+                        paddingLeft: "0.5rem",
+                        paddingRight: "0.5rem",
+                        boxShadow: "0 0 0 2px #FEF7CD"
+                      }
+                    : {}
+                }
                 title={hasUnreadComments ? "You have unread comments!" : undefined}
               >
                 {index + 1}.
