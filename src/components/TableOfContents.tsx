@@ -15,27 +15,30 @@ interface TableOfContentsProps {
   className?: string;
   readArticles?: Set<string>;
   hideRead?: boolean;
-  commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
+  commentCounts?: { [articleId: string]: { commentCount: number; viewedCommentCount: number } };
+  onOpenComments?: (articleId: string) => void; // ADDED
 }
-const TableOfContents = ({ 
-  articles, 
-  onArticleClick, 
+
+const TableOfContents = ({
+  articles,
+  onArticleClick,
   className,
   readArticles = new Set(),
   hideRead = false,
   commentCounts = {},
+  onOpenComments, // ADDED
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
   const { recommendations, loading, isSaving, handleSaveRecommendations } = useRecommendations();
 
   // Filter articles if hideRead is true
-  const displayArticles = hideRead 
-    ? articles.filter(article => !readArticles.has(article.id))
+  const displayArticles = hideRead
+    ? articles.filter((article) => !readArticles.has(article.id))
     : articles;
 
   const recommendationsHeight = recommendations ? 120 : 0;
-  const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60);
+  const articlesListHeight = isMobile ? 250 : maxHeight - recommendationsHeight - 60;
 
   return (
     <Card className={`h-full max-h-[600px] flex flex-col ${className || ""}`}>
@@ -46,24 +49,22 @@ const TableOfContents = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden p-6 pt-0 flex flex-col">
-        <ScrollArea 
-          className="pr-4"
-          style={{ height: articlesListHeight }}
-        >
-          <ArticlesList 
+        <ScrollArea className="pr-4" style={{ height: articlesListHeight }}>
+          <ArticlesList
             articles={displayArticles}
             readArticles={readArticles}
             onArticleClick={onArticleClick}
             commentCounts={commentCounts}
+            onOpenComments={onOpenComments} // ADDED
           />
         </ScrollArea>
-        
+
         {!loading && (
           <div className="mt-3 max-h-[120px] overflow-hidden">
             <ScrollArea className="h-[120px]">
-              <EditableMarkdown 
-                content={recommendations} 
-                onSave={handleSaveRecommendations} 
+              <EditableMarkdown
+                content={recommendations}
+                onSave={handleSaveRecommendations}
                 placeholder="Add recommendations here..."
                 disabled={isSaving}
               />
