@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Article } from "@/lib/types";
 import { MessageCircle } from "lucide-react";
@@ -78,6 +79,12 @@ const ArticlesList = ({
                 </button>
               )}
             </div>
+            {/* Optionally: Show counts inline */}
+            {counts.commentCount > 0 && (
+              <span className="ml-10 block text-xs text-muted-foreground">
+                Comments {counts.viewedCommentCount}/{counts.commentCount}
+              </span>
+            )}
           </li>
         );
       })}
