@@ -45,11 +45,17 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     if (user && comments.length > 0) {
       await trackCommentViews(comments);
       
-      // Also update the comment view context and refresh counts to update UI
+      // First update the comment view context
       updateViewedCommentsForArticle(articleId);
+      
+      // Then refresh the counts to ensure UI components using the hook get updated
       await refreshCommentCounts();
     }
-    onClose();
+    
+    // Small delay to ensure all state updates are processed
+    setTimeout(() => {
+      onClose();
+    }, 50);
   };
 
   const handleLoginRedirect = () => {

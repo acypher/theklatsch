@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,10 +29,11 @@ export const useCommentView = () => {
 
 export const CommentViewProvider = ({ children }: { children: ReactNode }) => {
   const [commentCounts, setCommentCounts] = useState<CommentCountMap>({});
+  const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
   const { user, isAuthenticated } = useAuth();
 
-  // Function to refresh comment counts
-  const refreshCommentCounts = async () => {
+  // Function to refresh comment counts - converted to useCallback to prevent recreating
+  const refreshCommentCounts = useCallback(async () => {
     // No need to fetch if not authenticated
     if (!isAuthenticated || !user) {
       setCommentCounts({});
@@ -40,6 +41,8 @@ export const CommentViewProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
+      console.log('Refreshing comment counts');
+      
       // Get the total comment count per article
       const { data: rawCommentCounts, error: ccError } = await supabase
         .from("comments")
@@ -83,29 +86,38 @@ export const CommentViewProvider = ({ children }: { children: ReactNode }) => {
       }
       
       setCommentCounts(result);
+      setLastUpdated(Date.now()); // Trigger a refresh for components watching this
+      
+      console.log('Comment counts updated:', result);
     } catch (error) {
       console.error("Error in refreshCommentCounts:", error);
     }
-  };
+  }, [isAuthenticated, user?.id]);
 
   // Function to mark comments for an article as viewed
-  const updateViewedCommentsForArticle = (articleId: string) => {
+  const updateViewedCommentsForArticle = useCallback((articleId: string) => {
     if (!articleId || !isAuthenticated) return;
 
     setCommentCounts(prev => {
       // If we don't have this article in our counts, don't update anything
       if (!prev[articleId]) return prev;
 
-      // Create a new object with updated counts - ensure we're updating correctly
-      return {
+      // Create a new object with updated counts
+      const updated = {
         ...prev,
         [articleId]: {
           ...prev[articleId],
           viewedCommentCount: prev[articleId].commentCount
         }
       };
+      
+      console.log(`Updated view count for article ${articleId}:`, updated[articleId]);
+      return updated;
     });
-  };
+    
+    // Also update lastUpdated to trigger re-renders
+    setLastUpdated(Date.now());
+  }, [isAuthenticated]);
 
   // Initial fetch on mount or auth change
   useEffect(() => {
