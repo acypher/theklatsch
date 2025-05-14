@@ -15,6 +15,7 @@ export function useArticleCommentCounts(articleIds: string[]) {
   const { user, isAuthenticated } = useAuth();
   const [counts, setCounts] = useState<ArticleCommentCounts>({});
   const [isLoading, setIsLoading] = useState(false);
+  const hasUnreadComments = counts.viewedCommentCount < counts.commentCount;
 
   useEffect(() => {
     async function fetchCounts() {
