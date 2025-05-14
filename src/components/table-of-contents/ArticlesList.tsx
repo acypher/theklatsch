@@ -42,15 +42,20 @@ const ArticlesList = ({ articles, readArticles, onArticleClick, commentCounts = 
               onClick={() => handleItemClick(article.id)}
               aria-current={activeItem === article.id ? "true" : undefined}
             >
-              <span 
-                className={`font-medium min-w-6 flex items-center justify-center relative
-                  ${hasUnreadComments ? "bg-yellow-300 text-black rounded-full px-2" : isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}
-                `}
-                style={hasUnreadComments ? { boxShadow: "0 0 0 2px #FFD600" } : {}}
-                title={hasUnreadComments ? "You have unread comments!" : undefined}
-              >
-                {index + 1}.
-              </span>
+              {hasUnreadComments ? (
+                <span 
+                  className="bg-yellow-300 text-black rounded-full px-2 font-medium min-w-6 flex items-center justify-center"
+                  title="You have unread comments!"
+                >
+                  {index + 1}.
+                </span>
+              ) : (
+                <span 
+                  className={`font-medium min-w-6 flex items-center justify-center ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}
+                >
+                  {index + 1}.
+                </span>
+              )}
               <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>
             </button>
           </li>
