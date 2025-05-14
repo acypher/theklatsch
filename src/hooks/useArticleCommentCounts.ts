@@ -13,12 +13,16 @@ export function useArticleCommentCounts(articleIds: string[]) {
   
   // Use try-catch to handle the case when CommentViewContext is not available
   let commentCounts: CommentCountMap = {};
+  let refreshContextCounts: () => Promise<void> = async () => {};
+  
   try {
     const context = useCommentView();
     commentCounts = context.commentCounts;
+    refreshContextCounts = context.refreshCommentCounts;
   } catch (error) {
     // If CommentViewContext is not available, use an empty object
     commentCounts = {};
+    refreshContextCounts = async () => {};
   }
 
   useEffect(() => {
@@ -29,55 +33,68 @@ export function useArticleCommentCounts(articleIds: string[]) {
       }
       setIsLoading(true);
 
-      // Get the total comment count per article
-      const { data: rawCommentCounts, error: ccError } = await supabase
-        .from("comments")
-        .select("article_id, id");
-
-      // Get the viewed comment count per article for this user
-      const { data: viewed, error: vError } = await supabase
-        .from("comment_views")
-        .select("article_id, comment_id")
-        .eq("user_id", user.id);
-
-      if (ccError || vError || !rawCommentCounts) {
-        setCounts({});
-        setIsLoading(false);
-        return;
-      }
-
-      // Compute counts per article
-      const commentCountMap: { [id: string]: Set<string> } = {};
-      for (const item of rawCommentCounts) {
-        if (!commentCountMap[item.article_id]) {
-          commentCountMap[item.article_id] = new Set();
+      try {
+        await refreshContextCounts();
+        
+        // If we have data from the context now, use that instead of fetching
+        if (Object.keys(commentCounts).length > 0) {
+          setIsLoading(false);
+          return;
         }
-        commentCountMap[item.article_id].add(item.id);
-      }
+        
+        // Fall back to direct fetching if context doesn't have data
+        const { data: rawCommentCounts, error: ccError } = await supabase
+          .from("comments")
+          .select("article_id, id");
 
-      const viewedMap: { [id: string]: Set<string> } = {};
-      if (viewed) {
-        for (const item of viewed) {
-          if (!viewedMap[item.article_id]) {
-            viewedMap[item.article_id] = new Set();
+        // Get the viewed comment count per article for this user
+        const { data: viewed, error: vError } = await supabase
+          .from("comment_views")
+          .select("article_id, comment_id")
+          .eq("user_id", user.id);
+
+        if (ccError || vError || !rawCommentCounts) {
+          setCounts({});
+          setIsLoading(false);
+          return;
+        }
+
+        // Compute counts per article
+        const commentCountMap: { [id: string]: Set<string> } = {};
+        for (const item of rawCommentCounts) {
+          if (!commentCountMap[item.article_id]) {
+            commentCountMap[item.article_id] = new Set();
           }
-          viewedMap[item.article_id].add(item.comment_id);
+          commentCountMap[item.article_id].add(item.id);
         }
-      }
 
-      const result: CommentCountMap = {};
-      for (const articleId of articleIds) {
-        const total = commentCountMap[articleId]?.size ?? 0;
-        const seen = viewedMap[articleId]?.size ?? 0;
-        result[articleId] = { commentCount: total, viewedCommentCount: seen };
+        const viewedMap: { [id: string]: Set<string> } = {};
+        if (viewed) {
+          for (const item of viewed) {
+            if (!viewedMap[item.article_id]) {
+              viewedMap[item.article_id] = new Set();
+            }
+            viewedMap[item.article_id].add(item.comment_id);
+          }
+        }
+
+        const result: CommentCountMap = {};
+        for (const articleId of articleIds) {
+          const total = commentCountMap[articleId]?.size ?? 0;
+          const seen = viewedMap[articleId]?.size ?? 0;
+          result[articleId] = { commentCount: total, viewedCommentCount: seen };
+        }
+        setCounts(result);
+      } catch (error) {
+        console.error("Error fetching comment counts:", error);
+        setCounts({});
+      } finally {
+        setIsLoading(false);
       }
-      setCounts(result);
-      setIsLoading(false);
     }
 
     fetchCounts();
-    // Re-run only if user or articleIds change
-  }, [articleIds.join(","), isAuthenticated, user?.id]);
+  }, [articleIds.join(","), isAuthenticated, user?.id, commentCounts]);
 
   // Use the context values if they exist, otherwise use the fetched values
   const finalCounts = Object.keys(commentCounts).length > 0 ? commentCounts : counts;

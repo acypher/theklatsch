@@ -22,7 +22,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const { user } = useAuth();
   const [showCommentForm, setShowCommentForm] = useState(false);
   const navigate = useNavigate();
-  const { updateViewedCommentsForArticle } = useCommentView();
+  const { updateViewedCommentsForArticle, refreshCommentCounts } = useCommentView();
   
   const { 
     comments, 
@@ -40,12 +40,14 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     }
   }, [isOpen, comments.length, articleId, user]);
 
-  const handleClose = () => {
+  const handleClose = async () => {
     // Track comment views when closing the dialog
     if (user && comments.length > 0) {
-      trackCommentViews(comments);
-      // Also update the comment view context
+      await trackCommentViews(comments);
+      
+      // Also update the comment view context and refresh counts to update UI
       updateViewedCommentsForArticle(articleId);
+      await refreshCommentCounts();
     }
     onClose();
   };

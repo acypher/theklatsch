@@ -105,9 +105,6 @@ export const CommentViewProvider = ({ children }: { children: ReactNode }) => {
         }
       };
     });
-    
-    // Force refresh to ensure latest data
-    refreshCommentCounts();
   };
 
   // Initial fetch on mount or auth change
