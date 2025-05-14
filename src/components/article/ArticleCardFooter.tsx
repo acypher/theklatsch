@@ -36,7 +36,9 @@ const ArticleCardFooter = ({
       <MessageSquare className="h-4 w-4" />
       {!isLoading && !hasError && commentCount > 0 ? (
         viewedCommentCount !== undefined ? (
-          <span>Comments {viewedCommentCount}/{commentCount}</span>
+          <span>
+            Comments <span className="bg-yellow-300 text-black px-1 rounded">{viewedCommentCount}/{commentCount}</span>
+          </span>
         ) : (
           <span>Comments {commentCount}</span>
         )
