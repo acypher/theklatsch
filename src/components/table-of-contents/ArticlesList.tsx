@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Article } from "@/lib/types";
 
 interface ArticlesListProps {
@@ -19,6 +19,12 @@ const ArticlesList = ({
 }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
+  // Log the articles and allArticles arrays to verify we're getting the right data
+  useEffect(() => {
+    console.log("ArticlesList - Filtered articles:", articles.map(a => a.id));
+    console.log("ArticlesList - All articles:", allArticles.map(a => a.id));
+  }, [articles, allArticles]);
+  
   const handleItemClick = (articleId: string) => {
     setActiveItem(articleId);
     onArticleClick(articleId);
@@ -32,6 +38,8 @@ const ArticlesList = ({
         // Find the original position of the article in the full list
         const originalIndex = allArticles.findIndex(a => a.id === article.id);
         const displayNumber = originalIndex + 1; // 1-based numbering
+        
+        console.log(`Article ${article.id} - Original index: ${originalIndex}, Display number: ${displayNumber}`);
 
         // Check for unread comments
         const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };

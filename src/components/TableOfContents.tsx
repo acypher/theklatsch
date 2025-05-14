@@ -11,16 +11,17 @@ import ArticlesList from "./table-of-contents/ArticlesList";
 
 interface TableOfContentsProps {
   articles: Article[];
-  allArticles?: Article[]; // Added to support preserving original numbering
+  allArticles: Article[]; // The complete list of articles for reference
   onArticleClick: (articleId: string) => void;
   className?: string;
   readArticles?: Set<string>;
   hideRead?: boolean;
   commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
 }
+
 const TableOfContents = ({ 
   articles, 
-  allArticles, // The complete list of articles for reference
+  allArticles, 
   onArticleClick, 
   className,
   readArticles = new Set(),
@@ -30,9 +31,6 @@ const TableOfContents = ({
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
   const { recommendations, loading, isSaving, handleSaveRecommendations } = useRecommendations();
-
-  // Use the provided allArticles or default to articles if not provided
-  const fullArticlesList = allArticles || articles;
 
   // Filter articles if hideRead is true
   const displayArticles = hideRead 
@@ -57,7 +55,7 @@ const TableOfContents = ({
         >
           <ArticlesList 
             articles={displayArticles}
-            allArticles={fullArticlesList} // Pass the full list of articles
+            allArticles={allArticles}
             readArticles={readArticles}
             onArticleClick={onArticleClick}
             commentCounts={commentCounts}

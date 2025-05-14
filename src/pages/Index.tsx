@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
@@ -90,6 +89,7 @@ const Index = () => {
     restoreScrollPosition();
   }, [articles, location]);
 
+  // Only filter the displayed articles, but keep the full list for reference
   const filteredArticles = React.useMemo(() => {
     if (!filterEnabled || !isAuthenticated) return articles;
     return articles.filter(article => !readArticles.has(article.id));
@@ -113,7 +113,7 @@ const Index = () => {
           <>
             <div ref={articleListRef}>
               <ArticleList 
-                articles={filteredArticles} 
+                articles={filteredArticles}
                 loading={loading}
                 readArticles={readArticles}
                 hideRead={filterEnabled}
