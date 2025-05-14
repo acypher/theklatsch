@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,7 +36,12 @@ export function useArticleCommentCounts(articleIds: string[]) {
         await refreshContextCounts();
         
         // If we have data from the context now, use that instead of fetching
-        if (Object.keys(commentCounts).length > 0) {
+        const relevantContextCounts = Object.entries(commentCounts)
+          .filter(([id]) => articleIds.includes(id))
+          .reduce((acc, [id, data]) => ({ ...acc, [id]: data }), {});
+          
+        if (Object.keys(relevantContextCounts).length > 0) {
+          setCounts(relevantContextCounts);
           setIsLoading(false);
           return;
         }
@@ -94,10 +98,17 @@ export function useArticleCommentCounts(articleIds: string[]) {
     }
 
     fetchCounts();
-  }, [articleIds.join(","), isAuthenticated, user?.id, commentCounts]);
+  }, [articleIds.join(","), isAuthenticated, user?.id, Object.keys(commentCounts).length]);
 
-  // Use the context values if they exist, otherwise use the fetched values
-  const finalCounts = Object.keys(commentCounts).length > 0 ? commentCounts : counts;
+  // Use the context values if they exist for the requested articles,
+  // otherwise use the fetched values
+  const relevantContextCounts = Object.entries(commentCounts)
+    .filter(([id]) => articleIds.includes(id))
+    .reduce((acc, [id, data]) => ({ ...acc, [id]: data }), {});
+    
+  const finalCounts = Object.keys(relevantContextCounts).length > 0 
+    ? relevantContextCounts 
+    : counts;
 
   return { counts: finalCounts, isLoading };
 }

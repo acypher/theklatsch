@@ -3,6 +3,7 @@ import React, { forwardRef, useState } from 'react';
 import { Article } from "@/lib/types";
 import ArticleCard from "@/components/ArticleCard";
 import CommentDialog from "../comments/CommentDialog";
+import { useCommentView } from "@/contexts/CommentViewContext";
 
 interface DraggableArticleProps {
   article: Article;
@@ -29,13 +30,18 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(
     onCommentDialogClose
   }, ref) => {
     const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
+    const { refreshCommentCounts } = useCommentView();
     
     const handleCommentDialogOpen = () => {
       setIsCommentDialogOpen(true);
     };
     
-    const handleCommentDialogClose = () => {
+    const handleCommentDialogClose = async () => {
       setIsCommentDialogOpen(false);
+      
+      // Make sure to refresh the comment counts when dialog closes
+      await refreshCommentCounts();
+      
       if (onCommentDialogClose) {
         onCommentDialogClose();
       }
