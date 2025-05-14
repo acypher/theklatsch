@@ -10,6 +10,9 @@ import CommentList from "./CommentList";
 import AuthPrompt from "./AuthPrompt";
 import { useComments } from "./useComments";
 
+// Create a custom event name for comment updates
+export const COMMENTS_UPDATED_EVENT = 'comments-updated';
+
 interface CommentDialogProps {
   articleId: string;
   articleTitle: string;
@@ -50,6 +53,18 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     }
   };
 
+  const handleClose = () => {
+    // Dispatch a custom event to notify all components that comments have been updated
+    window.dispatchEvent(
+      new CustomEvent(COMMENTS_UPDATED_EVENT, {
+        detail: { articleId }
+      })
+    );
+    
+    // Call the original onClose handler
+    onClose();
+  };
+
   return (
     <Dialog 
       open={isOpen} 
@@ -57,7 +72,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
         if (!open) {
           // Ensure the body is scrollable when the dialog closes
           document.body.style.overflow = '';
-          onClose();
+          handleClose();
         }
       }}
     >
