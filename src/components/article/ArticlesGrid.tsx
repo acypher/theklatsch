@@ -62,7 +62,7 @@ const ArticlesGrid = ({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div className="h-full">
         <TableOfContents 
-          articles={displayArticles} 
+          articles={displayArticles}
           allArticles={articles} // Pass the full article list to preserve numbering 
           onArticleClick={scrollToArticle}
           readArticles={readArticles}
