@@ -7,6 +7,7 @@ import { useArticleCommentCounts } from "@/hooks/useArticleCommentCounts";
 
 interface ArticlesGridProps {
   articles: Article[];
+  allArticles: Article[]; // Complete list of articles for reference
   isLoggedIn: boolean;
   isDragging: boolean;
   draggedItemId: string | null;
@@ -20,6 +21,7 @@ interface ArticlesGridProps {
 
 const ArticlesGrid = ({ 
   articles,
+  allArticles,
   isLoggedIn,
   isDragging,
   draggedItemId,
@@ -63,7 +65,7 @@ const ArticlesGrid = ({
       <div className="h-full">
         <TableOfContents 
           articles={displayArticles}
-          allArticles={articles} // Pass the full article list to preserve numbering 
+          allArticles={allArticles} // Always pass the complete list for correct numbering
           onArticleClick={scrollToArticle}
           readArticles={readArticles}
           hideRead={hideRead}

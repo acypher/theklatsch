@@ -19,7 +19,6 @@ const ArticlesList = ({
 }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
-  // Log the articles and allArticles arrays to verify we're getting the right data
   useEffect(() => {
     console.log("ArticlesList - Filtered articles:", articles.map(a => a.id));
     console.log("ArticlesList - All articles:", allArticles.map(a => a.id));
@@ -35,11 +34,12 @@ const ArticlesList = ({
       {articles.map((article) => {
         const isArticleRead = readArticles.has(article.id);
         
-        // Find the original position of the article in the full list
-        const originalIndex = allArticles.findIndex(a => a.id === article.id);
-        const displayNumber = originalIndex + 1; // 1-based numbering
+        // Find the actual position in the full list of articles (not just the filtered ones)
+        const originalPosition = allArticles.findIndex(a => a.id === article.id);
+        // Display the position + 1 (for 1-based numbering)
+        const displayNumber = originalPosition !== -1 ? originalPosition + 1 : 0;
         
-        console.log(`Article ${article.id} - Original index: ${originalIndex}, Display number: ${displayNumber}`);
+        console.log(`Article ${article.id} - Original position: ${originalPosition}, Display number: ${displayNumber}`);
 
         // Check for unread comments
         const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };

@@ -89,11 +89,14 @@ const Index = () => {
     restoreScrollPosition();
   }, [articles, location]);
 
-  // Only filter the displayed articles, but keep the full list for reference
+  // Filter articles for display, but keep the full list for reference
   const filteredArticles = React.useMemo(() => {
     if (!filterEnabled || !isAuthenticated) return articles;
     return articles.filter(article => !readArticles.has(article.id));
   }, [articles, filterEnabled, readArticles, isAuthenticated]);
+
+  console.log("Index - All articles:", articles.map(a => a.id));
+  console.log("Index - Filtered articles:", filteredArticles.map(a => a.id));
 
   return (
     <div className="min-h-screen">
@@ -114,6 +117,7 @@ const Index = () => {
             <div ref={articleListRef}>
               <ArticleList 
                 articles={filteredArticles}
+                allArticles={articles} // Pass the complete list here
                 loading={loading}
                 readArticles={readArticles}
                 hideRead={filterEnabled}

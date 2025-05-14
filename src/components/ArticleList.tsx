@@ -16,6 +16,7 @@ interface ArticleListProps {
   loading?: boolean;
   readArticles?: Set<string>;
   hideRead?: boolean;
+  allArticles?: Article[]; // Add this to pass through the complete article list
 }
 
 const ArticleList = ({ 
@@ -24,7 +25,8 @@ const ArticleList = ({
   onKeywordClear, 
   loading = false, 
   readArticles = new Set(), 
-  hideRead = false 
+  hideRead = false,
+  allArticles // Original complete list of articles
 }: ArticleListProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
@@ -72,6 +74,7 @@ const ArticleList = ({
       
       <ArticlesGrid 
         articles={localArticles}
+        allArticles={allArticles || initialArticles} // Pass the complete list
         isLoggedIn={isLoggedIn}
         isDragging={isDragging}
         draggedItemId={draggedItem?.id || null}
