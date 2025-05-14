@@ -1,4 +1,3 @@
-
 import React, { forwardRef, useState } from 'react';
 import { Article } from "@/lib/types";
 import ArticleCard from "@/components/ArticleCard";

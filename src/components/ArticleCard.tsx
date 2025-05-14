@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface ArticleCardProps {
   article: Article;
+  onCommentClick?: () => void;  // Make this prop optional
 }
 
 const ArticleCard = ({ article }: ArticleCardProps) => {
