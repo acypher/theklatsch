@@ -4,12 +4,19 @@ import { Article } from "@/lib/types";
 
 interface ArticlesListProps {
   articles: Article[];
+  allArticles: Article[]; // Added to know the original position of each article
   readArticles: Set<string>;
   onArticleClick: (articleId: string) => void;
   commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
 }
 
-const ArticlesList = ({ articles, readArticles, onArticleClick, commentCounts = {} }: ArticlesListProps) => {
+const ArticlesList = ({ 
+  articles, 
+  allArticles, 
+  readArticles, 
+  onArticleClick, 
+  commentCounts = {} 
+}: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
   const handleItemClick = (articleId: string) => {
@@ -19,8 +26,12 @@ const ArticlesList = ({ articles, readArticles, onArticleClick, commentCounts = 
 
   return (
     <ul className="space-y-2">
-      {articles.map((article, index) => {
+      {articles.map((article) => {
         const isArticleRead = readArticles.has(article.id);
+        
+        // Find the original position of the article in the full list
+        const originalIndex = allArticles.findIndex(a => a.id === article.id);
+        const displayNumber = originalIndex + 1; // 1-based numbering
 
         // Check for unread comments
         const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
@@ -47,13 +58,13 @@ const ArticlesList = ({ articles, readArticles, onArticleClick, commentCounts = 
                   className="bg-yellow-300 text-black rounded-full px-2 font-medium min-w-6 flex items-center justify-center"
                   title="You have unread comments!"
                 >
-                  {index + 1}.
+                  {displayNumber}.
                 </span>
               ) : (
                 <span 
                   className={`font-medium min-w-6 flex items-center justify-center ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}
                 >
-                  {index + 1}.
+                  {displayNumber}.
                 </span>
               )}
               <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>

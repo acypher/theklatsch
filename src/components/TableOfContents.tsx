@@ -52,6 +52,7 @@ const TableOfContents = ({
         >
           <ArticlesList 
             articles={displayArticles}
+            allArticles={articles} // Pass the full list of articles
             readArticles={readArticles}
             onArticleClick={onArticleClick}
             commentCounts={commentCounts}
