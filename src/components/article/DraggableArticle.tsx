@@ -13,13 +13,9 @@ interface DraggableArticleProps {
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
-  // Add these for ToC comments dialog highlight logic
-  onCommentDialogOpen?: () => void;
-  onCommentDialogClose?: () => void;
-  isCommentDialogOpen?: boolean;
 }
 
-const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
+const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({ 
   article,
   isLoggedIn,
   isDragging,
@@ -27,10 +23,7 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
   onDragStart,
   onDragEnd,
   onDragOver,
-  onDrop,
-  onCommentDialogOpen,       // Accept (not used for now)
-  onCommentDialogClose,      // Accept (not used for now)
-  isCommentDialogOpen        // Accept (not used for now)
+  onDrop
 }, ref) => {
   return (
     <div
@@ -60,4 +53,3 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
 DraggableArticle.displayName = 'DraggableArticle';
 
 export default DraggableArticle;
-
