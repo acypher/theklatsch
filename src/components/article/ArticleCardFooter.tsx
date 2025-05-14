@@ -37,7 +37,11 @@ const ArticleCardFooter = ({
       {!isLoading && !hasError && commentCount > 0 ? (
         viewedCommentCount !== undefined ? (
           <span>
-            Comments <span className="bg-yellow-300 text-black px-1 rounded">{viewedCommentCount}/{commentCount}</span>
+            Comments {viewedCommentCount < commentCount ? (
+              <span className="bg-yellow-300 text-black px-1 rounded">{viewedCommentCount}/{commentCount}</span>
+            ) : (
+              `${viewedCommentCount}/${commentCount}`
+            )}
           </span>
         ) : (
           <span>Comments {commentCount}</span>
