@@ -32,7 +32,16 @@ const ArticlesGrid = ({
   onDrop
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const { updateViewedCommentsForArticle } = useCommentView();
+  
+  // Use try-catch to handle the case when CommentViewContext is not available
+  let updateViewedCommentsForArticle: (articleId: string) => void = () => {};
+  try {
+    const { updateViewedCommentsForArticle: updateFn } = useCommentView();
+    updateViewedCommentsForArticle = updateFn;
+  } catch (error) {
+    // If CommentViewContext is not available, use a no-op function
+    console.warn("CommentViewContext is not available in ArticlesGrid");
+  }
 
   const scrollToArticle = (articleId: string) => {
     const articleElement = articleRefs.current.get(articleId);

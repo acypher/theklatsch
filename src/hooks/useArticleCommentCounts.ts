@@ -10,7 +10,16 @@ export function useArticleCommentCounts(articleIds: string[]) {
   const { user, isAuthenticated } = useAuth();
   const [counts, setCounts] = useState<CommentCountMap>({});
   const [isLoading, setIsLoading] = useState(false);
-  const { commentCounts } = useCommentView();
+  
+  // Use try-catch to handle the case when CommentViewContext is not available
+  let commentCounts: CommentCountMap = {};
+  try {
+    const context = useCommentView();
+    commentCounts = context.commentCounts;
+  } catch (error) {
+    // If CommentViewContext is not available, use an empty object
+    commentCounts = {};
+  }
 
   useEffect(() => {
     async function fetchCounts() {
