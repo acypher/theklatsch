@@ -30,6 +30,11 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     updateComment 
   } = useComments(articleId, isOpen);
 
+  const handleClose = () => {
+  trackCommentViews(comments); // Ensure this function is called
+  onClose();
+};
+
   const handleLoginRedirect = () => {
     onClose();
     navigate("/auth");
