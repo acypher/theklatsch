@@ -16,7 +16,7 @@ const ReadFilter = ({ enabled, onToggle }: ReadFilterProps) => {
       className="flex items-center gap-2 text-xs"
     >
       <Filter size={16} />
-      {enabled ? "Showing unread" : "Show all"}
+      {enabled ? "Showing unread" : "Showing all"}
     </Button>
   );
 };
