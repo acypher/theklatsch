@@ -29,7 +29,8 @@ const ArticlesList = ({
       {visibleArticles.map((article) => {
         const isArticleRead = readArticles.has(article.id);
         
-        // Find the original index from the complete articles list
+        // Get the actual index from the complete articles array
+        // This ensures numbering stays consistent even when filtering
         const originalIndex = articles.findIndex((a) => a.id === article.id);
         const displayIndex = originalIndex + 1; // Use 1-based indexing for display
 
