@@ -40,16 +40,20 @@ const ArticleCardFooter = ({
         variant="ghost" 
         size="sm" 
         onClick={onCommentsClick}
-        className={cn(
-          "flex items-center gap-1 text-xs",
-          hasUnreadComments ? "bg-[#FEF7CD] hover:bg-[#FEF7CD]/90" : ""
-        )}
+        className="flex items-center gap-1 text-xs"
         title={hasError ? "Error loading comment count" : hasUnreadComments ? "You have unread comments!" : ""}
       >
         <MessageSquare className="h-4 w-4" />
         {!isLoading && !hasError && commentCount > 0 ? (
           viewedCommentCount !== undefined ? (
-            <span>Comments {viewedCommentCount}/{commentCount}</span>
+            <span>
+              Comments <span className={cn(
+                "px-1 rounded",
+                hasUnreadComments ? "bg-[#FEF7CD]" : ""
+              )}>
+                {viewedCommentCount}/{commentCount}
+              </span>
+            </span>
           ) : (
             <span>Comments {commentCount}</span>
           )
