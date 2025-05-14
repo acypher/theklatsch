@@ -27,13 +27,17 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     isLoading, 
     fetchError, 
     fetchComments,
-    updateComment 
+    updateComment,
+    trackCommentViews
   } = useComments(articleId, isOpen);
 
   const handleClose = () => {
-  trackCommentViews(comments); // Ensure this function is called
-  onClose();
-};
+    // Track comment views when closing the dialog
+    if (user && comments.length > 0) {
+      trackCommentViews(comments);
+    }
+    onClose();
+  };
 
   const handleLoginRedirect = () => {
     onClose();
@@ -62,7 +66,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
         if (!open) {
           // Ensure the body is scrollable when the dialog closes
           document.body.style.overflow = '';
-          onClose();
+          handleClose();
         }
       }}
     >

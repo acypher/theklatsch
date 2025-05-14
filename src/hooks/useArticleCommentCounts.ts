@@ -2,20 +2,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface ArticleCommentCounts {
-  [articleId: string]: {
-    commentCount: number;
-    viewedCommentCount: number;
-  };
-}
+import { useCommentView } from "@/contexts/CommentViewContext";
+import { CommentCountMap } from "@/contexts/CommentViewContext";
 
 // Hook to fetch comment and viewed counts for a list of article IDs
 export function useArticleCommentCounts(articleIds: string[]) {
   const { user, isAuthenticated } = useAuth();
-  const [counts, setCounts] = useState<ArticleCommentCounts>({});
+  const [counts, setCounts] = useState<CommentCountMap>({});
   const [isLoading, setIsLoading] = useState(false);
-  const hasUnreadComments = counts.viewedCommentCount < counts.commentCount;
+  const { commentCounts } = useCommentView();
 
   useEffect(() => {
     async function fetchCounts() {
@@ -61,7 +56,7 @@ export function useArticleCommentCounts(articleIds: string[]) {
         }
       }
 
-      const result: ArticleCommentCounts = {};
+      const result: CommentCountMap = {};
       for (const articleId of articleIds) {
         const total = commentCountMap[articleId]?.size ?? 0;
         const seen = viewedMap[articleId]?.size ?? 0;
@@ -75,5 +70,8 @@ export function useArticleCommentCounts(articleIds: string[]) {
     // Re-run only if user or articleIds change
   }, [articleIds.join(","), isAuthenticated, user?.id]);
 
-  return { counts, isLoading };
+  // Use the context values if they exist, otherwise use the fetched values
+  const finalCounts = Object.keys(commentCounts).length > 0 ? commentCounts : counts;
+
+  return { counts: finalCounts, isLoading };
 }

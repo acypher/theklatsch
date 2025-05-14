@@ -1,8 +1,10 @@
+
 import { useRef } from "react";
 import { Article } from "@/lib/types";
 import DraggableArticle from "./DraggableArticle";
 import TableOfContents from "../TableOfContents";
 import { useArticleCommentCounts } from "@/hooks/useArticleCommentCounts";
+import { useCommentView } from "@/contexts/CommentViewContext";
 
 interface ArticlesGridProps {
   articles: Article[];
@@ -30,6 +32,7 @@ const ArticlesGrid = ({
   onDrop
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const { updateViewedCommentsForArticle } = useCommentView();
 
   const scrollToArticle = (articleId: string) => {
     const articleElement = articleRefs.current.get(articleId);
@@ -57,6 +60,12 @@ const ArticlesGrid = ({
   const allArticleIds = articles.map(a => a.id);
   const { counts: commentCounts } = useArticleCommentCounts(allArticleIds);
 
+  // Function to handle comment dialog close
+  const handleCommentDialogClose = (articleId: string) => {
+    // Update the viewed comments count for this article
+    updateViewedCommentsForArticle(articleId);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div className="h-full">
@@ -80,6 +89,7 @@ const ArticlesGrid = ({
           onDragEnd={onDragEnd}
           onDragOver={onDragOver}
           onDrop={onDrop}
+          onCommentDialogClose={() => handleCommentDialogClose(article.id)}
           ref={(el) => {
             if (el) articleRefs.current.set(article.id, el);
           }}
