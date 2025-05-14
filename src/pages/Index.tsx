@@ -103,9 +103,6 @@ const Index = () => {
       <Navbar 
         onLogoClick={() => setShowMaintenancePage(false)} 
         currentIssue={currentIssue}
-        showReadFilter={true}
-        filterEnabled={filterEnabled}
-        onFilterToggle={setFilterEnabled}
       />
       <main className="container mx-auto px-4 py-8">
         <HomeLogo />
@@ -121,6 +118,8 @@ const Index = () => {
                 loading={loading}
                 readArticles={readArticles}
                 hideRead={filterEnabled}
+                filterEnabled={filterEnabled}
+                onFilterToggle={setFilterEnabled}
               />
             </div>
             <StorefrontImage />

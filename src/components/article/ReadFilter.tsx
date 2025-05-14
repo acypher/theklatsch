@@ -1,5 +1,6 @@
 
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Filter } from "lucide-react";
 
 interface ReadFilterProps {
   enabled: boolean;
@@ -8,19 +9,15 @@ interface ReadFilterProps {
 
 const ReadFilter = ({ enabled, onToggle }: ReadFilterProps) => {
   return (
-    <div className="flex items-center gap-2">
-      <Switch
-        id="read-filter"
-        checked={enabled}
-        onCheckedChange={onToggle}
-      />
-      <label 
-        htmlFor="read-filter" 
-        className="text-sm text-muted-foreground cursor-pointer"
-      >
-        Filter articles already read
-      </label>
-    </div>
+    <Button
+      variant={enabled ? "default" : "outline"}
+      size="sm"
+      onClick={() => onToggle(!enabled)}
+      className="flex items-center gap-2 text-xs"
+    >
+      <Filter size={16} />
+      {enabled ? "Showing unread" : "Show all"}
+    </Button>
   );
 };
 

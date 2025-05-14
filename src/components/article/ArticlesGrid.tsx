@@ -13,6 +13,8 @@ interface ArticlesGridProps {
   draggedItemId: string | null;
   readArticles: Set<string>;
   hideRead: boolean;
+  filterEnabled: boolean;
+  onFilterToggle: (checked: boolean) => void;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -27,6 +29,8 @@ const ArticlesGrid = ({
   draggedItemId,
   readArticles,
   hideRead,
+  filterEnabled,
+  onFilterToggle,
   onDragStart,
   onDragEnd,
   onDragOver,
@@ -70,6 +74,8 @@ const ArticlesGrid = ({
           readArticles={readArticles}
           hideRead={hideRead}
           commentCounts={commentCounts}
+          filterEnabled={filterEnabled}
+          onFilterToggle={onFilterToggle}
         />
       </div>
       

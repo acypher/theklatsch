@@ -8,6 +8,7 @@ import EditableMarkdown from "./EditableMarkdown";
 import { useRecommendations } from "@/hooks/useRecommendations";
 import { useContentsHeight } from "@/hooks/useContentsHeight";
 import ArticlesList from "./table-of-contents/ArticlesList";
+import ReadFilter from "./article/ReadFilter";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -17,6 +18,8 @@ interface TableOfContentsProps {
   readArticles?: Set<string>;
   hideRead?: boolean;
   commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
+  filterEnabled?: boolean;
+  onFilterToggle?: (checked: boolean) => void;
 }
 
 const TableOfContents = ({ 
@@ -27,6 +30,8 @@ const TableOfContents = ({
   readArticles = new Set(),
   hideRead = false,
   commentCounts = {},
+  filterEnabled = false,
+  onFilterToggle,
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
@@ -43,10 +48,18 @@ const TableOfContents = ({
   return (
     <Card className={`h-full max-h-[600px] flex flex-col ${className || ""}`}>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <BookOpen className="h-5 w-5" />
-          In This Issue
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <BookOpen className="h-5 w-5" />
+            In This Issue
+          </CardTitle>
+          {onFilterToggle && (
+            <ReadFilter
+              enabled={filterEnabled}
+              onToggle={onFilterToggle}
+            />
+          )}
+        </div>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden p-6 pt-0 flex flex-col">
         <ScrollArea 

@@ -16,6 +16,8 @@ interface ArticleListProps {
   loading?: boolean;
   readArticles?: Set<string>;
   hideRead?: boolean;
+  filterEnabled?: boolean;
+  onFilterToggle?: (checked: boolean) => void;
   allArticles?: Article[]; // Add this to pass through the complete article list
 }
 
@@ -26,6 +28,8 @@ const ArticleList = ({
   loading = false, 
   readArticles = new Set(), 
   hideRead = false,
+  filterEnabled = false,
+  onFilterToggle,
   allArticles // Original complete list of articles
 }: ArticleListProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -80,6 +84,8 @@ const ArticleList = ({
         draggedItemId={draggedItem?.id || null}
         readArticles={readArticles}
         hideRead={hideRead}
+        filterEnabled={filterEnabled}
+        onFilterToggle={onFilterToggle}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
