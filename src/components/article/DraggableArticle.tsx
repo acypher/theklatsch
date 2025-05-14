@@ -1,3 +1,4 @@
+
 import React, { forwardRef, useState } from 'react';
 import { Article } from "@/lib/types";
 import ArticleCard from "@/components/ArticleCard";
@@ -55,7 +56,7 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(
         data-article-id={article.id}
       >
         <ArticleCard 
-          article={article} 
+          article={article}
           onCommentClick={handleCommentDialogOpen}
         />
         

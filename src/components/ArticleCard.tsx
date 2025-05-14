@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -18,7 +17,7 @@ interface ArticleCardProps {
   onCommentClick?: () => void;  // Make this prop optional
 }
 
-const ArticleCard = ({ article }: ArticleCardProps) => {
+const ArticleCard = ({ article, onCommentClick }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const [viewedCommentCount, setViewedCommentCount] = useState<number | undefined>(undefined);
@@ -103,6 +102,18 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     fetchCommentData();
   };
 
+  const handleCommentsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Use the provided onCommentClick if available, otherwise show internal dialog
+    if (onCommentClick) {
+      onCommentClick();
+    } else {
+      setShowComments(true);
+    }
+  };
+
+  // Define customRenderers outside of the component to avoid recreating it on each render
   const customRenderers = {
     a: ({ node, ...props }: any) => (
       <a 
@@ -169,11 +180,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         </Link>
         <ArticleCardFooter 
           keywords={article.keywords}
-          onCommentsClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setShowComments(true);
-          }}
+          onCommentsClick={handleCommentsClick}
           isLoading={isLoading}
           hasError={hasError}
           commentCount={commentCount}

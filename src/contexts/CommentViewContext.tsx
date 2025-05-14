@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 // Types for the comment counts
 export interface CommentCountMap {
@@ -33,13 +34,58 @@ export const CommentViewProvider = ({ children }: { children: ReactNode }) => {
   // Function to refresh comment counts
   const refreshCommentCounts = async () => {
     // No need to fetch if not authenticated
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
       setCommentCounts({});
       return;
     }
 
-    // This would be implemented with the actual supabase fetching code
-    // But for now we're just reusing the existing functionality
+    try {
+      // Get the total comment count per article
+      const { data: rawCommentCounts, error: ccError } = await supabase
+        .from("comments")
+        .select("article_id, id");
+
+      // Get the viewed comment count per article for this user
+      const { data: viewed, error: vError } = await supabase
+        .from("comment_views")
+        .select("article_id, comment_id")
+        .eq("user_id", user.id);
+
+      if (ccError || vError || !rawCommentCounts) {
+        console.error("Error fetching comment counts:", ccError || vError);
+        return;
+      }
+
+      // Compute counts per article
+      const commentCountMap: { [id: string]: Set<string> } = {};
+      for (const item of rawCommentCounts) {
+        if (!commentCountMap[item.article_id]) {
+          commentCountMap[item.article_id] = new Set();
+        }
+        commentCountMap[item.article_id].add(item.id);
+      }
+
+      const viewedMap: { [id: string]: Set<string> } = {};
+      if (viewed) {
+        for (const item of viewed) {
+          if (!viewedMap[item.article_id]) {
+            viewedMap[item.article_id] = new Set();
+          }
+          viewedMap[item.article_id].add(item.comment_id);
+        }
+      }
+
+      const result: CommentCountMap = {};
+      for (const articleId of Object.keys(commentCountMap)) {
+        const total = commentCountMap[articleId]?.size ?? 0;
+        const seen = viewedMap[articleId]?.size ?? 0;
+        result[articleId] = { commentCount: total, viewedCommentCount: seen };
+      }
+      
+      setCommentCounts(result);
+    } catch (error) {
+      console.error("Error in refreshCommentCounts:", error);
+    }
   };
 
   // Function to mark comments for an article as viewed
@@ -50,7 +96,7 @@ export const CommentViewProvider = ({ children }: { children: ReactNode }) => {
       // If we don't have this article in our counts, don't update anything
       if (!prev[articleId]) return prev;
 
-      // Create a new object with updated counts
+      // Create a new object with updated counts - ensure we're updating correctly
       return {
         ...prev,
         [articleId]: {
@@ -59,6 +105,9 @@ export const CommentViewProvider = ({ children }: { children: ReactNode }) => {
         }
       };
     });
+    
+    // Force refresh to ensure latest data
+    refreshCommentCounts();
   };
 
   // Initial fetch on mount or auth change

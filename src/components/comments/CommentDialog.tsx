@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import CommentForm from "./CommentForm";
 import CommentList from "./CommentList";
 import AuthPrompt from "./AuthPrompt";
 import { useComments } from "./useComments";
+import { useCommentView } from "@/contexts/CommentViewContext";
 
 interface CommentDialogProps {
   articleId: string;
@@ -21,6 +22,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const { user } = useAuth();
   const [showCommentForm, setShowCommentForm] = useState(false);
   const navigate = useNavigate();
+  const { updateViewedCommentsForArticle } = useCommentView();
   
   const { 
     comments, 
@@ -31,10 +33,19 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     trackCommentViews
   } = useComments(articleId, isOpen);
 
+  // When dialog is opened, mark comments as viewed
+  useEffect(() => {
+    if (isOpen && user && comments.length > 0) {
+      updateViewedCommentsForArticle(articleId);
+    }
+  }, [isOpen, comments.length, articleId, user]);
+
   const handleClose = () => {
     // Track comment views when closing the dialog
     if (user && comments.length > 0) {
       trackCommentViews(comments);
+      // Also update the comment view context
+      updateViewedCommentsForArticle(articleId);
     }
     onClose();
   };

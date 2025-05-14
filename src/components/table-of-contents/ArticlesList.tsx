@@ -24,7 +24,7 @@ const ArticlesList = ({ articles, readArticles, onArticleClick, commentCounts = 
 
         // Check for unread comments
         const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
-        const hasUnreadComments = counts.viewedCommentCount < counts.commentCount;
+        const hasUnreadComments = counts.commentCount > 0 && counts.viewedCommentCount < counts.commentCount;
 
         return (
           <li 
