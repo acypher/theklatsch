@@ -51,8 +51,7 @@ const TableOfContents = ({
           style={{ height: articlesListHeight }}
         >
           <ArticlesList 
-            articles={articles} // Pass all articles for numbering reference
-            visibleArticles={displayArticles} // Pass filtered articles for display
+            articles={displayArticles}
             readArticles={readArticles}
             onArticleClick={onArticleClick}
             commentCounts={commentCounts}

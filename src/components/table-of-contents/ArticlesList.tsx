@@ -7,16 +7,9 @@ interface ArticlesListProps {
   readArticles: Set<string>;
   onArticleClick: (articleId: string) => void;
   commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
-  visibleArticles?: Article[]; // Added to track which articles are currently visible
 }
 
-const ArticlesList = ({ 
-  articles, 
-  readArticles, 
-  onArticleClick, 
-  commentCounts = {},
-  visibleArticles = articles // Default to all articles if not provided
-}: ArticlesListProps) => {
+const ArticlesList = ({ articles, readArticles, onArticleClick, commentCounts = {} }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
   const handleItemClick = (articleId: string) => {
@@ -26,13 +19,8 @@ const ArticlesList = ({
 
   return (
     <ul className="space-y-2">
-      {visibleArticles.map((article) => {
+      {articles.map((article, index) => {
         const isArticleRead = readArticles.has(article.id);
-        
-        // Get the actual index from the complete articles array
-        // This ensures numbering stays consistent even when filtering
-        const originalIndex = articles.findIndex((a) => a.id === article.id);
-        const displayIndex = originalIndex + 1; // Use 1-based indexing for display
 
         // Check for unread comments
         const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
@@ -59,13 +47,13 @@ const ArticlesList = ({
                   className="bg-yellow-300 text-black rounded-full px-2 font-medium min-w-6 flex items-center justify-center"
                   title="You have unread comments!"
                 >
-                  {displayIndex}.
+                  {index + 1}.
                 </span>
               ) : (
                 <span 
                   className={`font-medium min-w-6 flex items-center justify-center ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}
                 >
-                  {displayIndex}.
+                  {index + 1}.
                 </span>
               )}
               <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>
