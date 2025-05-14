@@ -2,7 +2,6 @@
 import KeywordBadge from "../KeywordBadge";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface ArticleCardFooterProps {
   keywords: string[];
@@ -20,49 +19,32 @@ const ArticleCardFooter = ({
   hasError,
   commentCount,
   viewedCommentCount
-}: ArticleCardFooterProps) => {
-  // Determine if there are unread comments
-  const hasUnreadComments = 
-    !isLoading && 
-    !hasError && 
-    commentCount > 0 && 
-    viewedCommentCount !== undefined && 
-    viewedCommentCount < commentCount;
-
-  return (
-    <div className="flex justify-between items-center">
-      <div className="flex flex-wrap gap-2">
-        {keywords.map((keyword, index) => (
-          <KeywordBadge key={index} keyword={keyword} />
-        ))}
-      </div>
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={onCommentsClick}
-        className="flex items-center gap-1 text-xs"
-        title={hasError ? "Error loading comment count" : hasUnreadComments ? "You have unread comments!" : ""}
-      >
-        <MessageSquare className="h-4 w-4" />
-        {!isLoading && !hasError && commentCount > 0 ? (
-          viewedCommentCount !== undefined ? (
-            <span>
-              Comments <span className={cn(
-                "px-1 rounded",
-                hasUnreadComments ? "bg-[#FEF7CD]" : ""
-              )}>
-                {viewedCommentCount}/{commentCount}
-              </span>
-            </span>
-          ) : (
-            <span>Comments {commentCount}</span>
-          )
-        ) : (
-          <span>Comments</span>
-        )}
-      </Button>
+}: ArticleCardFooterProps) => (
+  <div className="flex justify-between items-center">
+    <div className="flex flex-wrap gap-2">
+      {keywords.map((keyword, index) => (
+        <KeywordBadge key={index} keyword={keyword} />
+      ))}
     </div>
-  );
-};
+    <Button 
+      variant="ghost" 
+      size="sm" 
+      onClick={onCommentsClick}
+      className="flex items-center gap-1 text-xs"
+      title={hasError ? "Error loading comment count" : ""}
+    >
+      <MessageSquare className="h-4 w-4" />
+      {!isLoading && !hasError && commentCount > 0 ? (
+        viewedCommentCount !== undefined ? (
+          <span>Comments {viewedCommentCount}/{commentCount}</span>
+        ) : (
+          <span>Comments {commentCount}</span>
+        )
+      ) : (
+        <span>Comments</span>
+      )}
+    </Button>
+  </div>
+);
 
 export default ArticleCardFooter;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -144,7 +143,6 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     isLoading,
     fetchError,
     fetchComments,
-    updateComment,
-    trackCommentViews // Now exposing this function
+    updateComment
   };
 };

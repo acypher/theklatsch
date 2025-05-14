@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,6 @@ import CommentForm from "./CommentForm";
 import CommentList from "./CommentList";
 import AuthPrompt from "./AuthPrompt";
 import { useComments } from "./useComments";
-import { useCommentView } from "@/contexts/CommentViewContext";
 
 interface CommentDialogProps {
   articleId: string;
@@ -22,41 +21,14 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
   const { user } = useAuth();
   const [showCommentForm, setShowCommentForm] = useState(false);
   const navigate = useNavigate();
-  const { updateViewedCommentsForArticle, refreshCommentCounts } = useCommentView();
   
   const { 
     comments, 
     isLoading, 
     fetchError, 
     fetchComments,
-    updateComment,
-    trackCommentViews
+    updateComment 
   } = useComments(articleId, isOpen);
-
-  // When dialog is opened, mark comments as viewed
-  useEffect(() => {
-    if (isOpen && user && comments.length > 0) {
-      updateViewedCommentsForArticle(articleId);
-    }
-  }, [isOpen, comments.length, articleId, user]);
-
-  const handleClose = async () => {
-    // Track comment views when closing the dialog
-    if (user && comments.length > 0) {
-      await trackCommentViews(comments);
-      
-      // First update the comment view context
-      updateViewedCommentsForArticle(articleId);
-      
-      // Then refresh the counts to ensure UI components using the hook get updated
-      await refreshCommentCounts();
-    }
-    
-    // Small delay to ensure all state updates are processed
-    setTimeout(() => {
-      onClose();
-    }, 50);
-  };
 
   const handleLoginRedirect = () => {
     onClose();
@@ -85,7 +57,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
         if (!open) {
           // Ensure the body is scrollable when the dialog closes
           document.body.style.overflow = '';
-          handleClose();
+          onClose();
         }
       }}
     >

@@ -6,34 +6,78 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useState, useEffect } from "react";
 import CommentDialog from "./comments/CommentDialog";
+import { supabase } from "@/integrations/supabase/client";
 import ArticleCardHeader from "./article/ArticleCardHeader";
 import ArticleCardMeta from "./article/ArticleCardMeta";
 import ArticleCardFooter from "./article/ArticleCardFooter";
 import ReadCheckbox from './article/ReadCheckbox';
 import { useAuth } from "@/contexts/AuthContext";
-import { useArticleCommentCounts } from "@/hooks/useArticleCommentCounts";
 
 interface ArticleCardProps {
   article: Article;
-  onCommentClick?: () => void;  // Make this prop optional
 }
 
-const ArticleCard = ({ article, onCommentClick }: ArticleCardProps) => {
+const ArticleCard = ({ article }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
+  const [viewedCommentCount, setViewedCommentCount] = useState<number | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const { user, isAuthenticated } = useAuth();
+
   const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
   
-  // Use the hook with a single article ID
-  const { counts, isLoading } = useArticleCommentCounts([article.id]);
-  const commentData = counts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
-  const { commentCount, viewedCommentCount } = commentData;
-  
   const fetchCommentData = async () => {
-    // The useArticleCommentCounts hook now handles this automatically
+    try {
+      setIsLoading(true);
+      setHasError(false);
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timed out')), 8000)
+      );
+      
+      const fetchPromise = supabase
+        .from("comments")
+        .select("*", { count: 'exact', head: true })
+        .eq("article_id", article.id);
+      
+      const { count, error } = await Promise.race([
+        fetchPromise,
+        timeoutPromise.then(() => { throw new Error('Request timed out'); })
+      ]) as any;
+      
+      if (error) {
+        throw error;
+      }
+      
+      setCommentCount(count || 0);
+      
+      // Only fetch viewed comments if user is authenticated
+      if (isAuthenticated && user) {
+        try {
+          const { data, error: viewError } = await supabase
+            .from("comment_views")
+            .select("comment_id", { count: 'exact' })
+            .eq("article_id", article.id)
+            .eq("user_id", user.id);
+            
+          if (!viewError) {
+            setViewedCommentCount(data?.length || 0);
+          }
+        } catch (viewError) {
+          console.error("Error fetching viewed comments:", viewError);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching comment count:", error);
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   useEffect(() => {
-    // No need for additional fetching as the hook handles this
+    fetchCommentData();
   }, [article.id, isAuthenticated, user]);
   
   const formatDate = (dateString: string) => {
@@ -54,20 +98,10 @@ const ArticleCard = ({ article, onCommentClick }: ArticleCardProps) => {
 
   const handleCommentsClose = () => {
     setShowComments(false);
+    // Refresh comment count data when dialog closes
+    fetchCommentData();
   };
 
-  const handleCommentsClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Use the provided onCommentClick if available, otherwise show internal dialog
-    if (onCommentClick) {
-      onCommentClick();
-    } else {
-      setShowComments(true);
-    }
-  };
-
-  // Define customRenderers outside of the component to avoid recreating it on each render
   const customRenderers = {
     a: ({ node, ...props }: any) => (
       <a 
@@ -134,9 +168,13 @@ const ArticleCard = ({ article, onCommentClick }: ArticleCardProps) => {
         </Link>
         <ArticleCardFooter 
           keywords={article.keywords}
-          onCommentsClick={handleCommentsClick}
+          onCommentsClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowComments(true);
+          }}
           isLoading={isLoading}
-          hasError={false}
+          hasError={hasError}
           commentCount={commentCount}
           viewedCommentCount={isAuthenticated ? viewedCommentCount : undefined}
         />

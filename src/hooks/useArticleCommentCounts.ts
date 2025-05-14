@@ -1,58 +1,30 @@
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCommentView } from "@/contexts/CommentViewContext";
-import { CommentCountMap } from "@/contexts/CommentViewContext";
+
+interface ArticleCommentCounts {
+  [articleId: string]: {
+    commentCount: number;
+    viewedCommentCount: number;
+  };
+}
 
 // Hook to fetch comment and viewed counts for a list of article IDs
 export function useArticleCommentCounts(articleIds: string[]) {
   const { user, isAuthenticated } = useAuth();
-  const [counts, setCounts] = useState<CommentCountMap>({});
+  const [counts, setCounts] = useState<ArticleCommentCounts>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  
-  // Use try-catch to handle the case when CommentViewContext is not available
-  let commentCounts: CommentCountMap = {};
-  let refreshContextCounts: () => Promise<void> = async () => {};
-  
-  try {
-    const context = useCommentView();
-    commentCounts = context.commentCounts;
-    refreshContextCounts = context.refreshCommentCounts;
-  } catch (error) {
-    // If CommentViewContext is not available, use an empty object
-    commentCounts = {};
-    refreshContextCounts = async () => {};
-  }
 
-  // Define fetchCounts as a useCallback to prevent unnecessary re-renders
-  const fetchCounts = useCallback(async () => {
-    if (!isAuthenticated || articleIds.length === 0) {
-      setCounts({});
-      setIsLoading(false);
-      return;
-    }
-    
-    setIsLoading(true);
-    setHasError(false);
-
-    try {
-      // First try to refresh counts from context
-      await refreshContextCounts();
-      
-      // Check if we now have the data in context
-      const relevantContextCounts = Object.entries(commentCounts)
-        .filter(([id]) => articleIds.includes(id))
-        .reduce((acc, [id, data]) => ({ ...acc, [id]: data }), {});
-        
-      if (Object.keys(relevantContextCounts).length === articleIds.length) {
-        setCounts(relevantContextCounts);
-        setIsLoading(false);
+  useEffect(() => {
+    async function fetchCounts() {
+      if (!isAuthenticated || articleIds.length === 0) {
+        setCounts({});
         return;
       }
-      
-      // Fall back to direct fetching if context doesn't have all the data
+      setIsLoading(true);
+
+      // Get the total comment count per article
       const { data: rawCommentCounts, error: ccError } = await supabase
         .from("comments")
         .select("article_id, id");
@@ -64,7 +36,6 @@ export function useArticleCommentCounts(articleIds: string[]) {
         .eq("user_id", user.id);
 
       if (ccError || vError || !rawCommentCounts) {
-        setHasError(true);
         setCounts({});
         setIsLoading(false);
         return;
@@ -89,35 +60,19 @@ export function useArticleCommentCounts(articleIds: string[]) {
         }
       }
 
-      const result: CommentCountMap = {};
+      const result: ArticleCommentCounts = {};
       for (const articleId of articleIds) {
         const total = commentCountMap[articleId]?.size ?? 0;
         const seen = viewedMap[articleId]?.size ?? 0;
         result[articleId] = { commentCount: total, viewedCommentCount: seen };
       }
       setCounts(result);
-    } catch (error) {
-      console.error("Error fetching comment counts:", error);
-      setHasError(true);
-      setCounts({});
-    } finally {
       setIsLoading(false);
     }
-  }, [articleIds.join(","), isAuthenticated, user?.id, Object.keys(commentCounts).length]);
 
-  // Fetch counts when dependencies change
-  useEffect(() => {
     fetchCounts();
-  }, [fetchCounts, commentCounts]);
+    // Re-run only if user or articleIds change
+  }, [articleIds.join(","), isAuthenticated, user?.id]);
 
-  // Always prioritize context values for the requested articles
-  const relevantContextCounts = Object.entries(commentCounts)
-    .filter(([id]) => articleIds.includes(id))
-    .reduce((acc, [id, data]) => ({ ...acc, [id]: data }), {});
-    
-  const finalCounts = Object.keys(relevantContextCounts).length > 0 
-    ? relevantContextCounts 
-    : counts;
-
-  return { counts: finalCounts, isLoading, hasError, refreshCounts: fetchCounts };
+  return { counts, isLoading };
 }

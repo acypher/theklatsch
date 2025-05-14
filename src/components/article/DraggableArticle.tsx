@@ -1,9 +1,8 @@
 
-import React, { forwardRef, useState } from 'react';
 import { Article } from "@/lib/types";
-import ArticleCard from "@/components/ArticleCard";
-import CommentDialog from "../comments/CommentDialog";
-import { useCommentView } from "@/contexts/CommentViewContext";
+import { GripVertical } from "lucide-react";
+import ArticleCard from "../ArticleCard";
+import { forwardRef } from "react";
 
 interface DraggableArticleProps {
   article: Article;
@@ -14,68 +13,42 @@ interface DraggableArticleProps {
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
-  onCommentDialogClose?: () => void;
 }
 
-const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(
-  ({ 
-    article, 
-    isLoggedIn, 
-    isDragging, 
-    draggedItemId,
-    onDragStart, 
-    onDragEnd, 
-    onDragOver, 
-    onDrop,
-    onCommentDialogClose
-  }, ref) => {
-    const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
-    const { refreshCommentCounts } = useCommentView();
-    
-    const handleCommentDialogOpen = () => {
-      setIsCommentDialogOpen(true);
-    };
-    
-    const handleCommentDialogClose = async () => {
-      setIsCommentDialogOpen(false);
-      
-      // Make sure to refresh the comment counts when dialog closes
-      await refreshCommentCounts();
-      
-      if (onCommentDialogClose) {
-        onCommentDialogClose();
-      }
-    };
-    
-    const isDraggable = isLoggedIn;
-    const isBeingDragged = isDragging && draggedItemId === article.id;
-    
-    return (
-      <div
-        ref={ref}
-        draggable={isDraggable}
-        onDragStart={(e) => isDraggable && onDragStart(e, article)}
-        onDragEnd={onDragEnd}
-        onDragOver={onDragOver}
-        onDrop={(e) => onDrop(e, article)}
-        className={`transition-opacity ${isBeingDragged ? 'opacity-50' : 'opacity-100'}`}
-        data-article-id={article.id}
-      >
-        <ArticleCard 
-          article={article}
-          onCommentClick={handleCommentDialogOpen}
-        />
-        
-        <CommentDialog
-          articleId={article.id}
-          articleTitle={article.title}
-          isOpen={isCommentDialogOpen}
-          onClose={handleCommentDialogClose}
-        />
+const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({ 
+  article,
+  isLoggedIn,
+  isDragging,
+  draggedItemId,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop
+}, ref) => {
+  return (
+    <div
+      id={`article-${article.id}`}
+      ref={ref}
+      draggable={isLoggedIn}
+      onDragStart={(e) => onDragStart(e, article)}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, article)}
+      className={`transition-all duration-200 ${
+        isLoggedIn ? "cursor-grab active:cursor-grabbing" : ""
+      } ${isDragging && draggedItemId === article.id ? "opacity-50" : "opacity-100"}`}
+    >
+      <div className={`relative ${isLoggedIn ? "hover:ring-2 hover:ring-primary/30 rounded-lg" : ""}`}>
+        {isLoggedIn && (
+          <div className="absolute top-2 left-2 bg-background/90 rounded-full p-1 shadow-sm">
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+        )}
+        <ArticleCard article={article} />
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 DraggableArticle.displayName = 'DraggableArticle';
 

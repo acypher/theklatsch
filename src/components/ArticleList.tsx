@@ -8,7 +8,6 @@ import UnsavedChangesPrompt from "./article/UnsavedChangesPrompt";
 import SelectedKeyword from "./article/SelectedKeyword";
 import ArticlesGrid from "./article/ArticlesGrid";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
-import { CommentViewProvider } from "@/contexts/CommentViewContext";
 
 interface ArticleListProps {
   articles: Article[];
@@ -71,21 +70,18 @@ const ArticleList = ({
         onClear={onKeywordClear || (() => {})} 
       />
       
-      {/* Wrap ArticlesGrid with CommentViewProvider here since it's using useCommentView */}
-      <CommentViewProvider>
-        <ArticlesGrid 
-          articles={localArticles}
-          isLoggedIn={isLoggedIn}
-          isDragging={isDragging}
-          draggedItemId={draggedItem?.id || null}
-          readArticles={readArticles}
-          hideRead={hideRead}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        />
-      </CommentViewProvider>
+      <ArticlesGrid 
+        articles={localArticles}
+        isLoggedIn={isLoggedIn}
+        isDragging={isDragging}
+        draggedItemId={draggedItem?.id || null}
+        readArticles={readArticles}
+        hideRead={hideRead}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      />
       
       {hasChanges && (
         <UnsavedChangesPrompt 
