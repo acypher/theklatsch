@@ -4,7 +4,7 @@ import { Article } from "@/lib/types";
 
 interface ArticlesListProps {
   articles: Article[];
-  allArticles: Article[]; // Added to know the original position of each article
+  allArticles: Article[]; // Need this to know the original position of each article
   readArticles: Set<string>;
   onArticleClick: (articleId: string) => void;
   commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
