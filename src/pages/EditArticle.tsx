@@ -1,14 +1,45 @@
 
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import EditArticleForm from "@/components/EditArticleForm";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { updateSpecificArticle } from "@/lib/data/updateSpecificArticle";
+import { toast } from "sonner";
 
 const EditArticle = () => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+
+  const handleUpdateArticle = async () => {
+    try {
+      toast.info("Updating article with latest issue data...");
+      await updateSpecificArticle();
+      toast.success("Article updated successfully!");
+      // Refresh the page to show updated data
+      navigate(0);
+    } catch (error) {
+      toast.error("Failed to update article.");
+      console.error("Error updating article:", error);
+    }
+  };
+
   return (
     <div>
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Edit Article</h1>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold mb-2">Edit Article</h1>
+            <Button 
+              onClick={handleUpdateArticle}
+              className="gap-2 mb-4 sm:mb-0"
+              variant="outline"
+            >
+              <RefreshCw size={16} />
+              Update Article
+            </Button>
+          </div>
           <p className="text-muted-foreground mb-8">
             Update your article details below.
           </p>
