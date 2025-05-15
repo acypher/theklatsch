@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import EditArticleForm from "@/components/EditArticleForm";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Save } from "lucide-react";
 import { updateSpecificArticle } from "@/lib/data/updateSpecificArticle";
 import { toast } from "sonner";
 
@@ -34,10 +34,9 @@ const EditArticle = () => {
             <Button 
               onClick={handleUpdateArticle}
               className="gap-2 mb-4 sm:mb-0"
-              variant="outline"
             >
-              <RefreshCw size={16} />
-              Update Article
+              <Save size={16} />
+              Save Changes
             </Button>
           </div>
           <p className="text-muted-foreground mb-8">

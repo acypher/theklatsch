@@ -105,7 +105,7 @@ const EditArticleForm = () => {
       form={form}
       onSubmit={onSubmit}
       isSubmitting={isSubmitting}
-      submitButtonText="Update Article"
+      submitButtonText="Save Changes"
     >
       <div className="mb-2">
         <Button 
