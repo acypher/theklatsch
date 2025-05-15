@@ -19,6 +19,7 @@ interface ArticleFormProps {
   onSubmit: (data: ArticleFormValues) => Promise<void>;
   isSubmitting: boolean;
   submitButtonText: string;
+  submitButtonIcon?: React.ReactNode;
   onChange?: () => void;
   children?: ReactNode;
 }
@@ -27,7 +28,8 @@ const ArticleForm = ({
   form, 
   onSubmit, 
   isSubmitting, 
-  submitButtonText, 
+  submitButtonText,
+  submitButtonIcon,
   onChange,
   children 
 }: ArticleFormProps) => {
@@ -49,13 +51,18 @@ const ArticleForm = ({
         <ContentField />
         
         <div className="pt-4">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <Button type="submit" disabled={isSubmitting} className="w-full gap-2">
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                <Loader2 className="h-4 w-4 animate-spin" /> 
                 {submitButtonText === "Publish Article" ? "Publishing..." : "Updating..."}
               </>
-            ) : submitButtonText}
+            ) : (
+              <>
+                {submitButtonIcon}
+                {submitButtonText}
+              </>
+            )}
           </Button>
         </div>
       </form>
