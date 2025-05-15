@@ -51,7 +51,7 @@ const TableOfContents = ({
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center gap-2 text-xl whitespace-nowrap">
             <BookOpen className="h-5 w-5 flex-shrink-0" />
-            <span className="flex-shrink-0">In This Issue</span>
+            <span className="flex-shrink-0 ml-1">In This Issue</span>
           </CardTitle>
           {onFilterToggle && (
             <ReadFilter
