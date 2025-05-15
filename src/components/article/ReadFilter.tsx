@@ -13,7 +13,7 @@ const ReadFilter = ({ enabled, onToggle }: ReadFilterProps) => {
       variant={enabled ? "default" : "outline"}
       size="sm"
       onClick={() => onToggle(!enabled)}
-      className="text-xs"
+      className="text-xs whitespace-nowrap"
     >
       {enabled && <Filter size={16} className="mr-1" />}
       {enabled ? "Showing unread" : "Showing all"}

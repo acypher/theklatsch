@@ -48,18 +48,16 @@ const TableOfContents = ({
   return (
     <Card className={`h-full max-h-[600px] flex flex-col ${className || ""}`}>
       <CardHeader className="pb-2">
-        <div className="flex flex-col gap-2">
-          <CardTitle className="flex items-center text-xl">
+        <div className="flex flex-row flex-wrap items-center justify-between gap-2">
+          <CardTitle className="flex items-center text-xl whitespace-nowrap">
             <BookOpen className="h-5 w-5 flex-shrink-0" />
             <span className="ml-2">In This Issue</span>
           </CardTitle>
           {onFilterToggle && (
-            <div>
-              <ReadFilter
-                enabled={filterEnabled}
-                onToggle={onFilterToggle}
-              />
-            </div>
+            <ReadFilter
+              enabled={filterEnabled}
+              onToggle={onFilterToggle}
+            />
           )}
         </div>
       </CardHeader>
