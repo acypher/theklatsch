@@ -31,13 +31,21 @@ const EditArticle = () => {
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
             <h1 className="text-3xl font-bold mb-2">Edit Article</h1>
-            <Button 
-              onClick={handleUpdateArticle}
-              className="gap-2 mb-4 sm:mb-0"
-            >
-              <Save size={16} />
-              Save Changes
-            </Button>
+            <div className="flex gap-2 mb-4 sm:mb-0">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate(`/article/${id}`)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpdateArticle}
+                className="gap-2"
+              >
+                <Save size={16} />
+                Save Changes
+              </Button>
+            </div>
           </div>
           <p className="text-muted-foreground mb-8">
             Update your article details below.

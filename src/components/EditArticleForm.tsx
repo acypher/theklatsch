@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
 import { getArticleById, updateArticle } from "@/lib/data";
 import { toast } from "sonner";
 import { Loader2, Save } from "lucide-react";
@@ -107,18 +106,7 @@ const EditArticleForm = () => {
       isSubmitting={isSubmitting}
       submitButtonText="Save Changes"
       submitButtonIcon={<Save size={16} />}
-    >
-      <div className="mb-2">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => navigate(`/article/${id}`)} 
-          className="w-full"
-        >
-          Cancel
-        </Button>
-      </div>
-    </ArticleForm>
+    />
   );
 };
 
