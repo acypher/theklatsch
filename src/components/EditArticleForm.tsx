@@ -19,6 +19,7 @@ const EditArticleForm = () => {
   const { id } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [articleLoaded, setArticleLoaded] = useState(false);
   
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -27,7 +28,7 @@ const EditArticleForm = () => {
   
   useEffect(() => {
     const fetchArticle = async () => {
-      if (!id) return;
+      if (!id || articleLoaded) return;
       
       try {
         setIsLoading(true);
@@ -52,6 +53,8 @@ const EditArticleForm = () => {
           sourceUrl: article.sourceUrl || "",
           more_content: article.more_content || ""
         });
+        
+        setArticleLoaded(true);
       } catch (error) {
         console.error("Error fetching article for editing:", error);
         toast.error("Failed to load article");
@@ -62,7 +65,7 @@ const EditArticleForm = () => {
     };
     
     fetchArticle();
-  }, [id, navigate, form]);
+  }, [id, navigate, form, articleLoaded]);
 
   const onSubmit = async (data: ArticleFormValues) => {
     if (!id) return;

@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const updateSpecificArticle = async (
   articleId: string, 
-  updateData: Partial<Pick<Article, "displayPosition">> & { [key: string]: any }
+  updateData: Partial<Pick<Article, "displayPosition">> & { display_position?: number, [key: string]: any }
 ): Promise<boolean> => {
   try {
     console.log(`Updating article ${articleId} with data:`, updateData);
@@ -39,7 +39,9 @@ export const updateSpecificArticle = async (
       deletedAt: currentArticle.deleted_at,
       displayPosition: updateData.displayPosition !== undefined 
         ? updateData.displayPosition 
-        : currentArticle.display_position
+        : (updateData.display_position !== undefined 
+          ? updateData.display_position 
+          : currentArticle.display_position)
     };
     
     // Apply any other updates
@@ -50,11 +52,6 @@ export const updateSpecificArticle = async (
     if (updateData.imageUrl) mappedArticle.imageUrl = updateData.imageUrl;
     if (updateData.sourceUrl) mappedArticle.sourceUrl = updateData.sourceUrl;
     if (updateData.more_content) mappedArticle.more_content = updateData.more_content;
-    
-    // Handle display_position to displayPosition mapping
-    if (updateData.display_position !== undefined && updateData.displayPosition === undefined) {
-      mappedArticle.displayPosition = updateData.display_position;
-    }
     
     await updateArticle(articleId, mappedArticle);
     return true;
