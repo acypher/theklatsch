@@ -6,27 +6,42 @@ import { forwardRef } from "react";
 
 interface DraggableArticleProps {
   article: Article;
-  index?: number;
-  draggingItem: Article | null;
-  getFirstImage: (imageUrls: string[]) => string;
-  formatDate: (dateString: string) => string;
+  isLoggedIn?: boolean;
+  isDragging?: boolean;
+  draggedItemId?: string | null;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  isLoggedIn?: boolean;
+  onDrop?: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
+  getFirstImage?: (imageUrls: string[]) => string;
+  formatDate?: (dateString: string) => string;
+  index?: number;
 }
 
 const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({ 
   article,
-  index,
-  draggingItem,
-  getFirstImage,
-  formatDate,
+  isLoggedIn = true,
+  isDragging = false,
+  draggedItemId = null,
   onDragStart,
   onDragEnd,
   onDragOver,
-  isLoggedIn = true
+  onDrop
 }, ref) => {
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    onDragOver(e);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (onDrop) {
+      onDrop(e, article);
+    }
+  };
+  
+  const isBeingDragged = draggedItemId === article.id;
+
   return (
     <div
       id={`article-${article.id}`}
@@ -34,10 +49,11 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
       draggable={isLoggedIn}
       onDragStart={(e) => onDragStart(e, article)}
       onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       className={`transition-all duration-200 ${
         isLoggedIn ? "cursor-grab active:cursor-grabbing" : ""
-      } ${draggingItem && draggingItem.id === article.id ? "opacity-50" : "opacity-100"}`}
+      } ${isBeingDragged ? "opacity-50" : "opacity-100"}`}
     >
       <div className={`relative ${isLoggedIn ? "hover:ring-2 hover:ring-primary/30 rounded-lg" : ""}`}>
         {isLoggedIn && (
