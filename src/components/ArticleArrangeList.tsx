@@ -212,12 +212,14 @@ const ArticleArrangeList = () => {
             key={article.id}
             article={article}
             index={index}
+            draggedItemId={draggingItem?.id || null}
             draggingItem={draggingItem}
             getFirstImage={getFirstImage}
             formatDate={formatDate}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
           />
         ))}
       </div>
