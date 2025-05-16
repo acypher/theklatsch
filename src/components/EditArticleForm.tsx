@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -45,7 +46,8 @@ const EditArticleForm = () => {
           description: article.description,
           author: article.author,
           keywords: keywordsString,
-          imageUrl: article.imageUrl,
+          // Use the first image URL from the array or empty string
+          imageUrl: article.imageUrl.length > 0 ? article.imageUrl[0] : "",
           sourceUrl: article.sourceUrl || "",
           more_content: article.more_content || ""
         });

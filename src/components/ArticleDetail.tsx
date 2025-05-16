@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -63,17 +64,23 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   }, [id, navigate, propArticle]);
 
   useEffect(() => {
-    if (article?.imageUrl?.toLowerCase().endsWith('.gif')) {
-      // Initialize the GIF controller when the article loads
-      const initGif = async () => {
-        try {
-          await initGifController();
-        } catch (error) {
-          console.error("Error initializing GIF controller:", error);
-        }
-      };
+    if (article?.imageUrl?.length > 0) {
+      // Check if first image is a GIF
+      const firstImage = article.imageUrl[0];
+      const isGif = firstImage && firstImage.toLowerCase().endsWith('.gif');
       
-      initGif();
+      if (isGif) {
+        // Initialize the GIF controller when the article loads
+        const initGif = async () => {
+          try {
+            await initGifController();
+          } catch (error) {
+            console.error("Error initializing GIF controller:", error);
+          }
+        };
+        
+        initGif();
+      }
     }
   }, [article]);
 
