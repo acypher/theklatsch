@@ -6,24 +6,26 @@ import { forwardRef } from "react";
 
 interface DraggableArticleProps {
   article: Article;
-  isLoggedIn: boolean;
-  isDragging: boolean;
-  draggedItemId: string | null;
+  index?: number;
+  draggingItem: Article | null;
+  getFirstImage: (imageUrls: string[]) => string;
+  formatDate: (dateString: string) => string;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
+  isLoggedIn?: boolean;
 }
 
 const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({ 
   article,
-  isLoggedIn,
-  isDragging,
-  draggedItemId,
+  index,
+  draggingItem,
+  getFirstImage,
+  formatDate,
   onDragStart,
   onDragEnd,
   onDragOver,
-  onDrop
+  isLoggedIn = true
 }, ref) => {
   return (
     <div
@@ -33,10 +35,9 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
       onDragStart={(e) => onDragStart(e, article)}
       onDragEnd={onDragEnd}
       onDragOver={onDragOver}
-      onDrop={(e) => onDrop(e, article)}
       className={`transition-all duration-200 ${
         isLoggedIn ? "cursor-grab active:cursor-grabbing" : ""
-      } ${isDragging && draggedItemId === article.id ? "opacity-50" : "opacity-100"}`}
+      } ${draggingItem && draggingItem.id === article.id ? "opacity-50" : "opacity-100"}`}
     >
       <div className={`relative ${isLoggedIn ? "hover:ring-2 hover:ring-primary/30 rounded-lg" : ""}`}>
         {isLoggedIn && (

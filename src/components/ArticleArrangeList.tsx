@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Article } from '@/lib/types';
@@ -8,10 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Search } from 'lucide-react';
 import NoArticlesFound from '@/components/article/NoArticlesFound';
 import LoadingState from '@/components/article/LoadingState';
-import { updateSpecificArticle } from '@/lib/data';
+import { updateSpecificArticle } from '@/lib/data/updateSpecificArticle';
 import { Input } from './ui/input';
 import { getCurrentIssue } from '@/lib/data';
-import useDragAndDrop from '@/hooks/useDragAndDrop';
+import { useDragAndDrop } from '@/hooks/useDragAndDrop';
 
 const ArticleArrangeList = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -24,7 +25,7 @@ const ArticleArrangeList = () => {
   const queryClient = useQueryClient();
   
   // Initialize drag and drop functionality
-  const { draggingItem, handleDragStart, handleDragOver, handleDragEnd } = useDragAndDrop({
+  const { draggingItem, handleDragStart, handleDragOver, handleDragEnd, handleDrop } = useDragAndDrop({
     items: filteredArticles,
     onReorder: (reorderedItems) => {
       setFilteredArticles(reorderedItems);
