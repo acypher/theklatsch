@@ -4,6 +4,9 @@ import App from './App.tsx'
 import './index.css'
 import { supabase } from "@/integrations/supabase/client";
 
+// Set the default document title
+document.title = "The Klatsch";
+
 // Dynamically set the favicon from Supabase storage
 async function setFavicon() {
   try {
