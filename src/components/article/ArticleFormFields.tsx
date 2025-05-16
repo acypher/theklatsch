@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -127,7 +126,8 @@ export const KeywordsField = () => {
 };
 
 export const ImageField = () => {
-  const { control, setValue } = useFormContext<ArticleFormValues>();
+  const { control, setValue, watch } = useFormContext<ArticleFormValues>();
+  const currentImageUrl = watch('imageUrl');
   
   const handleImageUpload = (imageUrl: string) => {
     setValue('imageUrl', imageUrl);
@@ -141,7 +141,7 @@ export const ImageField = () => {
         <FieldWrapper 
           name="imageUrl" 
           label="Article Image"
-          description="Upload an image or provide an image URL"
+          description="Upload an image or provide an image URL (only primary image for now)"
         >
           <div className="flex space-x-4 items-center">
             <Input
@@ -151,6 +151,16 @@ export const ImageField = () => {
             />
             <ImageUploader onImageUpload={handleImageUpload} />
           </div>
+          {currentImageUrl && (
+            <div className="mt-2 p-2 border rounded">
+              <div className="text-xs text-muted-foreground mb-1">Preview:</div>
+              <img 
+                src={currentImageUrl} 
+                alt="Image preview" 
+                className="h-20 object-contain" 
+              />
+            </div>
+          )}
         </FieldWrapper>
       )}
     />
