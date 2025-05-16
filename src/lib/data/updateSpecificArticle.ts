@@ -51,6 +51,11 @@ export const updateSpecificArticle = async (
     if (updateData.sourceUrl) mappedArticle.sourceUrl = updateData.sourceUrl;
     if (updateData.more_content) mappedArticle.more_content = updateData.more_content;
     
+    // Handle display_position to displayPosition mapping
+    if (updateData.display_position !== undefined && updateData.displayPosition === undefined) {
+      mappedArticle.displayPosition = updateData.display_position;
+    }
+    
     await updateArticle(articleId, mappedArticle);
     return true;
   } catch (error) {

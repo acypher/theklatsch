@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Article } from '@/lib/types';
@@ -120,7 +119,7 @@ const ArticleArrangeList = () => {
       // Create save operations for all articles with new positions
       const savePromises = filteredArticles.map((article, index) => {
         return updateSpecificArticle(article.id, {
-          display_position: index
+          displayPosition: index  // Changed from display_position to displayPosition
         });
       });
       
