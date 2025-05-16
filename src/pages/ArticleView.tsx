@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -34,8 +35,8 @@ const ArticleView = () => {
           if (articleData) {
             setArticle(articleData);
             
-            // Update page title using the article title from h1 content
-            document.title = articleData.title;
+            // Update page title using the article title
+            document.title = `${articleData.title} | Tech Magazine`;
             
             // Update or create Open Graph meta tags
             updateMetaTags(articleData);
@@ -50,9 +51,9 @@ const ArticleView = () => {
     
     fetchArticle();
     
-    // Clean up meta tags when unmounting
+    // Clean up meta tags and title when unmounting
     return () => {
-      // Reset title
+      // Reset title to default
       document.title = "Tech Magazine";
       
       // Remove Open Graph meta tags

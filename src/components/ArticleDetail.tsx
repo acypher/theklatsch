@@ -45,10 +45,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
           const fetchedArticle = await getArticleById(id);
           if (fetchedArticle) {
             setArticle(fetchedArticle);
-            
-            // Set the document title to the article title
-            // We do this here to ensure the title is updated when the component is loaded
-            document.title = fetchedArticle.title;
+            // Title is now managed by ArticleView component
           } else {
             toast.error("Article not found");
             navigate("/");
