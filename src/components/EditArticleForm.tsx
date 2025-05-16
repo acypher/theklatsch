@@ -39,6 +39,7 @@ const EditArticleForm = () => {
           return;
         }
         
+        // Process keywords into a space-separated string
         const keywordsString = article.keywords.join(' ');
         
         form.reset({
@@ -52,6 +53,7 @@ const EditArticleForm = () => {
           more_content: article.more_content || ""
         });
       } catch (error) {
+        console.error("Error fetching article for editing:", error);
         toast.error("Failed to load article");
         navigate("/");
       } finally {
@@ -92,6 +94,7 @@ const EditArticleForm = () => {
       toast.success("Article updated successfully!");
       navigate(`/article/${id}`);
     } catch (error) {
+      console.error("Failed to update article:", error);
       toast.error("Failed to update article. Please try again.");
     } finally {
       setIsSubmitting(false);

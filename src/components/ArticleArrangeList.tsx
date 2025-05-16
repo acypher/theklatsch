@@ -25,7 +25,15 @@ const ArticleArrangeList = () => {
   const queryClient = useQueryClient();
   
   // Initialize drag and drop functionality
-  const { draggingItem, handleDragStart, handleDragOver, handleDragEnd, handleDrop } = useDragAndDrop({
+  const { 
+    draggingItem, 
+    handleDragStart, 
+    handleDragOver, 
+    handleDragEnd, 
+    handleDrop, 
+    isDragging, 
+    hasChanges 
+  } = useDragAndDrop({
     items: filteredArticles,
     onReorder: (reorderedItems) => {
       setFilteredArticles(reorderedItems);
@@ -146,6 +154,12 @@ const ArticleArrangeList = () => {
     return "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
   };
 
+  const handleCancelChanges = () => {
+    // Reset the filtered articles to the original order
+    setFilteredArticles([...articles]);
+    setUnsavedChanges(false);
+  };
+
   if (loading) {
     return <LoadingState />;
   }
@@ -223,6 +237,26 @@ const ArticleArrangeList = () => {
           />
         ))}
       </div>
+
+      {unsavedChanges && (
+        <div className="fixed bottom-4 right-4 p-4 bg-background border rounded-lg shadow-lg z-50">
+          <div className="flex space-x-2">
+            <Button variant="outline" onClick={handleCancelChanges}>
+              Cancel Changes
+            </Button>
+            <Button onClick={handleSavePositions} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

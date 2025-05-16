@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
@@ -130,7 +131,7 @@ export const ImageField = () => {
   const currentImageUrl = watch('imageUrl');
   
   const handleImageUpload = (imageUrl: string) => {
-    setValue('imageUrl', imageUrl);
+    setValue('imageUrl', imageUrl, { shouldValidate: true });
   };
   
   return (

@@ -9,7 +9,7 @@ interface DraggableArticleProps {
   isLoggedIn?: boolean;
   isDragging?: boolean;
   draggedItemId?: string | null;
-  draggingItem?: Article | null; // Added this prop to match what's passed in ArticleArrangeList
+  draggingItem?: Article | null;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -24,7 +24,7 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
   isLoggedIn = true,
   isDragging = false,
   draggedItemId = null,
-  draggingItem = null, // Added this to match interface update
+  draggingItem = null,
   onDragStart,
   onDragEnd,
   onDragOver,
