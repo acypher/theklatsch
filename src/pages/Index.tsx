@@ -114,12 +114,13 @@ const Index = () => {
             <div ref={articleListRef}>
               <ArticleList 
                 articles={filteredArticles}
-                allArticles={articles} // Pass the complete list here
+                allArticles={articles}
                 loading={loading}
                 readArticles={readArticles}
                 hideRead={filterEnabled}
                 filterEnabled={filterEnabled}
                 onFilterToggle={setFilterEnabled}
+                currentIssue={currentIssue}
               />
             </div>
             <StorefrontImage />

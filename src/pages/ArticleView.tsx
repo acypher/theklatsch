@@ -88,7 +88,7 @@ const ArticleView = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar currentIssue={currentIssue} />
       <main className="prose prose-lg max-w-none pb-12 markdown-content-container flex-grow overflow-y-auto">
-        <ArticleDetail />
+        <ArticleDetail currentIssue={currentIssue} />
       </main>
       
       {/* Add styles to properly isolate markdown content and ensure titles render correctly */}

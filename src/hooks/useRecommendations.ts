@@ -1,80 +1,75 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
-export const useRecommendations = () => {
+export const useRecommendations = (currentIssue?: string) => {
   const [recommendations, setRecommendations] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const { isAuthenticated } = useAuth();
-
+  
   useEffect(() => {
     const fetchRecommendations = async () => {
+      if (!currentIssue) return;
+      
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('vars')
-          .select('value')
-          .eq('key', 'recommendations')
+          .from("issue_recommendations")
+          .select("content")
+          .eq("issue", currentIssue)
           .maybeSingle();
         
         if (error) {
-          console.error('Error fetching recommendations:', error);
+          console.error("Error fetching recommendations:", error);
           return;
         }
         
-        if (data) {
-          setRecommendations(data.value || '');
-        }
+        setRecommendations(data?.content || "");
       } catch (error) {
-        console.error('Error fetching recommendations:', error);
+        console.error("Failed to fetch recommendations:", error);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchRecommendations();
-  }, []);
-
-  const handleSaveRecommendations = async (content: string) => {
-    if (!isAuthenticated) {
-      toast.error("You must be logged in to edit recommendations");
-      return;
+    if (currentIssue) {
+      fetchRecommendations();
     }
+  }, [currentIssue]);
+  
+  const handleSaveRecommendations = async (content: string) => {
+    if (!currentIssue || !isAuthenticated) return;
+    
+    setIsSaving(true);
     
     try {
-      setIsSaving(true);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
       const { error } = await supabase
-        .from('vars')
+        .from("issue_recommendations")
         .upsert(
           { 
-            key: 'recommendations', 
-            value: content,
-            updated_at: new Date().toISOString()
+            issue: currentIssue,
+            content 
           },
-          { onConflict: 'key' }
+          { onConflict: "issue" }
         );
       
       if (error) {
-        console.error('Error saving recommendations:', error);
-        toast.error('Failed to save recommendations');
         throw error;
       }
       
       setRecommendations(content);
-      toast.success('Recommendations saved successfully');
+      toast.success("Editor's comments saved successfully!");
     } catch (error) {
-      console.error('Error saving recommendations:', error);
-      throw error;
+      console.error("Failed to save recommendations:", error);
+      toast.error("Failed to save editor's comments");
     } finally {
       setIsSaving(false);
     }
   };
-
+  
   return {
     recommendations,
     loading,

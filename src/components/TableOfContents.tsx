@@ -9,6 +9,8 @@ import { useRecommendations } from "@/hooks/useRecommendations";
 import { useContentsHeight } from "@/hooks/useContentsHeight";
 import ArticlesList from "./table-of-contents/ArticlesList";
 import ReadFilter from "./article/ReadFilter";
+import { useEffect, useState } from "react";
+import { getCurrentIssue } from "@/lib/data";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -20,6 +22,7 @@ interface TableOfContentsProps {
   commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
   filterEnabled?: boolean;
   onFilterToggle?: (checked: boolean) => void;
+  currentIssue?: string;
 }
 
 const TableOfContents = ({ 
@@ -32,10 +35,26 @@ const TableOfContents = ({
   commentCounts = {},
   filterEnabled = false,
   onFilterToggle,
+  currentIssue: propCurrentIssue,
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
-  const { recommendations, loading, isSaving, handleSaveRecommendations } = useRecommendations();
+  const [currentIssue, setCurrentIssue] = useState<string | undefined>(propCurrentIssue);
+  const { recommendations, loading, isSaving, handleSaveRecommendations } = useRecommendations(currentIssue);
+
+  // Fetch current issue if not provided through props
+  useEffect(() => {
+    const fetchCurrentIssue = async () => {
+      if (!propCurrentIssue) {
+        const issueData = await getCurrentIssue();
+        if (issueData?.text) {
+          setCurrentIssue(issueData.text);
+        }
+      }
+    };
+    
+    fetchCurrentIssue();
+  }, [propCurrentIssue]);
 
   // Filter articles if hideRead is true
   const displayArticles = hideRead 
@@ -81,7 +100,7 @@ const TableOfContents = ({
               <EditableMarkdown 
                 content={recommendations} 
                 onSave={handleSaveRecommendations} 
-                placeholder="Add recommendations here..."
+                placeholder="Add editor's comments here..."
                 disabled={isSaving}
               />
             </ScrollArea>
