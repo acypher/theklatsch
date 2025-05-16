@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Article } from "@/lib/types";
@@ -38,22 +39,27 @@ const TableOfContents = ({
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
-  const [currentIssue, setCurrentIssue] = useState<string | undefined>(propCurrentIssue);
-  const { recommendations, loading, isSaving, handleSaveRecommendations } = useRecommendations(currentIssue);
-
-  // Fetch current issue if not provided through props
+  const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
+  
+  // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
-    const fetchCurrentIssue = async () => {
-      if (!propCurrentIssue) {
+    if (propCurrentIssue) {
+      setIssueKey(`recommendations_${propCurrentIssue}`);
+    } else {
+      const fetchCurrentIssue = async () => {
         const issueData = await getCurrentIssue();
         if (issueData?.text) {
-          setCurrentIssue(issueData.text);
+          setIssueKey(`recommendations_${issueData.text}`);
         }
-      }
-    };
-    
-    fetchCurrentIssue();
+      };
+      
+      fetchCurrentIssue();
+    }
   }, [propCurrentIssue]);
+
+  // Only call useRecommendations once we have an issue key
+  const { recommendations, loading, isSaving, handleSaveRecommendations } = 
+    useRecommendations(issueKey);
 
   // Filter articles if hideRead is true
   const displayArticles = hideRead 
@@ -93,7 +99,7 @@ const TableOfContents = ({
           />
         </ScrollArea>
         
-        {!loading && (
+        {!loading && issueKey && (
           <div className="mt-3 max-h-[120px] overflow-hidden">
             <ScrollArea className="h-[120px]">
               <EditableMarkdown 

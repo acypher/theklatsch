@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
-export const useRecommendations = (currentIssue?: string) => {
+export const useRecommendations = (key?: string) => {
   const [recommendations, setRecommendations] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -12,50 +12,50 @@ export const useRecommendations = (currentIssue?: string) => {
   
   useEffect(() => {
     const fetchRecommendations = async () => {
-      if (!currentIssue) return;
+      if (!key) return;
       
       setLoading(true);
       try {
-        // Use the vars table instead which exists in the TypeScript types
-        // We'll use a key pattern like `recommendations_${currentIssue}` 
+        // Using the vars table with the provided key
         const { data, error } = await supabase
           .from("vars")
           .select("value")
-          .eq("key", `recommendations_${currentIssue}`)
+          .eq("key", key)
           .maybeSingle();
         
         if (error) {
-          console.error("Error fetching recommendations:", error);
+          console.error(`Error fetching recommendations for key ${key}:`, error);
           return;
         }
         
         setRecommendations(data?.value || "");
       } catch (error) {
-        console.error("Failed to fetch recommendations:", error);
+        console.error(`Failed to fetch recommendations for key ${key}:`, error);
       } finally {
         setLoading(false);
       }
     };
     
-    if (currentIssue) {
+    if (key) {
       fetchRecommendations();
+    } else {
+      setLoading(false);
     }
-  }, [currentIssue]);
+  }, [key]);
   
   const handleSaveRecommendations = async (content: string) => {
-    if (!currentIssue || !isAuthenticated) return;
+    if (!key || !isAuthenticated) return;
     
     setIsSaving(true);
     
     try {
-      // Store in vars table with key pattern
-      const key = `recommendations_${currentIssue}`;
+      // Store in vars table with the provided key
       const { error } = await supabase
         .from("vars")
         .upsert(
           { 
-            key: key,
-            value: content 
+            key,
+            value: content
           },
           { onConflict: "key" }
         );
@@ -67,7 +67,7 @@ export const useRecommendations = (currentIssue?: string) => {
       setRecommendations(content);
       toast.success("Editor's comments saved successfully!");
     } catch (error) {
-      console.error("Failed to save recommendations:", error);
+      console.error(`Failed to save recommendations for key ${key}:`, error);
       toast.error("Failed to save editor's comments");
     } finally {
       setIsSaving(false);
