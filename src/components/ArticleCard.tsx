@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -24,8 +25,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   const [hasError, setHasError] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
-  // Use the first image from the array for the card
-  const isGif = article.imageUrl.length > 0 && article.imageUrl[0].toLowerCase().endsWith('.gif');
+  const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
   
   const fetchCommentData = async () => {
     try {

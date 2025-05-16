@@ -1,84 +1,65 @@
 
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { initGifController } from "@/utils/gifController";
+import { useEffect, useRef } from "react";
 
 interface ArticleCardHeaderProps {
   articleId: string;
-  imageUrl: string[];
+  imageUrl: string;
   title: string;
-  isGif?: boolean;
+  isGif: boolean;
   getImageUrl: (url: string) => string;
 }
 
-const ArticleCardHeader = ({ 
-  articleId, 
-  imageUrl, 
-  title, 
-  isGif, 
-  getImageUrl 
-}: ArticleCardHeaderProps) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-  // Automatically cycle through images if there are multiple
+const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: ArticleCardHeaderProps) => {
+  const gifControllerRef = useRef<{ dispose: () => void } | null>(null);
+
   useEffect(() => {
-    if (imageUrl.length <= 1) return;
-    
-    const interval = setInterval(() => {
-      setCurrentImageIndex((current) => (current + 1) % imageUrl.length);
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, [imageUrl]);
-  
-  // If there are no images, show a placeholder
-  if (!imageUrl || imageUrl.length === 0) {
-    return (
-      <Link 
-        to={`/article/${articleId}`}
-        className="block relative aspect-[4/3] w-full border rounded-t-lg bg-muted/30 flex items-center justify-center"
-      >
-        <p className="text-muted-foreground">No image available</p>
-      </Link>
-    );
-  }
-  
-  const currentImage = imageUrl[currentImageIndex];
-  const hasMultipleImages = imageUrl.length > 1;
-  
+    if (isGif) {
+      let isMounted = true;
+      const timer = setTimeout(async () => {
+        try {
+          const controller = await initGifController();
+          if (isMounted && controller) {
+            gifControllerRef.current = controller;
+          }
+        } catch (error) {
+          console.error("Error initializing GIF controller:", error);
+        }
+      }, 100);
+
+      return () => {
+        isMounted = false;
+        clearTimeout(timer);
+        if (gifControllerRef.current) {
+          gifControllerRef.current.dispose();
+        }
+      };
+    }
+  }, [isGif, imageUrl]);
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    if (isGif) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   return (
     <Link 
       to={`/article/${articleId}`}
-      className="block relative aspect-[4/3] w-full overflow-hidden rounded-t-lg"
+      onClick={isGif ? handleImageClick : undefined}
     >
-      <img 
-        src={getImageUrl(currentImage)} 
-        alt={title}
-        id={isGif ? "animated-gif" : undefined}
-        className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
-      />
-      
-      {isGif && (
-        <Badge 
-          variant="outline" 
-          className="absolute top-2 right-2 bg-background/70 text-xs font-normal px-1.5 py-0.5"
-        >
-          GIF
-        </Badge>
-      )}
-      
-      {hasMultipleImages && (
-        <div className="absolute bottom-2 inset-x-0 flex justify-center gap-1 px-4">
-          {imageUrl.map((_, index) => (
-            <div 
-              key={index}
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                index === currentImageIndex ? 'bg-primary' : 'bg-gray-300'
-              }`}
-            />
-          ))}
-        </div>
-      )}
+      <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
+        <img 
+          src={getImageUrl(imageUrl)} 
+          alt={title} 
+          className="w-full h-full object-contain"
+          loading="lazy"
+          id={isGif ? "animated-gif" : undefined}
+        />
+      </AspectRatio>
     </Link>
   );
 };

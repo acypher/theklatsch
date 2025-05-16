@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Article } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,19 +56,16 @@ const ArticleList = ({
   }, [initialArticles]);
 
   const {
-    draggingItem,
+    draggedItem,
     isDragging,
     hasChanges,
     handleDragStart,
-    handleDragOver,
     handleDragEnd,
+    handleDragOver,
     handleDrop,
     handleCancelChanges,
     saveChanges
-  } = useDragAndDrop({
-    items: localArticles,
-    onReorder: setLocalArticles
-  });
+  } = useDragAndDrop(localArticles, setLocalArticles);
 
   if (loading) return <LoadingState />;
   if (!loading && initialArticles.length === 0) return <NoArticlesFound />;
@@ -83,10 +79,10 @@ const ArticleList = ({
       
       <ArticlesGrid 
         articles={localArticles}
-        allArticles={allArticles || initialArticles}
+        allArticles={allArticles || initialArticles} // Pass the complete list
         isLoggedIn={isLoggedIn}
         isDragging={isDragging}
-        draggedItemId={draggingItem?.id || null}
+        draggedItemId={draggedItem?.id || null}
         readArticles={readArticles}
         hideRead={hideRead}
         filterEnabled={filterEnabled}

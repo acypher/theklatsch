@@ -1,107 +1,110 @@
 
-import { useState } from 'react';
-import { Article } from '@/lib/types';
+import { useState } from "react";
+import { Article } from "@/lib/types";
+import { supabase } from "@/integrations/supabase/client";
+import { updateArticlesOrder } from "@/lib/data/article/specialOperations";
+import { toast } from "sonner";
 
-interface UseDragAndDropProps<T> {
-  items: T[];
-  onReorder?: (items: T[]) => void;
-}
-
-export const useDragAndDrop = <T extends { id: string }>({ 
-  items, 
-  onReorder 
-}: UseDragAndDropProps<T>) => {
-  const [draggingItem, setDraggingItem] = useState<T | null>(null);
+export const useDragAndDrop = (articles: Article[], onOrderChange: (articles: Article[]) => void) => {
+  const [draggedItem, setDraggedItem] = useState<Article | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [originalOrder, setOriginalOrder] = useState<T[]>([]);
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: T) => {
-    // Store the original order if this is the first drag
-    if (!hasChanges) {
-      setOriginalOrder([...items]);
-    }
-    
-    setDraggingItem(item);
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, item: Article) => {
+    setDraggedItem(item);
     setIsDragging(true);
     
-    // Set the data to be transferred
-    e.dataTransfer.setData('text/plain', JSON.stringify(item));
+    e.dataTransfer.setData("text/plain", item.id);
+    e.dataTransfer.effectAllowed = "move";
     
-    // Set the drag image
-    if (e.dataTransfer.setDragImage && e.currentTarget) {
-      e.dataTransfer.setDragImage(e.currentTarget, 20, 20);
+    const element = e.currentTarget;
+    if (element) {
+      setTimeout(() => {
+        element.classList.add("opacity-50", "scale-95");
+      }, 0);
     }
-    
-    // Add styling
-    e.currentTarget.classList.add('opacity-50');
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
   };
 
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
     setIsDragging(false);
-    e.currentTarget.classList.remove('opacity-50');
+    
+    const element = e.currentTarget;
+    if (element) {
+      element.classList.remove("opacity-50", "scale-95");
+    }
+    
+    if (hasChanges) {
+      saveChanges();
+    }
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetItem: T) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => {
     e.preventDefault();
     
-    if (!draggingItem || draggingItem.id === targetItem.id) {
-      return;
-    }
+    if (!draggedItem || draggedItem.id === targetItem.id) return;
     
-    const updatedItems = [...items];
+    const updatedArticles = [...articles];
     
-    // Find the indices of the dragged item and the target item
-    const draggedIndex = updatedItems.findIndex(item => item.id === draggingItem.id);
-    const targetIndex = updatedItems.findIndex(item => item.id === targetItem.id);
+    const draggedIndex = updatedArticles.findIndex(item => item.id === draggedItem.id);
+    const targetIndex = updatedArticles.findIndex(item => item.id === targetItem.id);
     
-    if (draggedIndex === -1 || targetIndex === -1) {
-      return;
-    }
+    if (draggedIndex < 0 || targetIndex < 0) return;
     
-    // Remove the dragged item from its original position
-    const [removedItem] = updatedItems.splice(draggedIndex, 1);
+    const [removed] = updatedArticles.splice(draggedIndex, 1);
+    updatedArticles.splice(targetIndex, 0, removed);
     
-    // Insert it at the target position
-    updatedItems.splice(targetIndex, 0, removedItem);
+    const articlesWithNewPositions = updatedArticles.map((article, index) => ({
+      ...article,
+      displayPosition: index + 1
+    }));
     
-    // Call the onReorder callback with updated items
-    if (onReorder) {
-      onReorder(updatedItems);
-    }
-    
+    onOrderChange(articlesWithNewPositions);
     setHasChanges(true);
-    setDraggingItem(null);
+    setDraggedItem(null);
   };
 
-  // Function to save changes to the server
   const saveChanges = async () => {
-    // This function should be implemented by the consumer
-    // to save the changes to the server
-    setHasChanges(false);
+    const orderData = articles.map((article, index) => ({
+      id: article.id,
+      position: index + 1
+    }));
+    
+    try {
+      const success = await updateArticlesOrder(orderData);
+      if (success) {
+        toast.success("Article order updated successfully");
+      } else {
+        toast.error("Failed to update article order");
+        onOrderChange([...articles]);
+      }
+    } catch (error) {
+      console.error("Error saving article order:", error);
+      toast.error("Failed to update article order");
+      onOrderChange([...articles]);
+    } finally {
+      setHasChanges(false);
+    }
   };
 
-  // Function to cancel changes and restore the original order
   const handleCancelChanges = () => {
-    if (originalOrder.length > 0 && onReorder) {
-      onReorder([...originalOrder]);
-    }
+    onOrderChange([...articles]);
     setHasChanges(false);
   };
 
   return {
-    draggingItem,
+    draggedItem,
     isDragging,
     hasChanges,
     handleDragStart,
-    handleDragOver,
     handleDragEnd,
+    handleDragOver,
     handleDrop,
-    saveChanges,
-    handleCancelChanges
+    handleCancelChanges,
+    saveChanges
   };
 };

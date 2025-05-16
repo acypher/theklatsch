@@ -127,11 +127,10 @@ export const KeywordsField = () => {
 };
 
 export const ImageField = () => {
-  const { control, setValue, watch } = useFormContext<ArticleFormValues>();
-  const currentImageUrl = watch('imageUrl');
+  const { control, setValue } = useFormContext<ArticleFormValues>();
   
   const handleImageUpload = (imageUrl: string) => {
-    setValue('imageUrl', imageUrl, { shouldValidate: true });
+    setValue('imageUrl', imageUrl);
   };
   
   return (
@@ -142,7 +141,7 @@ export const ImageField = () => {
         <FieldWrapper 
           name="imageUrl" 
           label="Article Image"
-          description="Upload an image or provide an image URL (only primary image for now)"
+          description="Upload an image or provide an image URL"
         >
           <div className="flex space-x-4 items-center">
             <Input
@@ -152,16 +151,6 @@ export const ImageField = () => {
             />
             <ImageUploader onImageUpload={handleImageUpload} />
           </div>
-          {currentImageUrl && (
-            <div className="mt-2 p-2 border rounded">
-              <div className="text-xs text-muted-foreground mb-1">Preview:</div>
-              <img 
-                src={currentImageUrl} 
-                alt="Image preview" 
-                className="h-20 object-contain" 
-              />
-            </div>
-          )}
         </FieldWrapper>
       )}
     />

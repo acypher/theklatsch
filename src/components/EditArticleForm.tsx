@@ -19,7 +19,6 @@ const EditArticleForm = () => {
   const { id } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [articleLoaded, setArticleLoaded] = useState(false);
   
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -28,7 +27,7 @@ const EditArticleForm = () => {
   
   useEffect(() => {
     const fetchArticle = async () => {
-      if (!id || articleLoaded) return;
+      if (!id) return;
       
       try {
         setIsLoading(true);
@@ -40,7 +39,6 @@ const EditArticleForm = () => {
           return;
         }
         
-        // Process keywords into a space-separated string
         const keywordsString = article.keywords.join(' ');
         
         form.reset({
@@ -48,15 +46,11 @@ const EditArticleForm = () => {
           description: article.description,
           author: article.author,
           keywords: keywordsString,
-          // Use the first image URL from the array or empty string
-          imageUrl: article.imageUrl.length > 0 ? article.imageUrl[0] : "",
+          imageUrl: article.imageUrl,
           sourceUrl: article.sourceUrl || "",
           more_content: article.more_content || ""
         });
-        
-        setArticleLoaded(true);
       } catch (error) {
-        console.error("Error fetching article for editing:", error);
         toast.error("Failed to load article");
         navigate("/");
       } finally {
@@ -65,7 +59,7 @@ const EditArticleForm = () => {
     };
     
     fetchArticle();
-  }, [id, navigate, form, articleLoaded]);
+  }, [id, navigate, form]);
 
   const onSubmit = async (data: ArticleFormValues) => {
     if (!id) return;
@@ -79,17 +73,12 @@ const EditArticleForm = () => {
             .filter(keyword => keyword.trim().length > 0)
         : [];
 
-      // Convert imageUrl to an array if it's a single string
-      const imageUrlArray = data.imageUrl 
-        ? [data.imageUrl] 
-        : ["https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"];
-
       await updateArticle(id, {
         title: data.title,
         description: data.description,
         author: data.author || "Anonymous",
         keywords: keywordsArray,
-        imageUrl: imageUrlArray,
+        imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl,
         more_content: data.more_content
       });
@@ -97,7 +86,6 @@ const EditArticleForm = () => {
       toast.success("Article updated successfully!");
       navigate(`/article/${id}`);
     } catch (error) {
-      console.error("Failed to update article:", error);
       toast.error("Failed to update article. Please try again.");
     } finally {
       setIsSubmitting(false);

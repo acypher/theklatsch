@@ -5,7 +5,7 @@ export interface Article {
   description: string;
   author: string;
   keywords: string[];
-  imageUrl: string[];
+  imageUrl: string;
   sourceUrl: string;
   createdAt: string;
   more_content?: string | null;

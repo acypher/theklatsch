@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -56,7 +57,7 @@ const ArticleView = () => {
       document.title = "The Klatsch";
       
       // Remove Open Graph meta tags
-      const metaTags = document.querySelectorAll('meta[property^="og"]');
+      const metaTags = document.querySelectorAll('meta[property^="og:"]');
       metaTags.forEach(tag => tag.remove());
     };
   }, [id]);
@@ -75,13 +76,8 @@ const ArticleView = () => {
       meta.setAttribute('content', content);
     };
     
-    // Use the first image from the array, or fallback to logo
-    const imageToUse = article.imageUrl && article.imageUrl.length > 0
-      ? article.imageUrl[0]
-      : "/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png";
-    
     // Get the full URL for the image
-    const fullImageUrl = new URL(imageToUse, window.location.origin).href;
+    const fullImageUrl = new URL("/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png", window.location.origin).href;
     
     // Set Open Graph tags
     setMetaTag('og:title', article.title);

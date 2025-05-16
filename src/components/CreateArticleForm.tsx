@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -64,17 +65,12 @@ const CreateArticleForm = () => {
             .filter(keyword => keyword.trim().length > 0)
         : [];
 
-      // Convert imageUrl to an array if it's a single string
-      const imageUrlArray = data.imageUrl 
-        ? [data.imageUrl] 
-        : ["https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"];
-
       const newArticle = await addArticle({
         title: data.title,
         description: data.description,
         author: data.author || "Anonymous",
         keywords: keywordsArray,
-        imageUrl: imageUrlArray,
+        imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl,
         more_content: data.more_content
       });

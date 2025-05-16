@@ -6,44 +6,25 @@ import { forwardRef } from "react";
 
 interface DraggableArticleProps {
   article: Article;
-  isLoggedIn?: boolean;
-  isDragging?: boolean;
-  draggedItemId?: string | null;
-  draggingItem?: Article | null;
+  isLoggedIn: boolean;
+  isDragging: boolean;
+  draggedItemId: string | null;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, item: Article) => void;
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop?: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
-  getFirstImage?: (imageUrls: string[]) => string;
-  formatDate?: (dateString: string) => string;
-  index?: number;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
 }
 
 const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({ 
   article,
-  isLoggedIn = true,
-  isDragging = false,
-  draggedItemId = null,
-  draggingItem = null,
+  isLoggedIn,
+  isDragging,
+  draggedItemId,
   onDragStart,
   onDragEnd,
   onDragOver,
   onDrop
 }, ref) => {
-  
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    onDragOver(e);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    if (onDrop) {
-      onDrop(e, article);
-    }
-  };
-  
-  const isBeingDragged = draggedItemId === article.id;
-
   return (
     <div
       id={`article-${article.id}`}
@@ -51,11 +32,11 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
       draggable={isLoggedIn}
       onDragStart={(e) => onDragStart(e, article)}
       onDragEnd={onDragEnd}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, article)}
       className={`transition-all duration-200 ${
         isLoggedIn ? "cursor-grab active:cursor-grabbing" : ""
-      } ${isBeingDragged ? "opacity-50" : "opacity-100"}`}
+      } ${isDragging && draggedItemId === article.id ? "opacity-50" : "opacity-100"}`}
     >
       <div className={`relative ${isLoggedIn ? "hover:ring-2 hover:ring-primary/30 rounded-lg" : ""}`}>
         {isLoggedIn && (
