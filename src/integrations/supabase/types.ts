@@ -217,6 +217,27 @@ export type Database = {
         }
         Relationships: []
       }
+      issue_recommendations: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          issue: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          issue: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          issue?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

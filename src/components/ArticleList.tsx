@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Article } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +18,7 @@ interface ArticleListProps {
   filterEnabled?: boolean;
   onFilterToggle?: (checked: boolean) => void;
   allArticles?: Article[]; // The complete list of articles
-  currentIssue?: string; // Add the currentIssue prop
+  currentIssue?: string; // Current issue prop
 }
 
 const ArticleList = ({ 
@@ -31,7 +30,8 @@ const ArticleList = ({
   hideRead = false,
   filterEnabled = false,
   onFilterToggle,
-  allArticles // Original complete list of articles
+  allArticles, // Original complete list of articles
+  currentIssue
 }: ArticleListProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
@@ -91,6 +91,7 @@ const ArticleList = ({
         onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
+        currentIssue={currentIssue}
       />
       
       {hasChanges && (

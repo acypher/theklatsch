@@ -19,6 +19,7 @@ interface ArticlesGridProps {
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
+  currentIssue?: string;
 }
 
 const ArticlesGrid = ({ 
@@ -34,7 +35,8 @@ const ArticlesGrid = ({
   onDragStart,
   onDragEnd,
   onDragOver,
-  onDrop
+  onDrop,
+  currentIssue
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -76,6 +78,7 @@ const ArticlesGrid = ({
           commentCounts={commentCounts}
           filterEnabled={filterEnabled}
           onFilterToggle={onFilterToggle}
+          currentIssue={currentIssue}
         />
       </div>
       

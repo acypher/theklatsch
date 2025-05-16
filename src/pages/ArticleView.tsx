@@ -42,6 +42,8 @@ const ArticleView = () => {
           }
         } catch (error) {
           console.error("Error fetching article for meta tags:", error);
+        } finally {
+          setLoading(false);
         }
       }
     };
