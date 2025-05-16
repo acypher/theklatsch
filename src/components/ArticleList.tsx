@@ -18,7 +18,8 @@ interface ArticleListProps {
   hideRead?: boolean;
   filterEnabled?: boolean;
   onFilterToggle?: (checked: boolean) => void;
-  allArticles?: Article[]; // Add this to pass through the complete article list
+  allArticles?: Article[]; // The complete list of articles
+  currentIssue?: string; // Add the currentIssue prop
 }
 
 const ArticleList = ({ 

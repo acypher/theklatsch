@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,17 +14,31 @@ import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
 import { initGifController } from '@/utils/gifController';
 
-const ArticleDetail = () => {
+interface ArticleDetailProps {
+  article?: Article | null;
+  loading?: boolean;
+  currentIssue?: string;
+}
+
+const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssue }: ArticleDetailProps = {}) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [article, setArticle] = useState<Article | null>(propArticle || null);
+  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
+    if (propArticle) {
+      setArticle(propArticle);
+      setLoading(false);
+    }
+  }, [propArticle]);
+
+  useEffect(() => {
     const fetchArticle = async () => {
+      if (propArticle) return;
       if (id) {
         try {
           setLoading(true);
@@ -50,7 +63,7 @@ const ArticleDetail = () => {
     };
 
     fetchArticle();
-  }, [id, navigate]);
+  }, [id, navigate, propArticle]);
 
   useEffect(() => {
     if (article?.imageUrl?.toLowerCase().endsWith('.gif')) {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -11,6 +10,7 @@ const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
   const [currentIssue, setCurrentIssue] = useState<string>("May 2025");
   const [article, setArticle] = useState<Article | null>(null);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     // Save scroll position before navigating to article
@@ -88,7 +88,7 @@ const ArticleView = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar currentIssue={currentIssue} />
       <main className="prose prose-lg max-w-none pb-12 markdown-content-container flex-grow overflow-y-auto">
-        <ArticleDetail currentIssue={currentIssue} />
+        <ArticleDetail article={article} loading={loading} currentIssue={currentIssue} />
       </main>
       
       {/* Add styles to properly isolate markdown content and ensure titles render correctly */}

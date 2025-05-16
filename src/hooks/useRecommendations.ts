@@ -16,10 +16,12 @@ export const useRecommendations = (currentIssue?: string) => {
       
       setLoading(true);
       try {
+        // Use the vars table instead which exists in the TypeScript types
+        // We'll use a key pattern like `recommendations_${currentIssue}` 
         const { data, error } = await supabase
-          .from("issue_recommendations")
-          .select("content")
-          .eq("issue", currentIssue)
+          .from("vars")
+          .select("value")
+          .eq("key", `recommendations_${currentIssue}`)
           .maybeSingle();
         
         if (error) {
@@ -27,7 +29,7 @@ export const useRecommendations = (currentIssue?: string) => {
           return;
         }
         
-        setRecommendations(data?.content || "");
+        setRecommendations(data?.value || "");
       } catch (error) {
         console.error("Failed to fetch recommendations:", error);
       } finally {
@@ -46,14 +48,16 @@ export const useRecommendations = (currentIssue?: string) => {
     setIsSaving(true);
     
     try {
+      // Store in vars table with key pattern
+      const key = `recommendations_${currentIssue}`;
       const { error } = await supabase
-        .from("issue_recommendations")
+        .from("vars")
         .upsert(
           { 
-            issue: currentIssue,
-            content 
+            key: key,
+            value: content 
           },
-          { onConflict: "issue" }
+          { onConflict: "key" }
         );
       
       if (error) {
