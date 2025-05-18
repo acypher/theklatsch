@@ -40,12 +40,18 @@ const TableOfContents = ({
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
+  const [hasUnreadComments, setHasUnreadComments] = useState(false);
   
-  // Check for unread comments across ALL articles by using the commentCounts object directly
-  // This uses all article comment counts, not just the ones in the filtered view
-  const hasUnreadComments = Object.values(commentCounts).some(
-    (count) => count.viewedCommentCount < count.commentCount
-  );
+  // Update hasUnreadComments whenever commentCounts changes
+  useEffect(() => {
+    const unreadComments = Object.values(commentCounts).some(
+      (count) => count.viewedCommentCount < count.commentCount
+    );
+    setHasUnreadComments(unreadComments);
+    
+    // Log for debugging
+    console.log("Checking unread comments:", unreadComments, commentCounts);
+  }, [commentCounts]);
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
