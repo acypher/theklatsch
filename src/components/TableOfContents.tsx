@@ -41,7 +41,7 @@ const TableOfContents = ({
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   
-  // Check if any article has unread comments
+  // Check if ANY article has unread comments - now checking ALL articles, not just filtered ones
   const hasUnreadComments = Object.values(commentCounts).some(
     (count) => count.viewedCommentCount < count.commentCount
   );
