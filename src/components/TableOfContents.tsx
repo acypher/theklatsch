@@ -40,6 +40,7 @@ const TableOfContents = ({
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
+  const [hasUnreadComments, setHasUnreadComments] = useState(false);
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
@@ -56,6 +57,22 @@ const TableOfContents = ({
       fetchCurrentIssue();
     }
   }, [propCurrentIssue]);
+
+  // Check for unread comments across ALL articles (not just filtered ones)
+  useEffect(() => {
+    if (!commentCounts || Object.keys(commentCounts).length === 0) {
+      setHasUnreadComments(false);
+      return;
+    }
+
+    // Check ALL articles for unread comments
+    const hasUnread = allArticles.some(article => {
+      const counts = commentCounts[article.id];
+      return counts && counts.viewedCommentCount < counts.commentCount;
+    });
+    
+    setHasUnreadComments(hasUnread);
+  }, [commentCounts, allArticles]);
 
   // Only call useRecommendations once we have an issue key
   const { recommendations, loading, isSaving, handleSaveRecommendations } = 
@@ -74,7 +91,9 @@ const TableOfContents = ({
       <CardHeader className="pb-2">
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
-            <BookOpen className="h-5 w-5 flex-shrink-0" />
+            <span className={`flex items-center justify-center rounded-full ${hasUnreadComments ? 'bg-yellow-300' : ''} p-1`}>
+              <BookOpen className="h-5 w-5 flex-shrink-0" />
+            </span>
             <span className="ml-2">In This Issue</span>
           </CardTitle>
           {onFilterToggle && (
