@@ -74,7 +74,7 @@ const TableOfContents = ({
     setHasUnreadComments(hasUnread);
   };
 
-  // Initial check for unread comments
+  // Initial check for unread comments and recheck when commentCounts or allArticles change
   useEffect(() => {
     checkUnreadComments();
   }, [commentCounts, allArticles]);
@@ -95,8 +95,10 @@ const TableOfContents = ({
   const handleFilterToggle = (checked: boolean) => {
     if (onFilterToggle) {
       onFilterToggle(checked);
-      // Recalculate hasUnreadComments when filter is toggled
-      checkUnreadComments();
+      
+      // Always recalculate hasUnreadComments when filter is toggled
+      // This ensures the icon state is correct even when filters change
+      setTimeout(checkUnreadComments, 0);
     }
   };
 
