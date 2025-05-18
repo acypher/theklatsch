@@ -40,18 +40,6 @@ const TableOfContents = ({
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
-  const [hasUnreadComments, setHasUnreadComments] = useState(false);
-  
-  // Update hasUnreadComments whenever commentCounts changes
-  useEffect(() => {
-    const unreadComments = Object.values(commentCounts).some(
-      (count) => count.viewedCommentCount < count.commentCount
-    );
-    setHasUnreadComments(unreadComments);
-    
-    // Log for debugging
-    console.log("Checking unread comments:", unreadComments, commentCounts);
-  }, [commentCounts]);
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
@@ -86,9 +74,7 @@ const TableOfContents = ({
       <CardHeader className="pb-2">
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
-            <div className={`flex items-center justify-center ${hasUnreadComments ? "bg-yellow-300 rounded-full p-1" : ""}`}>
-              <BookOpen className="h-5 w-5 flex-shrink-0" />
-            </div>
+            <BookOpen className="h-5 w-5 flex-shrink-0" />
             <span className="ml-2">In This Issue</span>
           </CardTitle>
           {onFilterToggle && (

@@ -50,7 +50,7 @@ export type Database = {
           description: string
           display_position: number | null
           id: string
-          imageurl: string | null
+          imageurl: string
           keywords: string[]
           month: number | null
           more_content: string | null
@@ -67,7 +67,7 @@ export type Database = {
           description: string
           display_position?: number | null
           id?: string
-          imageurl?: string | null
+          imageurl: string
           keywords?: string[]
           month?: number | null
           more_content?: string | null
@@ -84,7 +84,7 @@ export type Database = {
           description?: string
           display_position?: number | null
           id?: string
-          imageurl?: string | null
+          imageurl?: string
           keywords?: string[]
           month?: number | null
           more_content?: string | null
