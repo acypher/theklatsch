@@ -59,7 +59,7 @@ const TableOfContents = ({
   }, [propCurrentIssue]);
 
   // Check for unread comments across ALL articles (not just filtered ones)
-  useEffect(() => {
+  const checkUnreadComments = () => {
     if (!commentCounts || Object.keys(commentCounts).length === 0) {
       setHasUnreadComments(false);
       return;
@@ -72,6 +72,11 @@ const TableOfContents = ({
     });
     
     setHasUnreadComments(hasUnread);
+  };
+
+  // Initial check for unread comments
+  useEffect(() => {
+    checkUnreadComments();
   }, [commentCounts, allArticles]);
 
   // Only call useRecommendations once we have an issue key
@@ -86,6 +91,15 @@ const TableOfContents = ({
   const recommendationsHeight = recommendations ? 120 : 0;
   const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60);
 
+  // Handle filter toggle and recalculate hasUnreadComments
+  const handleFilterToggle = (checked: boolean) => {
+    if (onFilterToggle) {
+      onFilterToggle(checked);
+      // Recalculate hasUnreadComments when filter is toggled
+      checkUnreadComments();
+    }
+  };
+
   return (
     <Card className={`h-full max-h-[600px] flex flex-col ${className || ""}`}>
       <CardHeader className="pb-2">
@@ -99,7 +113,7 @@ const TableOfContents = ({
           {onFilterToggle && (
             <ReadFilter
               enabled={filterEnabled}
-              onToggle={onFilterToggle}
+              onToggle={handleFilterToggle}
             />
           )}
         </div>
