@@ -8,6 +8,7 @@ interface ArticlesListProps {
   readArticles: Set<string>;
   onArticleClick: (articleId: string) => void;
   commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
+  onCommentsStateChanged?: () => void; // New callback for comment state changes
 }
 
 const ArticlesList = ({ 
@@ -15,14 +16,20 @@ const ArticlesList = ({
   allArticles, 
   readArticles, 
   onArticleClick, 
-  commentCounts = {} 
+  commentCounts = {},
+  onCommentsStateChanged
 }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
   useEffect(() => {
     console.log("ArticlesList - Filtered articles:", articles.map(a => a.id));
     console.log("ArticlesList - All articles:", allArticles.map(a => a.id));
-  }, [articles, allArticles]);
+    
+    // Call onCommentsStateChanged whenever commentCounts changes
+    if (onCommentsStateChanged) {
+      onCommentsStateChanged();
+    }
+  }, [articles, allArticles, commentCounts, onCommentsStateChanged]);
   
   const handleItemClick = (articleId: string) => {
     setActiveItem(articleId);

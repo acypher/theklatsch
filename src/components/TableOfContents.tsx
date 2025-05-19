@@ -40,6 +40,7 @@ const TableOfContents = ({
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
+  const [hasUnreadComments, setHasUnreadComments] = useState(false);
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
@@ -57,6 +58,23 @@ const TableOfContents = ({
     }
   }, [propCurrentIssue]);
 
+  // Check for unread comments in all articles (not just filtered ones)
+  useEffect(() => {
+    // Check if any article in the commentCounts has unread comments
+    const checkForUnreadComments = () => {
+      for (const articleId in commentCounts) {
+        const counts = commentCounts[articleId];
+        if (counts.viewedCommentCount < counts.commentCount) {
+          return true;
+        }
+      }
+      return false;
+    };
+    
+    // Set hasUnreadComments based on the check
+    setHasUnreadComments(checkForUnreadComments());
+  }, [commentCounts]);
+
   // Only call useRecommendations once we have an issue key
   const { recommendations, loading, isSaving, handleSaveRecommendations } = 
     useRecommendations(issueKey);
@@ -66,6 +84,21 @@ const TableOfContents = ({
     ? articles.filter(article => !readArticles.has(article.id))
     : articles;
 
+  // Event handler for filter toggle that will ensure we recalculate hasUnreadComments
+  const handleFilterToggle = (checked: boolean) => {
+    // First update the filter state
+    if (onFilterToggle) {
+      onFilterToggle(checked);
+    }
+    
+    // Then recalculate hasUnreadComments based on commentCounts
+    const hasAnyUnreadComments = Object.values(commentCounts).some(
+      counts => counts.viewedCommentCount < counts.commentCount
+    );
+    
+    setHasUnreadComments(hasAnyUnreadComments);
+  };
+
   const recommendationsHeight = recommendations ? 120 : 0;
   const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60);
 
@@ -74,13 +107,15 @@ const TableOfContents = ({
       <CardHeader className="pb-2">
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
-            <BookOpen className="h-5 w-5 flex-shrink-0" />
+            <span className={`flex items-center justify-center ${hasUnreadComments ? 'bg-yellow-300 rounded-full p-1' : ''}`}>
+              <BookOpen className="h-5 w-5 flex-shrink-0" />
+            </span>
             <span className="ml-2">In This Issue</span>
           </CardTitle>
           {onFilterToggle && (
             <ReadFilter
               enabled={filterEnabled}
-              onToggle={onFilterToggle}
+              onToggle={handleFilterToggle}
             />
           )}
         </div>
@@ -96,6 +131,13 @@ const TableOfContents = ({
             readArticles={readArticles}
             onArticleClick={onArticleClick}
             commentCounts={commentCounts}
+            onCommentsStateChanged={() => {
+              // Recalculate hasUnreadComments when comment state changes
+              const hasAnyUnreadComments = Object.values(commentCounts).some(
+                counts => counts.viewedCommentCount < counts.commentCount
+              );
+              setHasUnreadComments(hasAnyUnreadComments);
+            }}
           />
         </ScrollArea>
         
