@@ -40,7 +40,6 @@ const TableOfContents = ({
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
-  const [hasUnreadComments, setHasUnreadComments] = useState(false);
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
@@ -58,27 +57,6 @@ const TableOfContents = ({
     }
   }, [propCurrentIssue]);
 
-  // Check for unread comments across ALL articles (not just filtered ones)
-  const checkUnreadComments = () => {
-    if (!commentCounts || Object.keys(commentCounts).length === 0) {
-      setHasUnreadComments(false);
-      return;
-    }
-
-    // Check ALL articles for unread comments
-    const hasUnread = allArticles.some(article => {
-      const counts = commentCounts[article.id];
-      return counts && counts.viewedCommentCount < counts.commentCount;
-    });
-    
-    setHasUnreadComments(hasUnread);
-  };
-
-  // Initial check for unread comments and recheck when commentCounts or allArticles change
-  useEffect(() => {
-    checkUnreadComments();
-  }, [commentCounts, allArticles]);
-
   // Only call useRecommendations once we have an issue key
   const { recommendations, loading, isSaving, handleSaveRecommendations } = 
     useRecommendations(issueKey);
@@ -91,31 +69,18 @@ const TableOfContents = ({
   const recommendationsHeight = recommendations ? 120 : 0;
   const articlesListHeight = isMobile ? 250 : (maxHeight - recommendationsHeight - 60);
 
-  // Handle filter toggle and recalculate hasUnreadComments
-  const handleFilterToggle = (checked: boolean) => {
-    if (onFilterToggle) {
-      onFilterToggle(checked);
-      
-      // Always recalculate hasUnreadComments when filter is toggled
-      // This ensures the icon state is correct even when filters change
-      setTimeout(checkUnreadComments, 0);
-    }
-  };
-
   return (
     <Card className={`h-full max-h-[600px] flex flex-col ${className || ""}`}>
       <CardHeader className="pb-2">
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
-            <span className={`flex items-center justify-center rounded-full ${hasUnreadComments ? 'bg-yellow-300' : ''} p-1`}>
-              <BookOpen className="h-5 w-5 flex-shrink-0" />
-            </span>
+            <BookOpen className="h-5 w-5 flex-shrink-0" />
             <span className="ml-2">In This Issue</span>
           </CardTitle>
           {onFilterToggle && (
             <ReadFilter
               enabled={filterEnabled}
-              onToggle={handleFilterToggle}
+              onToggle={onFilterToggle}
             />
           )}
         </div>
