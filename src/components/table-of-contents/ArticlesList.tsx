@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Article } from "@/lib/types";
 
@@ -90,6 +91,6 @@ const ArticlesList = ({
       </ul>
     </div>
   );
-});
+};
 
 export default ArticlesList;
