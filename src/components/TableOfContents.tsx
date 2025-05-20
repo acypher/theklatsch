@@ -102,8 +102,17 @@ const TableOfContents = ({
   // Calculate the space distribution between articles and recommendations
   const hasRecommendations = !loading && recommendations && recommendations.trim().length > 0;
 
+  // Calculate heights based on maxHeight
+  const headerHeight = 56; // Approximate height of the card header
+  const contentAreaHeight = maxHeight - headerHeight;
+  const articleListHeight = hasRecommendations ? `${Math.floor(contentAreaHeight * 0.7)}px` : '100%';
+  const recommendationsHeight = hasRecommendations ? `${Math.floor(contentAreaHeight * 0.3)}px` : '0';
+
   return (
-    <Card className={`${className || ""}`} style={{ height: `${maxHeight}px`, maxHeight: `${maxHeight}px`, display: 'flex', flexDirection: 'column' }}>
+    <Card 
+      className={`${className || ""} relative`} 
+      style={{ height: `${maxHeight}px`, maxHeight: `${maxHeight}px`, display: 'flex', flexDirection: 'column' }}
+    >
       <CardHeader className="pb-2">
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
@@ -120,8 +129,8 @@ const TableOfContents = ({
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden p-6 pt-0 flex flex-col" style={{ height: 'calc(100% - 56px)' }}>
-        <div className={`flex-grow overflow-hidden ${hasRecommendations ? 'h-[70%]' : 'h-full'}`}>
+      <CardContent className="flex-grow overflow-hidden p-6 pt-0 flex flex-col" style={{ height: `calc(100% - ${headerHeight}px)` }}>
+        <div className="flex-grow overflow-hidden" style={{ height: articleListHeight }}>
           <ArticlesList 
             articles={displayArticles}
             allArticles={allArticles}
@@ -140,7 +149,7 @@ const TableOfContents = ({
         </div>
         
         {!loading && issueKey && hasRecommendations && (
-          <div className="mt-3 h-[30%] overflow-hidden border-t border-border pt-3">
+          <div className="mt-3 overflow-hidden border-t border-border pt-3" style={{ height: recommendationsHeight }}>
             <ScrollArea className="h-full">
               <EditableMarkdown 
                 content={recommendations} 
