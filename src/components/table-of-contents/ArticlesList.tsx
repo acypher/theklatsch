@@ -39,7 +39,7 @@ const ArticlesList = ({
   };
 
   return (
-    <div style={{ maxHeight }} className="overflow-auto">
+    <div style={{ height: maxHeight }} className="overflow-auto h-full">
       <ul className="space-y-2">
         {articles.map((article) => {
           const isArticleRead = readArticles.has(article.id);
@@ -49,8 +49,6 @@ const ArticlesList = ({
           // Display the position + 1 (for 1-based numbering)
           const displayNumber = originalPosition !== -1 ? originalPosition + 1 : 0;
           
-          console.log(`Article ${article.id} - Original position: ${originalPosition}, Display number: ${displayNumber}`);
-
           // Check for unread comments
           const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
           const hasUnreadComments = counts.viewedCommentCount < counts.commentCount;

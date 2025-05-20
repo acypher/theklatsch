@@ -101,11 +101,9 @@ const TableOfContents = ({
 
   // Calculate the space distribution between articles and recommendations
   const hasRecommendations = !loading && recommendations && recommendations.trim().length > 0;
-  const recommendationsHeight = hasRecommendations ? 'max-h-[30%]' : 'max-h-[0%]';
-  const articlesHeight = hasRecommendations ? 'max-h-[70%]' : 'max-h-[100%]';
 
   return (
-    <Card className={`h-full max-h-[${maxHeight}px] flex flex-col ${className || ""}`}>
+    <Card className={`${className || ""}`} style={{ height: `${maxHeight}px`, maxHeight: `${maxHeight}px`, display: 'flex', flexDirection: 'column' }}>
       <CardHeader className="pb-2">
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
@@ -122,8 +120,8 @@ const TableOfContents = ({
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden p-6 pt-0 flex flex-col h-full">
-        <div className={`${articlesHeight} overflow-hidden min-h-0 flex-grow`}>
+      <CardContent className="flex-grow overflow-hidden p-6 pt-0 flex flex-col" style={{ height: 'calc(100% - 56px)' }}>
+        <div className={`flex-grow overflow-hidden ${hasRecommendations ? 'h-[70%]' : 'h-full'}`}>
           <ArticlesList 
             articles={displayArticles}
             allArticles={allArticles}
@@ -141,18 +139,16 @@ const TableOfContents = ({
           />
         </div>
         
-        {!loading && issueKey && (
-          <div className={`mt-3 ${recommendationsHeight} overflow-hidden min-h-0 ${hasRecommendations ? 'flex-shrink pt-3 border-t border-border' : ''}`}>
-            {hasRecommendations && (
-              <ScrollArea className="h-full">
-                <EditableMarkdown 
-                  content={recommendations} 
-                  onSave={handleSaveRecommendations} 
-                  placeholder="Add editor's comments here..."
-                  disabled={isSaving}
-                />
-              </ScrollArea>
-            )}
+        {!loading && issueKey && hasRecommendations && (
+          <div className="mt-3 h-[30%] overflow-hidden border-t border-border pt-3">
+            <ScrollArea className="h-full">
+              <EditableMarkdown 
+                content={recommendations} 
+                onSave={handleSaveRecommendations} 
+                placeholder="Add editor's comments here..."
+                disabled={isSaving}
+              />
+            </ScrollArea>
           </div>
         )}
       </CardContent>

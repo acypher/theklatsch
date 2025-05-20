@@ -6,16 +6,21 @@ export const useContentsHeight = () => {
 
   useEffect(() => {
     const calculateMaxHeight = () => {
+      // Match the approximate height of article cards
+      const baseHeight = 380; // Base height that works well across most layouts
       const viewportWidth = window.innerWidth;
-      const maxAllowedHeight = 600;
       const minHeight = 250;
       
       if (viewportWidth >= 1200) {
-        return maxAllowedHeight;
+        // For larger screens, use a slightly taller height
+        return baseHeight;
+      } else if (viewportWidth >= 768) {
+        // For medium screens
+        return Math.max(baseHeight - 20, minHeight);
       }
       
-      const calculatedHeight = Math.floor(viewportWidth / 2);
-      return Math.min(Math.max(calculatedHeight, minHeight), maxAllowedHeight);
+      // For smaller screens
+      return Math.max(baseHeight - 40, minHeight);
     };
     
     setMaxHeight(calculateMaxHeight());
