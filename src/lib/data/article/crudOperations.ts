@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
@@ -120,10 +119,10 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
 // Function to update an existing article in Supabase
 export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
   try {
-    // First, get the current article to determine its month and year
+    // Get the current article to preserve its display position
     const { data: currentArticle, error: fetchError } = await supabase
       .from('articles')
-      .select('month, year')
+      .select('display_position')
       .eq('id', id)
       .single();
 
@@ -131,15 +130,7 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
       throw new Error(fetchError.message);
     }
 
-    // Recalculate display position based on keywords
-    const position = await determineDisplayPosition(
-      article.keywords, 
-      currentArticle.month, 
-      currentArticle.year
-    );
-    
-    console.log(`Recalculating position for updated article ${id} with keywords: ${article.keywords.join(', ')}`);
-    console.log(`New position: ${position}`);
+    console.log(`Updating article ${id} while preserving display position: ${currentArticle.display_position}`);
 
     const updatedArticle = {
       title: article.title,
@@ -149,7 +140,7 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
       imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
       more_content: article.more_content,
-      display_position: position
+      display_position: currentArticle.display_position // Preserve the original position
     };
     
     const { data, error } = await supabase
