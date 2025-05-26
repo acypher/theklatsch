@@ -29,9 +29,9 @@ export const getAllArticles = async (): Promise<Article[]> => {
       .order('display_position', { ascending: true })
       .order('created_at', { ascending: false });
     
-    // Apply month/year filter if available
+    // Apply month/year filter if available, but also include articles with "list" keyword
     if (month !== null && year !== null) {
-      query = query.eq('month', month).eq('year', year);
+      query = query.or(`and(month.eq.${month},year.eq.${year}),keywords.cs.{"list"}`);
     }
     
     const { data: articles, error } = await query;
