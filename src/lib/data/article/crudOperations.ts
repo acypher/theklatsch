@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
@@ -117,13 +116,22 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
   }
 };
 
+interface UpdateOptions {
+  preservePosition?: boolean;
+  originalPosition?: number | null;
+}
+
 // Function to update an existing article in Supabase
-export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'createdAt'>): Promise<Article> => {
+export const updateArticle = async (
+  id: string, 
+  article: Omit<Article, 'id' | 'createdAt'>, 
+  options: UpdateOptions = {}
+): Promise<Article> => {
   try {
     // First, get the current article to determine its month and year
     const { data: currentArticle, error: fetchError } = await supabase
       .from('articles')
-      .select('month, year')
+      .select('month, year, display_position')
       .eq('id', id)
       .single();
 
@@ -131,15 +139,22 @@ export const updateArticle = async (id: string, article: Omit<Article, 'id' | 'c
       throw new Error(fetchError.message);
     }
 
-    // Recalculate display position based on keywords
-    const position = await determineDisplayPosition(
-      article.keywords, 
-      currentArticle.month, 
-      currentArticle.year
-    );
-    
-    console.log(`Recalculating position for updated article ${id} with keywords: ${article.keywords.join(', ')}`);
-    console.log(`New position: ${position}`);
+    let position: number;
+
+    if (options.preservePosition && options.originalPosition !== null && options.originalPosition !== undefined) {
+      // Preserve the original position
+      position = options.originalPosition;
+      console.log(`Preserving original position: ${position}`);
+    } else {
+      // Recalculate display position based on keywords
+      position = await determineDisplayPosition(
+        article.keywords, 
+        currentArticle.month, 
+        currentArticle.year
+      );
+      console.log(`Recalculating position for updated article ${id} with keywords: ${article.keywords.join(', ')}`);
+      console.log(`New position: ${position}`);
+    }
 
     const updatedArticle = {
       title: article.title,

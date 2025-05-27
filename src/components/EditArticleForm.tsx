@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { getArticleById, updateArticle } from "@/lib/data";
+import { getArticleById, updateArticle, getAllArticles } from "@/lib/data";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import ArticleForm from "@/components/article/ArticleForm";
@@ -19,6 +19,8 @@ const EditArticleForm = () => {
   const { id } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [originalPosition, setOriginalPosition] = useState<number | null>(null);
+  const [originalKeywords, setOriginalKeywords] = useState<string[]>([]);
   
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -31,13 +33,25 @@ const EditArticleForm = () => {
       
       try {
         setIsLoading(true);
-        const article = await getArticleById(id);
+        const [article, allArticles] = await Promise.all([
+          getArticleById(id),
+          getAllArticles()
+        ]);
         
         if (!article) {
           toast.error("Article not found");
           navigate("/");
           return;
         }
+        
+        // Find the original position in the list
+        const articleIndex = allArticles.findIndex(a => a.id === id);
+        if (articleIndex !== -1) {
+          setOriginalPosition(allArticles[articleIndex].display_position || articleIndex + 1);
+        }
+        
+        // Store original keywords
+        setOriginalKeywords([...article.keywords]);
         
         const keywordsString = article.keywords.join(' ');
         
@@ -73,6 +87,20 @@ const EditArticleForm = () => {
             .filter(keyword => keyword.trim().length > 0)
         : [];
 
+      // Check if venue or ott keywords have changed
+      const originalHasVenue = originalKeywords.includes('venue');
+      const originalHasOtt = originalKeywords.includes('ott');
+      const newHasVenue = keywordsArray.includes('venue');
+      const newHasOtt = keywordsArray.includes('ott');
+      
+      const venueChanged = originalHasVenue !== newHasVenue;
+      const ottChanged = originalHasOtt !== newHasOtt;
+      
+      console.log(`Original keywords: ${originalKeywords.join(', ')}`);
+      console.log(`New keywords: ${keywordsArray.join(', ')}`);
+      console.log(`Venue changed: ${venueChanged}, OTT changed: ${ottChanged}`);
+      console.log(`Original position: ${originalPosition}`);
+
       await updateArticle(id, {
         title: data.title,
         description: data.description,
@@ -81,6 +109,9 @@ const EditArticleForm = () => {
         imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl,
         more_content: data.more_content
+      }, {
+        preservePosition: !venueChanged && !ottChanged,
+        originalPosition: originalPosition
       });
       
       toast.success("Article updated successfully!");
