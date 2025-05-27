@@ -22,6 +22,7 @@ const ArticlesList = ({
   maxHeight = "250px" // Default height if not specified
 }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
+  const [readTimestamps, setReadTimestamps] = useState<{[articleId: string]: string}>({});
   
   useEffect(() => {
     console.log("ArticlesList - Filtered articles:", articles.map(a => a.id));
@@ -32,10 +33,52 @@ const ArticlesList = ({
       onCommentsStateChanged();
     }
   }, [articles, allArticles, commentCounts, onCommentsStateChanged]);
+
+  // Listen for read state changes to track when articles are marked as read
+  useEffect(() => {
+    const handleReadStateChange = (e: CustomEvent) => {
+      const { articleId, read } = e.detail;
+      
+      if (read) {
+        // Store the timestamp when the article was marked as read
+        setReadTimestamps(prev => ({
+          ...prev,
+          [articleId]: new Date().toISOString()
+        }));
+      } else {
+        // Remove timestamp when article is unmarked as read
+        setReadTimestamps(prev => {
+          const newTimestamps = { ...prev };
+          delete newTimestamps[articleId];
+          return newTimestamps;
+        });
+      }
+    };
+
+    window.addEventListener('article-read-state-changed' as any, handleReadStateChange);
+    
+    return () => {
+      window.removeEventListener('article-read-state-changed' as any, handleReadStateChange);
+    };
+  }, []);
   
   const handleItemClick = (articleId: string) => {
     setActiveItem(articleId);
     onArticleClick(articleId);
+  };
+
+  // Helper function to check if an article was edited after being marked as read
+  const isEditedAfterRead = (article: Article) => {
+    const readTimestamp = readTimestamps[article.id];
+    if (!readTimestamp || !readArticles.has(article.id)) {
+      return false;
+    }
+    
+    // Compare the article's updated timestamp with when it was marked as read
+    const articleUpdated = new Date(article.createdAt);
+    const markedAsRead = new Date(readTimestamp);
+    
+    return articleUpdated > markedAsRead;
   };
 
   return (
@@ -43,6 +86,7 @@ const ArticlesList = ({
       <ul className="space-y-2">
         {articles.map((article) => {
           const isArticleRead = readArticles.has(article.id);
+          const wasEditedAfterRead = isEditedAfterRead(article);
           
           // Find the actual position in the full list of articles (not just the filtered ones)
           const originalPosition = allArticles.findIndex(a => a.id === article.id);
@@ -83,7 +127,16 @@ const ArticlesList = ({
                     {displayNumber}.
                   </span>
                 )}
-                <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>
+                <span 
+                  className={`${
+                    isArticleRead ? "text-muted-foreground/50" : ""
+                  } ${
+                    wasEditedAfterRead ? "bg-blue-200 px-1 rounded" : ""
+                  }`}
+                  title={wasEditedAfterRead ? "This article was edited after you marked it as read" : undefined}
+                >
+                  {article.title}
+                </span>
               </button>
             </li>
           );
