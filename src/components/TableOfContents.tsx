@@ -11,7 +11,6 @@ import ArticlesList from "./table-of-contents/ArticlesList";
 import ReadFilter from "./article/ReadFilter";
 import { useEffect, useState } from "react";
 import { getCurrentIssue } from "@/lib/data";
-import { ARTICLE_UPDATED_EVENT } from "./EditArticleForm";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -42,7 +41,6 @@ const TableOfContents = ({
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   const [hasUnreadComments, setHasUnreadComments] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
@@ -59,19 +57,6 @@ const TableOfContents = ({
       fetchCurrentIssue();
     }
   }, [propCurrentIssue]);
-
-  // Listen for article updates to refresh the highlighting
-  useEffect(() => {
-    const handleArticleUpdated = () => {
-      setRefreshKey(prev => prev + 1);
-    };
-
-    window.addEventListener(ARTICLE_UPDATED_EVENT as any, handleArticleUpdated);
-    
-    return () => {
-      window.removeEventListener(ARTICLE_UPDATED_EVENT as any, handleArticleUpdated);
-    };
-  }, []);
 
   // Check for unread comments in all articles (not just filtered ones)
   useEffect(() => {
@@ -147,7 +132,6 @@ const TableOfContents = ({
       <CardContent className="flex-grow overflow-hidden p-6 pt-0 flex flex-col" style={{ height: `calc(100% - ${headerHeight}px)` }}>
         <div className="flex-grow overflow-hidden" style={{ height: articleListHeight }}>
           <ArticlesList 
-            key={refreshKey} // Force re-render when articles are updated
             articles={displayArticles}
             allArticles={allArticles}
             readArticles={readArticles}
