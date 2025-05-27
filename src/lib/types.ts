@@ -8,7 +8,6 @@ export interface Article {
   imageUrl: string;
   sourceUrl: string;
   createdAt: string;
-  updatedAt?: string;
   more_content?: string | null;
   deleted?: boolean;
   deletedAt?: string | null;
