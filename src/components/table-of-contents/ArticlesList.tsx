@@ -1,5 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { Article } from "@/lib/types";
+import { ARTICLE_UPDATED_EVENT } from "../EditArticleForm";
 
 interface ArticlesListProps {
   articles: Article[];
@@ -22,6 +24,7 @@ const ArticlesList = ({
 }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [readTimestamps, setReadTimestamps] = useState<{[articleId: string]: string}>({});
+  const [editedAfterReadArticles, setEditedAfterReadArticles] = useState<Set<string>>(new Set());
   
   useEffect(() => {
     console.log("ArticlesList - Filtered articles:", articles.map(a => a.id));
@@ -51,6 +54,13 @@ const ArticlesList = ({
           delete newTimestamps[articleId];
           return newTimestamps;
         });
+        
+        // Also remove from edited after read set
+        setEditedAfterReadArticles(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(articleId);
+          return newSet;
+        });
       }
     };
 
@@ -60,24 +70,56 @@ const ArticlesList = ({
       window.removeEventListener('article-read-state-changed' as any, handleReadStateChange);
     };
   }, []);
+
+  // Listen for article updates to immediately highlight them if they were read
+  useEffect(() => {
+    const handleArticleUpdated = (e: CustomEvent) => {
+      const { articleId } = e.detail;
+      
+      // Check if this article is marked as read
+      if (readArticles.has(articleId)) {
+        // Add it to the edited after read set
+        setEditedAfterReadArticles(prev => new Set(prev).add(articleId));
+      }
+    };
+
+    window.addEventListener(ARTICLE_UPDATED_EVENT as any, handleArticleUpdated);
+    
+    return () => {
+      window.removeEventListener(ARTICLE_UPDATED_EVENT as any, handleArticleUpdated);
+    };
+  }, [readArticles]);
+
+  // Check for edited articles when articles or read state changes
+  useEffect(() => {
+    const checkEditedArticles = () => {
+      const newEditedSet = new Set<string>();
+      
+      allArticles.forEach(article => {
+        if (readArticles.has(article.id)) {
+          const readTimestamp = readTimestamps[article.id];
+          if (readTimestamp) {
+            // Use updatedAt if available, otherwise fall back to createdAt
+            const articleUpdateTime = article.updatedAt || article.createdAt;
+            const articleUpdated = new Date(articleUpdateTime);
+            const markedAsRead = new Date(readTimestamp);
+            
+            if (articleUpdated > markedAsRead) {
+              newEditedSet.add(article.id);
+            }
+          }
+        }
+      });
+      
+      setEditedAfterReadArticles(newEditedSet);
+    };
+    
+    checkEditedArticles();
+  }, [allArticles, readArticles, readTimestamps]);
   
   const handleItemClick = (articleId: string) => {
     setActiveItem(articleId);
     onArticleClick(articleId);
-  };
-
-  // Helper function to check if an article was edited after being marked as read
-  const isEditedAfterRead = (article: Article) => {
-    const readTimestamp = readTimestamps[article.id];
-    if (!readTimestamp || !readArticles.has(article.id)) {
-      return false;
-    }
-    
-    // Compare the article's updated timestamp with when it was marked as read
-    const articleUpdated = new Date(article.createdAt);
-    const markedAsRead = new Date(readTimestamp);
-    
-    return articleUpdated > markedAsRead;
   };
 
   return (
@@ -85,7 +127,7 @@ const ArticlesList = ({
       <ul className="space-y-2">
         {articles.map((article) => {
           const isArticleRead = readArticles.has(article.id);
-          const wasEditedAfterRead = isEditedAfterRead(article);
+          const wasEditedAfterRead = editedAfterReadArticles.has(article.id);
           
           // Find the actual position in the full list of articles (not just the filtered ones)
           const originalPosition = allArticles.findIndex(a => a.id === article.id);
