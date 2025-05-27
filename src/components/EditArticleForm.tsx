@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -47,7 +46,7 @@ const EditArticleForm = () => {
         // Find the original position in the list
         const articleIndex = allArticles.findIndex(a => a.id === id);
         if (articleIndex !== -1) {
-          setOriginalPosition(allArticles[articleIndex].display_position || articleIndex + 1);
+          setOriginalPosition(allArticles[articleIndex].displayPosition || articleIndex + 1);
         }
         
         // Store original keywords
