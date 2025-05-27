@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Article } from "@/lib/types";
 
@@ -131,7 +130,7 @@ const ArticlesList = ({
                   className={`${
                     isArticleRead ? "text-muted-foreground/50" : ""
                   } ${
-                    wasEditedAfterRead ? "bg-blue-200 px-1 rounded" : ""
+                    wasEditedAfterRead ? "bg-yellow-300 text-black px-1 rounded" : ""
                   }`}
                   title={wasEditedAfterRead ? "This article was edited after you marked it as read" : undefined}
                 >
