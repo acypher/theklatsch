@@ -20,7 +20,7 @@ const ArticlesList = ({
   onArticleClick, 
   commentCounts = {},
   onCommentsStateChanged,
-  maxHeight = "250px" // Default height if not specified
+  maxHeight = "250px"
 }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   const [readTimestamps, setReadTimestamps] = useState<{[articleId: string]: string}>({});
