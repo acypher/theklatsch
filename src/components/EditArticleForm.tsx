@@ -111,7 +111,8 @@ const EditArticleForm = () => {
         keywords: keywordsArray,
         imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl,
-        more_content: data.more_content
+        more_content: data.more_content,
+        updatedAt: new Date().toISOString() // Explicitly set the updated timestamp
       }, {
         preservePosition: !venueChanged && !ottChanged,
         originalPosition: originalPosition
