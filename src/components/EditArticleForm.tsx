@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -12,6 +13,9 @@ import {
   articleFormSchema, 
   defaultFormValues 
 } from "@/components/article/ArticleFormSchema";
+
+// Custom event for article updates
+export const ARTICLE_UPDATED_EVENT = 'article-updated';
 
 const EditArticleForm = () => {
   const navigate = useNavigate();
@@ -107,11 +111,19 @@ const EditArticleForm = () => {
         keywords: keywordsArray,
         imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl,
-        more_content: data.more_content
+        more_content: data.more_content,
+        updatedAt: new Date().toISOString() // Explicitly set the updated timestamp
       }, {
         preservePosition: !venueChanged && !ottChanged,
         originalPosition: originalPosition
       });
+      
+      // Dispatch custom event to notify that an article has been updated
+      window.dispatchEvent(
+        new CustomEvent(ARTICLE_UPDATED_EVENT, {
+          detail: { articleId: id }
+        })
+      );
       
       toast.success("Article updated successfully!");
       navigate(`/article/${id}`);
