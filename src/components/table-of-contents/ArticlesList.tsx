@@ -76,25 +76,29 @@ const ArticlesList = ({
                 onClick={() => handleItemClick(article.id)}
                 aria-current={activeItem === article.id ? "true" : undefined}
               >
-                {hasUnreadComments ? (
-                  <span 
-                    className="bg-yellow-300 text-black rounded-full px-2 font-medium min-w-6 flex items-center justify-center"
-                    title="You have unread comments!"
-                  >
-                    {displayNumber}.
-                  </span>
-                ) : (
-                  <span 
-                    className={`font-medium min-w-6 flex items-center justify-center ${
-                      isRecentlyUpdated 
-                        ? "border-2 border-blue-500 rounded-full bg-blue-50" 
-                        : ""
-                    } ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}
-                    title={isRecentlyUpdated ? "Recently updated" : undefined}
-                  >
-                    {displayNumber}.
-                  </span>
-                )}
+                <span className="relative">
+                  {hasUnreadComments ? (
+                    <span 
+                      className={`bg-yellow-300 text-black rounded-full px-2 font-medium min-w-6 flex items-center justify-center relative ${
+                        isRecentlyUpdated ? "ring-2 ring-blue-500 ring-offset-1" : ""
+                      }`}
+                      title={isRecentlyUpdated ? "Recently updated with unread comments!" : "You have unread comments!"}
+                    >
+                      {displayNumber}.
+                    </span>
+                  ) : (
+                    <span 
+                      className={`font-medium min-w-6 flex items-center justify-center ${
+                        isRecentlyUpdated 
+                          ? "border-2 border-blue-500 rounded-full bg-blue-50" 
+                          : ""
+                      } ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}
+                      title={isRecentlyUpdated ? "Recently updated" : undefined}
+                    >
+                      {displayNumber}.
+                    </span>
+                  )}
+                </span>
                 <span className={isArticleRead ? "text-muted-foreground/50" : ""}>
                   {article.title}
                 </span>
