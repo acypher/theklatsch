@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Article } from "@/lib/types";
@@ -42,6 +41,7 @@ const TableOfContents = ({
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   const [hasUnreadComments, setHasUnreadComments] = useState(false);
+  const [hasUnreadUpdates, setHasUnreadUpdates] = useState(false);
   const { updatedArticles } = useArticleUpdates();
   
   // Initialize issue key for recommendations based on currentIssue prop
@@ -76,6 +76,12 @@ const TableOfContents = ({
     // Set hasUnreadComments based on the check
     setHasUnreadComments(checkForUnreadComments());
   }, [commentCounts]);
+
+  // Check for unread updates
+  useEffect(() => {
+    const hasAnyUnreadUpdates = Object.keys(updatedArticles).length > 0;
+    setHasUnreadUpdates(hasAnyUnreadUpdates);
+  }, [updatedArticles]);
 
   // Only call useRecommendations once we have an issue key
   const { recommendations, loading, isSaving, handleSaveRecommendations } = 
@@ -123,7 +129,13 @@ const TableOfContents = ({
       <CardHeader className="pb-2">
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
-            <span className={`flex items-center justify-center ${hasUnreadComments ? 'bg-yellow-300 rounded-full p-1' : ''}`}>
+            <span className={`flex items-center justify-center ${
+              hasUnreadComments 
+                ? 'bg-yellow-300 rounded-full p-1' 
+                : hasUnreadUpdates 
+                ? 'border-2 border-blue-500 rounded-full p-1' 
+                : ''
+            }`}>
               <BookOpen className="h-5 w-5 flex-shrink-0" />
             </span>
             <span className="ml-2">In This Issue</span>
