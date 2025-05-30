@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Article } from "@/lib/types";
@@ -130,10 +131,10 @@ const TableOfContents = ({
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
             <span className={`flex items-center justify-center ${
-              hasUnreadComments 
-                ? 'bg-yellow-300 rounded-full p-1' 
-                : hasUnreadUpdates 
+              hasUnreadUpdates 
                 ? 'border-2 border-blue-500 rounded-full p-1' 
+                : hasUnreadComments 
+                ? 'bg-yellow-300 rounded-full p-1' 
                 : ''
             }`}>
               <BookOpen className="h-5 w-5 flex-shrink-0" />
