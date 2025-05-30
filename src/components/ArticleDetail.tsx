@@ -13,6 +13,7 @@ import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
 import { initGifController } from '@/utils/gifController';
+import { useArticleUpdates } from "@/hooks/useArticleUpdates";
 
 interface ArticleDetailProps {
   article?: Article | null;
@@ -28,6 +29,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { isAuthenticated } = useAuth();
+  const { markAsViewed } = useArticleUpdates();
 
   useEffect(() => {
     if (propArticle) {
@@ -61,6 +63,13 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
 
     fetchArticle();
   }, [id, navigate, propArticle]);
+
+  // Mark article as viewed when the article page loads
+  useEffect(() => {
+    if (article && isAuthenticated) {
+      markAsViewed(article.id);
+    }
+  }, [article, isAuthenticated, markAsViewed]);
 
   useEffect(() => {
     if (article?.imageUrl?.toLowerCase().endsWith('.gif')) {

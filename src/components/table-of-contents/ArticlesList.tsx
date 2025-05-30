@@ -11,7 +11,6 @@ interface ArticlesListProps {
   onCommentsStateChanged?: () => void; // New callback for comment state changes
   maxHeight?: string; // Allow configurable max height
   updatedArticles?: {[key: string]: string}; // New prop for updated articles
-  onClearUpdated?: (articleId: string) => void; // New prop for clearing updated state
 }
 
 const ArticlesList = ({ 
@@ -22,8 +21,7 @@ const ArticlesList = ({
   commentCounts = {},
   onCommentsStateChanged,
   maxHeight = "250px", // Default height if not specified
-  updatedArticles = {},
-  onClearUpdated
+  updatedArticles = {}
 }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
@@ -41,10 +39,7 @@ const ArticlesList = ({
     setActiveItem(articleId);
     onArticleClick(articleId);
     
-    // Clear the updated state when the article is clicked
-    if (updatedArticles[articleId] && onClearUpdated) {
-      onClearUpdated(articleId);
-    }
+    // Don't clear the updated state here - only clear when article page is opened
   };
 
   return (

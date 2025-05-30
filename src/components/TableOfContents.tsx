@@ -42,7 +42,7 @@ const TableOfContents = ({
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   const [hasUnreadComments, setHasUnreadComments] = useState(false);
-  const { updatedArticles, markAsViewed } = useArticleUpdates();
+  const { updatedArticles } = useArticleUpdates();
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
@@ -101,14 +101,9 @@ const TableOfContents = ({
     setHasUnreadComments(hasAnyUnreadComments);
   };
 
-  // Handle article click and mark as viewed
+  // Handle article click - don't mark as viewed here, only when article page is opened
   const handleArticleClick = (articleId: string) => {
     onArticleClick(articleId);
-    
-    // Mark the article update as viewed
-    if (updatedArticles[articleId]) {
-      markAsViewed(articleId);
-    }
   };
 
   // Calculate the space distribution between articles and recommendations
@@ -151,7 +146,6 @@ const TableOfContents = ({
             commentCounts={commentCounts}
             maxHeight="100%"
             updatedArticles={updatedArticles}
-            onClearUpdated={markAsViewed}
             onCommentsStateChanged={() => {
               // Recalculate hasUnreadComments when comment state changes
               const hasAnyUnreadComments = Object.values(commentCounts).some(
