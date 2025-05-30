@@ -131,10 +131,12 @@ const TableOfContents = ({
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center text-xl whitespace-nowrap">
             <span className={`flex items-center justify-center ${
-              hasUnreadUpdates 
-                ? 'border-2 border-blue-500 rounded-full p-1' 
-                : hasUnreadComments 
+              hasUnreadComments 
                 ? 'bg-yellow-300 rounded-full p-1' 
+                : ''
+            } ${
+              hasUnreadUpdates 
+                ? 'border-2 border-blue-500 rounded-full' + (hasUnreadComments ? '' : ' p-1')
                 : ''
             }`}>
               <BookOpen className="h-5 w-5 flex-shrink-0" />
