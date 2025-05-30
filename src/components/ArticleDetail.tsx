@@ -14,7 +14,6 @@ import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
 import { initGifController } from '@/utils/gifController';
 import { useArticleUpdates } from "@/hooks/useArticleUpdates";
-import { supabase } from "@/integrations/supabase/client";
 
 interface ArticleDetailProps {
   article?: Article | null;
@@ -65,34 +64,12 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
     fetchArticle();
   }, [id, navigate, propArticle]);
 
-  // Mark article as viewed when the article page loads, but only if the current user didn't update it
+  // Mark article as viewed when the article page loads
   useEffect(() => {
-    const checkAndMarkAsViewed = async () => {
-      if (!article || !isAuthenticated || !id) return;
-      
-      try {
-        // Check if the current user updated this article
-        const { data: currentUser } = await supabase.auth.getUser();
-        if (!currentUser.user) return;
-        
-        const { data: updateRecord } = await supabase
-          .from('article_updates')
-          .select('updated_by')
-          .eq('article_id', id)
-          .single();
-        
-        // Only mark as viewed if the current user is not the one who updated it
-        if (!updateRecord || updateRecord.updated_by !== currentUser.user.id) {
-          markAsViewed(article.id);
-        }
-      } catch (error) {
-        // If there's no update record, it's safe to mark as viewed
-        markAsViewed(article.id);
-      }
-    };
-
-    checkAndMarkAsViewed();
-  }, [article, isAuthenticated, markAsViewed, id]);
+    if (article && isAuthenticated) {
+      markAsViewed(article.id);
+    }
+  }, [article, isAuthenticated, markAsViewed]);
 
   useEffect(() => {
     if (article?.imageUrl?.toLowerCase().endsWith('.gif')) {
