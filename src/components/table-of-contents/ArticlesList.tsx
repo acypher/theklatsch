@@ -85,17 +85,17 @@ const ArticlesList = ({
                   </span>
                 ) : (
                   <span 
-                    className={`font-medium min-w-6 flex items-center justify-center ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}
+                    className={`font-medium min-w-6 flex items-center justify-center ${
+                      isRecentlyUpdated 
+                        ? "border-2 border-blue-500 rounded-full bg-blue-50" 
+                        : ""
+                    } ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}
+                    title={isRecentlyUpdated ? "Recently updated" : undefined}
                   >
                     {displayNumber}.
                   </span>
                 )}
-                <span 
-                  className={`${isArticleRead ? "text-muted-foreground/50" : ""} ${
-                    isRecentlyUpdated ? "bg-yellow-200 px-1 rounded" : ""
-                  }`}
-                  title={isRecentlyUpdated ? "Recently updated" : undefined}
-                >
+                <span className={isArticleRead ? "text-muted-foreground/50" : ""}>
                   {article.title}
                 </span>
               </button>
