@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Article } from "@/lib/types";
@@ -10,7 +11,7 @@ import ArticlesList from "./table-of-contents/ArticlesList";
 import ReadFilter from "./article/ReadFilter";
 import { useEffect, useState } from "react";
 import { getCurrentIssue } from "@/lib/data";
-import { useUpdatedArticles } from "@/hooks/useUpdatedArticles";
+import { useArticleUpdates } from "@/hooks/useArticleUpdates";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -41,7 +42,7 @@ const TableOfContents = ({
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   const [hasUnreadComments, setHasUnreadComments] = useState(false);
-  const { updatedArticles, clearUpdatedArticle } = useUpdatedArticles();
+  const { updatedArticles, markAsViewed } = useArticleUpdates();
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
@@ -100,6 +101,16 @@ const TableOfContents = ({
     setHasUnreadComments(hasAnyUnreadComments);
   };
 
+  // Handle article click and mark as viewed
+  const handleArticleClick = (articleId: string) => {
+    onArticleClick(articleId);
+    
+    // Mark the article update as viewed
+    if (updatedArticles[articleId]) {
+      markAsViewed(articleId);
+    }
+  };
+
   // Calculate the space distribution between articles and recommendations
   const hasRecommendations = !loading && recommendations && recommendations.trim().length > 0;
 
@@ -136,11 +147,11 @@ const TableOfContents = ({
             articles={displayArticles}
             allArticles={allArticles}
             readArticles={readArticles}
-            onArticleClick={onArticleClick}
+            onArticleClick={handleArticleClick}
             commentCounts={commentCounts}
             maxHeight="100%"
             updatedArticles={updatedArticles}
-            onClearUpdated={clearUpdatedArticle}
+            onClearUpdated={markAsViewed}
             onCommentsStateChanged={() => {
               // Recalculate hasUnreadComments when comment state changes
               const hasAnyUnreadComments = Object.values(commentCounts).some(

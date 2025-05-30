@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -13,6 +12,7 @@ import {
   articleFormSchema, 
   defaultFormValues 
 } from "@/components/article/ArticleFormSchema";
+import { useArticleUpdates } from "@/hooks/useArticleUpdates";
 
 // Custom event for article updates
 export const ARTICLE_UPDATED_EVENT = 'article-updated';
@@ -24,6 +24,7 @@ const EditArticleForm = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [originalPosition, setOriginalPosition] = useState<number | null>(null);
   const [originalKeywords, setOriginalKeywords] = useState<string[]>([]);
+  const { recordArticleUpdate } = useArticleUpdates();
   
   const form = useForm<ArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -118,12 +119,8 @@ const EditArticleForm = () => {
         originalPosition: originalPosition
       });
       
-      // Dispatch custom event to notify components that an article was updated
-      window.dispatchEvent(
-        new CustomEvent(ARTICLE_UPDATED_EVENT, {
-          detail: { articleId: id, updatedAt: new Date().toISOString() }
-        })
-      );
+      // Record the article update in the database
+      await recordArticleUpdate(id);
       
       toast.success("Article updated successfully!");
       navigate(`/article/${id}`);
