@@ -10,6 +10,8 @@ interface ArticlesListProps {
   commentCounts?: {[articleId: string]: {commentCount: number, viewedCommentCount: number}};
   onCommentsStateChanged?: () => void; // New callback for comment state changes
   maxHeight?: string; // Allow configurable max height
+  updatedArticles?: {[key: string]: string}; // New prop for updated articles
+  onClearUpdated?: (articleId: string) => void; // New prop for clearing updated state
 }
 
 const ArticlesList = ({ 
@@ -19,7 +21,9 @@ const ArticlesList = ({
   onArticleClick, 
   commentCounts = {},
   onCommentsStateChanged,
-  maxHeight = "250px" // Default height if not specified
+  maxHeight = "250px", // Default height if not specified
+  updatedArticles = {},
+  onClearUpdated
 }: ArticlesListProps) => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
   
@@ -36,6 +40,11 @@ const ArticlesList = ({
   const handleItemClick = (articleId: string) => {
     setActiveItem(articleId);
     onArticleClick(articleId);
+    
+    // Clear the updated state when the article is clicked
+    if (updatedArticles[articleId] && onClearUpdated) {
+      onClearUpdated(articleId);
+    }
   };
 
   return (
@@ -52,6 +61,9 @@ const ArticlesList = ({
           // Check for unread comments
           const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
           const hasUnreadComments = counts.viewedCommentCount < counts.commentCount;
+
+          // Check if article was recently updated
+          const isRecentlyUpdated = updatedArticles[article.id] !== undefined;
 
           return (
             <li 
@@ -83,7 +95,14 @@ const ArticlesList = ({
                     {displayNumber}.
                   </span>
                 )}
-                <span className={isArticleRead ? "text-muted-foreground/50" : ""}>{article.title}</span>
+                <span 
+                  className={`${isArticleRead ? "text-muted-foreground/50" : ""} ${
+                    isRecentlyUpdated ? "bg-yellow-200 px-1 rounded" : ""
+                  }`}
+                  title={isRecentlyUpdated ? "Recently updated" : undefined}
+                >
+                  {article.title}
+                </span>
               </button>
             </li>
           );

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Article } from "@/lib/types";
@@ -11,6 +10,7 @@ import ArticlesList from "./table-of-contents/ArticlesList";
 import ReadFilter from "./article/ReadFilter";
 import { useEffect, useState } from "react";
 import { getCurrentIssue } from "@/lib/data";
+import { useUpdatedArticles } from "@/hooks/useUpdatedArticles";
 
 interface TableOfContentsProps {
   articles: Article[];
@@ -41,6 +41,7 @@ const TableOfContents = ({
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   const [hasUnreadComments, setHasUnreadComments] = useState(false);
+  const { updatedArticles, clearUpdatedArticle } = useUpdatedArticles();
   
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
@@ -138,6 +139,8 @@ const TableOfContents = ({
             onArticleClick={onArticleClick}
             commentCounts={commentCounts}
             maxHeight="100%"
+            updatedArticles={updatedArticles}
+            onClearUpdated={clearUpdatedArticle}
             onCommentsStateChanged={() => {
               // Recalculate hasUnreadComments when comment state changes
               const hasAnyUnreadComments = Object.values(commentCounts).some(
