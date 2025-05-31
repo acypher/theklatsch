@@ -40,6 +40,7 @@ const CommentForm = ({ articleId, onSubmitSuccess, onCancel }: CommentFormProps)
         content: newComment.trim(),
         author_name: authorName.trim() || "Anonymous",
         author_email: authorEmail.trim() || null,
+        user_id: user.id, // Add the user_id to satisfy RLS policies
       });
       
       // Race between insert and timeout

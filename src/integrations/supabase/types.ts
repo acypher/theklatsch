@@ -221,7 +221,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           article_id: string
@@ -230,7 +230,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           article_id?: string
@@ -239,7 +239,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
