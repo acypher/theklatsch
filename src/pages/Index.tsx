@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import ArticleList from "@/components/ArticleList";
+import SearchBar from "@/components/SearchBar";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,12 +11,14 @@ import { MaintenancePage } from "@/components/home/MaintenancePage";
 import { StorefrontImage } from "@/components/home/StorefrontImage";
 import { useReadArticles } from "@/hooks/useReadArticles";
 import { useLocation } from "react-router-dom";
+import { searchArticles } from "@/lib/search";
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const articleListRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
   const location = useLocation();
@@ -91,9 +94,29 @@ const Index = () => {
 
   // Filter articles for display, but keep the full list for reference
   const filteredArticles = React.useMemo(() => {
-    if (!filterEnabled || !isAuthenticated) return articles;
-    return articles.filter(article => !readArticles.has(article.id));
-  }, [articles, filterEnabled, readArticles, isAuthenticated]);
+    let result = articles;
+    
+    // Apply search filter first
+    if (searchQuery.trim()) {
+      result = searchArticles(result, searchQuery);
+    }
+    
+    // Then apply read filter if enabled
+    if (filterEnabled && isAuthenticated) {
+      result = result.filter(article => !readArticles.has(article.id));
+    }
+    
+    return result;
+  }, [articles, searchQuery, filterEnabled, readArticles, isAuthenticated]);
+
+  // Search handlers
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+  };
 
   console.log("Index - All articles:", articles.map(a => a.id));
   console.log("Index - Filtered articles:", filteredArticles.map(a => a.id));
@@ -111,6 +134,13 @@ const Index = () => {
           <MaintenancePage />
         ) : (
           <>
+            <SearchBar
+              onSearch={handleSearch}
+              onClear={handleClearSearch}
+              currentQuery={searchQuery}
+              placeholder="Search articles by title, content, keywords, or author..."
+            />
+            
             <div ref={articleListRef}>
               <ArticleList 
                 articles={filteredArticles}

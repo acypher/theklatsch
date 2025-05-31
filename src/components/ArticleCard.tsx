@@ -12,6 +12,8 @@ import ArticleCardMeta from "./article/ArticleCardMeta";
 import ArticleCardFooter from "./article/ArticleCardFooter";
 import ReadCheckbox from './article/ReadCheckbox';
 import { useAuth } from "@/contexts/AuthContext";
+import VideoViewer from "./VideoViewer";
+import { isVideoUrl } from "@/lib/search";
 
 interface ArticleCardProps {
   article: Article;
