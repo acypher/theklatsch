@@ -28,6 +28,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   const { user, isAuthenticated } = useAuth();
 
   const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
+  const hasVideo = isVideoUrl(article.sourceUrl);
   
   const fetchCommentData = async () => {
     try {
@@ -168,6 +169,17 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             </ReactMarkdown>
           </div>
         </Link>
+        
+        {hasVideo && (
+          <div className="mb-4">
+            <VideoViewer 
+              url={article.sourceUrl}
+              title={article.title}
+              showPreview={true}
+              className="w-full"
+            />
+          </div>
+        )}
         <ArticleCardFooter 
           keywords={article.keywords}
           onCommentsClick={(e) => {
