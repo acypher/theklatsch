@@ -22,7 +22,7 @@ const Index = () => {
   const articleListRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
   const location = useLocation();
-  
+
   const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated);
 
   useEffect(() => {
@@ -30,16 +30,16 @@ const Index = () => {
       const issueData = await checkAndFixDisplayIssue();
       setCurrentIssue(issueData.text);
     };
-    
+
     loadCurrentIssue();
   }, []);
-  
+
   useEffect(() => {
     const loadMaintenanceMode = async () => {
       const mode = await getMaintenanceMode();
       setShowMaintenancePage(mode === "maintenance");
     };
-    
+
     loadMaintenanceMode();
   }, []);
 
@@ -63,25 +63,25 @@ const Index = () => {
   useEffect(() => {
     const restoreScrollPosition = () => {
       const lastViewedArticleId = sessionStorage.getItem('lastViewedArticleId');
-      
+
       if (lastViewedArticleId) {
         // Wait for articles to load and DOM to be ready
         setTimeout(() => {
           const articleElement = document.querySelector(`[data-article-id="${lastViewedArticleId}"]`);
-          
+
           if (articleElement) {
             const navbar = document.querySelector('nav');
             const navbarHeight = navbar ? navbar.offsetHeight : 0;
             const extraPadding = 20;
             const yOffset = -(navbarHeight + extraPadding);
-            
+
             const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            
+
             window.scrollTo({
               top: y,
               behavior: 'smooth'
             });
-            
+
             // Clear the saved article ID after scrolling
             sessionStorage.removeItem('lastViewedArticleId');
           }
@@ -95,17 +95,17 @@ const Index = () => {
   // Filter articles for display, but keep the full list for reference
   const filteredArticles = React.useMemo(() => {
     let result = articles;
-    
+
     // Apply search filter first
     if (searchQuery.trim()) {
       result = searchArticles(result, searchQuery);
     }
-    
+
     // Then apply read filter if enabled
     if (filterEnabled && isAuthenticated) {
       result = result.filter(article => !readArticles.has(article.id));
     }
-    
+
     return result;
   }, [articles, searchQuery, filterEnabled, readArticles, isAuthenticated]);
 
@@ -126,21 +126,17 @@ const Index = () => {
       <Navbar 
         onLogoClick={() => setShowMaintenancePage(false)} 
         currentIssue={currentIssue}
+        onSearch={handleSearch}
+        onClearSearch={handleClearSearch}
+        searchQuery={searchQuery}
       />
       <main className="container mx-auto px-4 py-8">
         <HomeLogo />
-        
+
         {showMaintenancePage ? (
           <MaintenancePage />
         ) : (
           <>
-            <SearchBar
-              onSearch={handleSearch}
-              onClear={handleClearSearch}
-              currentQuery={searchQuery}
-              placeholder="Search articles by title, content, keywords, or author..."
-            />
-            
             <div ref={articleListRef}>
               <ArticleList 
                 articles={filteredArticles}

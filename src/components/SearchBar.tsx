@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -32,7 +32,7 @@ const SearchBar = ({
   };
 
   return (
-    <Card className="p-4 mb-6">
+    <div className="p-2">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -67,7 +67,7 @@ const SearchBar = ({
           </Button>
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 

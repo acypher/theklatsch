@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import UserMenu from "./navbar/UserMenu";
 import IssueSelector from "./navbar/IssueSelector";
 import ArchivesMenu from "./navbar/ArchivesMenu";
+import SearchBar from "./SearchBar";
 
 interface NavbarProps {
   onLogoClick?: () => void;
@@ -18,6 +19,9 @@ interface NavbarProps {
   showReadFilter?: boolean;
   filterEnabled?: boolean;
   onFilterToggle?: (enabled: boolean) => void;
+  onSearch?: (query: string) => void;
+  onClearSearch?: () => void;
+  searchQuery?: string;
 }
 
 const Navbar = ({ 
@@ -25,7 +29,10 @@ const Navbar = ({
   currentIssue, 
   showReadFilter = false,
   filterEnabled = false,
-  onFilterToggle 
+  onFilterToggle,
+  onSearch,
+  onClearSearch,
+  searchQuery = ""
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -141,6 +148,17 @@ const Navbar = ({
             loadingArchives={loadingArchives}
             onArchiveClick={handleArchiveClick}
           />
+          
+          {onSearch && onClearSearch && (
+            <div className="flex-1 max-w-md mx-4">
+              <SearchBar
+                onSearch={onSearch}
+                onClear={onClearSearch}
+                currentQuery={searchQuery}
+                placeholder="Search articles..."
+              />
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-4">
