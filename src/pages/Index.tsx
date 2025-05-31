@@ -12,6 +12,8 @@ import { StorefrontImage } from "@/components/home/StorefrontImage";
 import { useReadArticles } from "@/hooks/useReadArticles";
 import { useLocation } from "react-router-dom";
 import { searchArticles } from "@/lib/search";
+import { supabase } from "@/integrations/supabase/client";
+import { mapArticleFromDb } from "@/lib/data/utils";
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -92,13 +94,57 @@ const Index = () => {
     restoreScrollPosition();
   }, [articles, location]);
 
+  // Store all articles without issue filtering for search
+  const [allArticlesForSearch, setAllArticlesForSearch] = useState<Article[]>([]);
+
+  // Fetch all articles for search (without issue filtering)
+  useEffect(() => {
+    const fetchAllArticlesForSearch = async () => {
+      try {
+        const { data: allArticles, error } = await supabase
+          .from('articles')
+          .select('*')
+          .eq('deleted', false)
+          .order('display_position', { ascending: true })
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        if (allArticles) {
+          setAllArticlesForSearch(allArticles.map(article => ({
+            id: article.id,
+            title: article.title,
+            description: article.description,
+            more_content: article.more_content,
+            imageUrl: article.image_url,
+            month: article.month,
+            year: article.year,
+            keywords: article.keywords || [],
+            author: article.author,
+            created_at: article.created_at,
+            updated_at: article.updated_at,
+            display_position: article.display_position,
+            deleted: article.deleted,
+            url: article.url
+          })));
+        }
+      } catch (error) {
+        console.error("Error fetching all articles for search:", error);
+      }
+    };
+
+    fetchAllArticlesForSearch();
+  }, []);
+
   // Filter articles for display, but keep the full list for reference
   const filteredArticles = React.useMemo(() => {
     let result = articles;
 
-    // Apply search filter first
+    // Apply search filter first - search across ALL articles, not just current issue
     if (searchQuery.trim()) {
-      result = searchArticles(result, searchQuery);
+      result = searchArticles(allArticlesForSearch, searchQuery);
     }
 
     // Then apply read filter if enabled
