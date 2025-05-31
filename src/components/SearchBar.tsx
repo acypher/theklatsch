@@ -33,8 +33,8 @@ const SearchBar = ({
 
   return (
     <div className="p-2">
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <div className="relative flex-1">
+      <form onSubmit={handleSubmit}>
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
@@ -55,9 +55,6 @@ const SearchBar = ({
             </Button>
           )}
         </div>
-        <Button type="submit" disabled={!query.trim()}>
-          Search
-        </Button>
       </form>
       {currentQuery && (
         <div className="mt-2 text-sm text-muted-foreground">

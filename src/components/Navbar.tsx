@@ -148,9 +148,11 @@ const Navbar = ({
             loadingArchives={loadingArchives}
             onArchiveClick={handleArchiveClick}
           />
-          
+        </div>
+        
+        <div className="flex items-center gap-4">
           {onSearch && onClearSearch && (
-            <div className="flex-1 max-w-md mx-4">
+            <div className={`${user ? 'flex-1 max-w-lg' : 'max-w-md'}`}>
               <SearchBar
                 onSearch={onSearch}
                 onClear={onClearSearch}
@@ -159,9 +161,6 @@ const Navbar = ({
               />
             </div>
           )}
-        </div>
-        
-        <div className="flex items-center gap-4">
           {showReadFilter && user && onFilterToggle && (
             <ReadFilter 
               enabled={filterEnabled} 
