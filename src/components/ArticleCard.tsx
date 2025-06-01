@@ -89,8 +89,8 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   const getImageUrl = (url: string) => {
-    // Use default image if no URL provided or if it's empty
-    if (!url || url.trim() === '') {
+    // Use default image if no URL provided, if it's empty, null, or undefined
+    if (!url || url.trim() === '' || url === 'null' || url === 'undefined') {
       return 'https://chatgpt.com/s/m_683bca1d9cc48191b1273258816b9fa8';
     }
     
