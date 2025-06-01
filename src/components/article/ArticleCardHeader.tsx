@@ -15,9 +15,11 @@ interface ArticleCardHeaderProps {
 
 const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: ArticleCardHeaderProps) => {
   const gifControllerRef = useRef<{ dispose: () => void } | null>(null);
+  const isVideo = isVideoUrl(imageUrl);
 
   useEffect(() => {
-    if (isGif) {
+    // Only initialize GIF controller if it's actually a GIF and not a video
+    if (isGif && !isVideo) {
       let isMounted = true;
       const timer = setTimeout(async () => {
         try {
@@ -38,10 +40,10 @@ const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: A
         }
       };
     }
-  }, [isGif, imageUrl]);
+  }, [isGif, isVideo, imageUrl]);
 
   const handleImageClick = (e: React.MouseEvent) => {
-    if (isGif) {
+    if (isGif && !isVideo) {
       e.preventDefault();
       e.stopPropagation();
     }
@@ -50,10 +52,10 @@ const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: A
   return (
     <Link 
       to={`/article/${articleId}`}
-      onClick={isGif ? handleImageClick : undefined}
+      onClick={isGif && !isVideo ? handleImageClick : undefined}
     >
       <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
-        {isVideoUrl(imageUrl) ? (
+        {isVideo ? (
           <VideoViewer videoUrl={getImageUrl(imageUrl)} title={title} />
         ) : (
           <img 
@@ -61,7 +63,7 @@ const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: A
             alt={title} 
             className="w-full h-full object-contain"
             loading="lazy"
-            id={isGif ? "animated-gif" : undefined}
+            id={isGif && !isVideo ? "animated-gif" : undefined}
           />
         )}
       </AspectRatio>
