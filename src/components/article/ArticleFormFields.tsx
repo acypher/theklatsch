@@ -140,8 +140,8 @@ export const ImageField = () => {
       render={({ field }) => (
         <FieldWrapper 
           name="imageUrl" 
-          label="Article Image"
-          description="Upload an image or provide an image URL"
+          label="Article Image or Video"
+          description="Provide a URL or upload an image or video"
         >
           <div className="flex space-x-4 items-center">
             <Input

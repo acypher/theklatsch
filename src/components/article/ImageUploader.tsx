@@ -112,7 +112,7 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
         onClick={triggerFileInput}
       >
         <Upload size={16} className="mr-2" />
-        {uploading ? 'Uploading...' : 'Upload Image'}
+        {uploading ? 'Uploading...' : 'Upload'}
       </Button>
     </div>
   );
