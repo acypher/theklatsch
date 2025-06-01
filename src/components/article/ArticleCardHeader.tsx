@@ -1,8 +1,9 @@
-
 import { Link } from "react-router-dom";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { initGifController } from "@/utils/gifController";
 import { useEffect, useRef } from "react";
+import { initGifController } from "@/utils/gifController";
+import VideoViewer from "@/components/VideoViewer";
+import { isVideoUrl } from "@/lib/search";
 
 interface ArticleCardHeaderProps {
   articleId: string;
@@ -52,13 +53,17 @@ const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: A
       onClick={isGif ? handleImageClick : undefined}
     >
       <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
-        <img 
-          src={getImageUrl(imageUrl)} 
-          alt={title} 
-          className="w-full h-full object-contain"
-          loading="lazy"
-          id={isGif ? "animated-gif" : undefined}
-        />
+        {isVideoUrl(imageUrl) ? (
+          <VideoViewer videoUrl={getImageUrl(imageUrl)} title={title} />
+        ) : (
+          <img 
+            src={getImageUrl(imageUrl)} 
+            alt={title} 
+            className="w-full h-full object-contain"
+            loading="lazy"
+            id={isGif ? "animated-gif" : undefined}
+          />
+        )}
       </AspectRatio>
     </Link>
   );

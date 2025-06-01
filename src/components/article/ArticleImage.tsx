@@ -1,4 +1,7 @@
 
+import VideoViewer from "@/components/VideoViewer";
+import { isVideoUrl } from "@/lib/search";
+
 interface ArticleImageProps {
   imageUrl: string;
   sourceUrl: string | null;
@@ -9,6 +12,7 @@ interface ArticleImageProps {
 const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageProps) => {
   // Only apply GIF controls if the image is a GIF
   const isGif = imageUrl.toLowerCase().endsWith('.gif');
+  const isVideo = isVideoUrl(imageUrl);
   
   const handleGifClick = (e: React.MouseEvent) => {
     if (isGif) {
@@ -20,7 +24,16 @@ const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageP
   
   return (
     <div className="mb-8">
-      {sourceUrl ? (
+      {isVideo ? (
+        <div className="h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden bg-muted/20">
+          <VideoViewer 
+            url={imageUrl}
+            title={title}
+            showPreview={true}
+            className="w-full h-full"
+          />
+        </div>
+      ) : sourceUrl ? (
         <a 
           href={sourceUrl}
           target="_blank"

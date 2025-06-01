@@ -155,8 +155,6 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         <ArticleCardMeta 
           author={article.author}
           createdAt={article.createdAt}
-          sourceUrl={article.sourceUrl}
-          isGif={isGif}
           formatDate={formatDate}
         />
         <Link to={`/article/${article.id}`} className="block">
