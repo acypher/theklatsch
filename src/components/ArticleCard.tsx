@@ -107,17 +107,16 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
 
   const customRenderers = {
     a: ({ node, ...props }: any) => (
-      <a 
-        {...props} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="text-primary hover:underline"
+      <span 
+        className="text-primary hover:underline cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
           window.open(props.href, '_blank', 'noopener,noreferrer');
         }}
-      />
+      >
+        {props.children}
+      </span>
     ),
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
     h1: ({ node, ...props }: any) => <h1 className="m-0 p-0 text-xl font-semibold" {...props} />,
