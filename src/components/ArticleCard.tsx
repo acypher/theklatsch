@@ -89,6 +89,11 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   const getImageUrl = (url: string) => {
+    // Use default image if no URL provided or if it's empty
+    if (!url || url.trim() === '') {
+      return 'https://chatgpt.com/s/m_683bca1d9cc48191b1273258816b9fa8';
+    }
+    
     if (url.includes('drive.google.com/file/d/')) {
       const fileIdMatch = url.match(/\/d\/([^/]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
