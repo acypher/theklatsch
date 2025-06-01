@@ -77,7 +77,7 @@ const ArticleView = () => {
     };
     
     // Get the full URL for the image
-    const fullImageUrl = new URL("/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png", window.location.origin).href;
+    const fullImageUrl = "https://kjfwyaniengzduyeeufq.supabase.co/storage/v1/object/public/logos/defaultImage.png";
     
     // Set Open Graph tags
     setMetaTag('og:title', article.title);

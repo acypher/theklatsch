@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Article } from "@/lib/types";
@@ -29,32 +28,32 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
 
   const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
   const hasVideo = isVideoUrl(article.sourceUrl);
-  
+
   const fetchCommentData = async () => {
     try {
       setIsLoading(true);
       setHasError(false);
-      
+
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Request timed out')), 8000)
       );
-      
+
       const fetchPromise = supabase
         .from("comments")
         .select("*", { count: 'exact', head: true })
         .eq("article_id", article.id);
-      
+
       const { count, error } = await Promise.race([
         fetchPromise,
         timeoutPromise.then(() => { throw new Error('Request timed out'); })
       ]) as any;
-      
+
       if (error) {
         throw error;
       }
-      
+
       setCommentCount(count || 0);
-      
+
       // Only fetch viewed comments if user is authenticated
       if (isAuthenticated && user) {
         try {
@@ -63,7 +62,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             .select("comment_id", { count: 'exact' })
             .eq("article_id", article.id)
             .eq("user_id", user.id);
-            
+
           if (!viewError) {
             setViewedCommentCount(data?.length || 0);
           }
@@ -78,11 +77,11 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
       setIsLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchCommentData();
   }, [article.id, isAuthenticated, user]);
-  
+
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -96,7 +95,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         return `https://drive.google.com/uc?export=view&id=${fileId}`;
       }
     }
-    return url;
+    return url || "https://kjfwyaniengzduyeeufq.supabase.co/storage/v1/object/public/logos/defaultImage.png";
   };
 
   const handleCommentsClose = () => {
@@ -130,7 +129,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={article.id}>
       <ReadCheckbox articleId={article.id} />
-      
+
       <CardHeader className="p-0">
         <ArticleCardHeader 
           articleId={article.id}
@@ -166,7 +165,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             </ReactMarkdown>
           </div>
         </Link>
-        
+
         {hasVideo && (
           <div className="mb-4">
             <VideoViewer 
