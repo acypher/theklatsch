@@ -56,7 +56,7 @@ const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: A
     >
       <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
         {isVideo ? (
-          <VideoViewer videoUrl={getImageUrl(imageUrl)} title={title} />
+          <VideoViewer url={getImageUrl(imageUrl)} title={title} />
         ) : (
           <img 
             src={getImageUrl(imageUrl)} 

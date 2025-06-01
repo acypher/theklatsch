@@ -17,6 +17,10 @@ const VideoViewer = ({ url, title, showPreview = true, className }: VideoViewerP
 
   // Extract video ID and determine platform
   const getVideoInfo = (url: string) => {
+    if (!url || typeof url !== 'string') {
+      return null;
+    }
+    
     // YouTube patterns
     const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const youtubeMatch = url.match(youtubeRegex);
