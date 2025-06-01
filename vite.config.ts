@@ -13,8 +13,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       strictPort: true,
       hmr: {
-        port: 8080,
-        host: "0.0.0.0"
+        clientPort: 8080
       }
     },
     build: {
