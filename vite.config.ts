@@ -9,8 +9,13 @@ export default defineConfig(({ mode }) => {
   
   return {
     server: {
-      host: "::",
+      host: "0.0.0.0",
       port: 8080,
+      strictPort: true,
+      hmr: {
+        port: 8080,
+        host: "0.0.0.0"
+      }
     },
     build: {
       sourcemap: true, // Always generate complete source maps
