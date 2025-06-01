@@ -14,6 +14,7 @@ import { useLocation } from "react-router-dom";
 import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
 import { mapArticleFromDb } from "@/lib/data/utils";
+import { LogoUploader } from "@/components/LogoUploader";
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -183,6 +184,10 @@ const Index = () => {
           <MaintenancePage />
         ) : (
           <>
+            {/* Temporary Logo Uploader - Remove after testing */}
+            <div className="mb-8">
+              <LogoUploader />
+            </div>
             <div ref={articleListRef}>
               <ArticleList 
                 articles={filteredArticles}
