@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 const ImageDisplay = () => {
   const [searchParams] = useSearchParams();
-  const imageUrl = searchParams.get("url") || "/lovable-uploads/17100c7f-adac-4287-bf4c-d08288a0c3f5.png";
+  const imageUrl = searchParams.get("url") || "https://kjfwyaniengzduyeeufq.supabase.co/storage/v1/object/public/logos/defaultImage.png";
   const imageName = imageUrl.split("/").pop() || "image";
 
   const copyLinkToClipboard = () => {
