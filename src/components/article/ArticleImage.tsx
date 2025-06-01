@@ -9,8 +9,10 @@ interface ArticleImageProps {
 }
 
 const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageProps) => {
-  // Use the default image from logos bucket if imageUrl is empty
-  const finalImageUrl = imageUrl || DEFAULT_IMAGE_URL;
+  // Use the default image from logos bucket if imageUrl is empty or contains unsplash
+  const finalImageUrl = (!imageUrl || imageUrl.includes('images.unsplash.com') || imageUrl.trim() === '') 
+    ? DEFAULT_IMAGE_URL 
+    : imageUrl;
   
   return (
     <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
