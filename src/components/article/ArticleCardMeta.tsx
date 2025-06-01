@@ -13,4 +13,4 @@ const ArticleCardMeta = ({ author, createdAt, formatDate }: ArticleCardMetaProps
   );
 };
 
-export default ArticleCardMetaa;
+export default ArticleCardMeta;
