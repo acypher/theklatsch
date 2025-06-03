@@ -171,16 +171,6 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           </div>
         </Link>
 
-        {hasVideo && (
-          <div className="mb-4">
-            <VideoViewer 
-              url={article.sourceUrl}
-              title={article.title}
-              showPreview={true}
-              className="w-full"
-            />
-          </div>
-        )}
         <ArticleCardFooter 
           keywords={article.keywords}
           onCommentsClick={(e) => {
