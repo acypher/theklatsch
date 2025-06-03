@@ -114,7 +114,7 @@ const Index = () => {
         }
 
         if (allArticles) {
-          setAllArticlesForSearch(allArticles.map(article => ({
+          const mappedArticles = allArticles.map(article => ({
             id: article.id,
             title: article.title || '',
             description: article.description || '',
@@ -127,7 +127,10 @@ const Index = () => {
             displayPosition: article.display_position || 0,
             deleted: article.deleted || false,
             sourceUrl: article.url || ''
-          })));
+          }));
+          
+          console.log("Mapped search articles sample:", mappedArticles.slice(0, 2));
+          setAllArticlesForSearch(mappedArticles);
         }
       } catch (error) {
         console.error("Error fetching all articles for search:", error);

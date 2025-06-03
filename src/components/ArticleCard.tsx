@@ -88,8 +88,8 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   const getImageUrl = (url: string) => {
-    // If URL is empty, contains unsplash reference, or is invalid, use default
-    if (!url || url.includes('images.unsplash.com') || url.trim() === '') {
+    // If URL is empty, undefined, contains unsplash reference, or is invalid, use default
+    if (!url || url === 'undefined' || url.includes('images.unsplash.com') || url.trim() === '') {
       return "https://kjfwyaniengzduyeeufq.supabase.co/storage/v1/object/public/logos/defaultImage.png";
     }
     
