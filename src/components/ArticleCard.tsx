@@ -19,8 +19,6 @@ interface ArticleCardProps {
 }
 
 const ArticleCard = ({ article }: ArticleCardProps) => {
-  console.log(`ArticleCard for ${article.id} - imageUrl:`, article.imageUrl);
-  
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const [viewedCommentCount, setViewedCommentCount] = useState<number | undefined>(undefined);
@@ -90,10 +88,8 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   const getImageUrl = (url: string) => {
-    console.log(`getImageUrl called with: "${url}" for article ${article.id}`);
-    // If URL is empty, undefined, null, contains unsplash reference, or is invalid, use default
-    if (!url || url === 'undefined' || url === 'null' || url.includes('images.unsplash.com') || url.trim() === '') {
-      console.log(`Using default image for article ${article.id}`);
+    // If URL is empty, contains unsplash reference, or is invalid, use default
+    if (!url || url.includes('images.unsplash.com') || url.trim() === '') {
       return "https://kjfwyaniengzduyeeufq.supabase.co/storage/v1/object/public/logos/defaultImage.png";
     }
     

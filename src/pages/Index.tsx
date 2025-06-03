@@ -114,34 +114,22 @@ const Index = () => {
         }
 
         if (allArticles) {
-          const mappedArticles = allArticles.map(article => ({
+          setAllArticlesForSearch(allArticles.map(article => ({
             id: article.id,
             title: article.title || '',
             description: article.description || '',
             more_content: article.more_content || '',
             imageUrl: article.image_url || '',
+            month: article.month || '',
+            year: article.year || '',
             keywords: article.keywords || [],
             author: article.author || '',
-            createdAt: article.created_at,
-            updatedAt: article.updated_at,
-            displayPosition: article.display_position || 0,
+            created_at: article.created_at,
+            updated_at: article.updated_at,
+            display_position: article.display_position || 0,
             deleted: article.deleted || false,
             sourceUrl: article.url || ''
-          }));
-          
-          // Find the specific article that's showing in search results
-          const searchArticle = mappedArticles.find(a => a.id === 'e835c19f-06ce-4612-85db-6f1e1ba2575e');
-          const rawSearchArticle = allArticles.find(a => a.id === 'e835c19f-06ce-4612-85db-6f1e1ba2575e');
-          
-          if (searchArticle && rawSearchArticle) {
-            console.log("=== SEARCH ARTICLE DEBUG ===");
-            console.log("Raw DB article:", rawSearchArticle);
-            console.log("Raw DB imageurl field:", rawSearchArticle.imageurl);
-            console.log("Mapped article imageUrl:", searchArticle.imageUrl);
-            console.log("Are they the same?", rawSearchArticle.imageurl === searchArticle.imageUrl);
-            console.log("=== END DEBUG ===");
-          }
-          setAllArticlesForSearch(mappedArticles);
+          })));
         }
       } catch (error) {
         console.error("Error fetching all articles for search:", error);
