@@ -56,14 +56,7 @@ const SearchBar = ({
           )}
         </div>
       </form>
-      {currentQuery && (
-        <div className="mt-2 text-sm text-muted-foreground">
-          Showing results for: <span className="font-medium">"{currentQuery}"</span>
-          <Button variant="link" size="sm" onClick={handleClear} className="ml-2 p-0 h-auto">
-            Clear search
-          </Button>
-        </div>
-      )}
+      
     </div>
   );
 };

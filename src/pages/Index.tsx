@@ -129,9 +129,13 @@ const Index = () => {
             sourceUrl: article.url || ''
           }));
           
+          // Find the specific article that's showing in search results
+          const searchArticle = mappedArticles.find(a => a.id === 'e835c19f-06ce-4612-85db-6f1e1ba2575e');
+          const rawSearchArticle = allArticles.find(a => a.id === 'e835c19f-06ce-4612-85db-6f1e1ba2575e');
+          
+          console.log("Search result article mapped:", searchArticle);
+          console.log("Search result article raw from DB:", rawSearchArticle);
           console.log("Mapped search articles sample:", mappedArticles.slice(0, 2));
-          console.log("First article imageUrl:", mappedArticles[0]?.imageUrl);
-          console.log("Raw image_url from DB:", allArticles[0]?.image_url);
           setAllArticlesForSearch(mappedArticles);
         }
       } catch (error) {
