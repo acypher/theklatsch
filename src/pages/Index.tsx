@@ -116,19 +116,19 @@ const Index = () => {
         if (allArticles) {
           setAllArticlesForSearch(allArticles.map(article => ({
             id: article.id,
-            title: article.title,
-            description: article.description,
-            more_content: article.more_content,
-            imageUrl: article.image_url,
-            month: article.month,
-            year: article.year,
+            title: article.title || '',
+            description: article.description || '',
+            more_content: article.more_content || '',
+            imageUrl: article.image_url || '',
+            month: article.month || '',
+            year: article.year || '',
             keywords: article.keywords || [],
-            author: article.author,
+            author: article.author || '',
             created_at: article.created_at,
             updated_at: article.updated_at,
-            display_position: article.display_position,
-            deleted: article.deleted,
-            url: article.url
+            display_position: article.display_position || 0,
+            deleted: article.deleted || false,
+            sourceUrl: article.url || ''
           })));
         }
       } catch (error) {
