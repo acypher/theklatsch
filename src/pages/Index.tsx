@@ -119,14 +119,14 @@ const Index = () => {
             title: article.title || '',
             description: article.description || '',
             more_content: article.more_content || '',
-            imageUrl: article.image_url || '',
+            imageUrl: article.imageurl || '',
             month: article.month || '',
             year: article.year || '',
             keywords: article.keywords || [],
             author: article.author || '',
-            created_at: article.created_at,
-            updated_at: article.updated_at,
-            display_position: article.display_position || 0,
+            createdAt: article.created_at,
+            updatedAt: article.updated_at,
+            displayPosition: article.display_position || 0,
             deleted: article.deleted || false,
             sourceUrl: article.url || ''
           })));
