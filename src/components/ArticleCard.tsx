@@ -19,6 +19,8 @@ interface ArticleCardProps {
 }
 
 const ArticleCard = ({ article }: ArticleCardProps) => {
+  console.log(`ArticleCard for ${article.id} - imageUrl:`, article.imageUrl);
+  
   const [showComments, setShowComments] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const [viewedCommentCount, setViewedCommentCount] = useState<number | undefined>(undefined);

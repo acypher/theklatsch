@@ -130,6 +130,8 @@ const Index = () => {
           }));
           
           console.log("Mapped search articles sample:", mappedArticles.slice(0, 2));
+          console.log("First article imageUrl:", mappedArticles[0]?.imageUrl);
+          console.log("Raw image_url from DB:", allArticles[0]?.image_url);
           setAllArticlesForSearch(mappedArticles);
         }
       } catch (error) {
