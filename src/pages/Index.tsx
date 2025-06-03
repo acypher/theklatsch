@@ -135,6 +135,8 @@ const Index = () => {
           
           console.log("Search result article mapped:", searchArticle);
           console.log("Search result article raw from DB:", rawSearchArticle);
+          console.log("Raw database imageurl field:", rawSearchArticle?.imageurl);
+          console.log("Mapped imageUrl field:", searchArticle?.imageUrl);
           console.log("Mapped search articles sample:", mappedArticles.slice(0, 2));
           setAllArticlesForSearch(mappedArticles);
         }
