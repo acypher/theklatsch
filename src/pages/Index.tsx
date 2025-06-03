@@ -114,22 +114,38 @@ const Index = () => {
         }
 
         if (allArticles) {
-          setAllArticlesForSearch(allArticles.map(article => ({
-            id: article.id,
-            title: article.title || '',
-            description: article.description || '',
-            more_content: article.more_content || '',
-            imageUrl: article.image_url || '',
-            month: article.month || '',
-            year: article.year || '',
-            keywords: article.keywords || [],
-            author: article.author || '',
-            created_at: article.created_at,
-            updated_at: article.updated_at,
-            display_position: article.display_position || 0,
-            deleted: article.deleted || false,
-            sourceUrl: article.url || ''
-          })));
+          const mappedArticles = allArticles.map(article => {
+            console.log(`Mapping article ${article.id} - imageurl from DB:`, article.imageurl, "image_url from DB:", article.image_url);
+            return {
+              id: article.id,
+              title: article.title || '',
+              description: article.description || '',
+              more_content: article.more_content || '',
+              imageUrl: article.imageurl || '', // Use imageurl instead of image_url
+              month: article.month || '',
+              year: article.year || '',
+              keywords: article.keywords || [],
+              author: article.author || '',
+              created_at: article.created_at,
+              updated_at: article.updated_at,
+              display_position: article.display_position || 0,
+              deleted: article.deleted || false,
+              sourceUrl: article.url || ''
+            };
+          });
+
+          const searchArticle = mappedArticles.find(a => a.id === 'e835c19f-06ce-4612-85db-6f1e1ba2575e');
+          const rawSearchArticle = allArticles.find(a => a.id === 'e835c19f-06ce-4612-85db-6f1e1ba2575e');
+
+          if (searchArticle && rawSearchArticle) {
+            console.log("=== SEARCH ARTICLE DEBUG ===");
+            console.log("Raw DB article:", rawSearchArticle);
+            console.log("Raw DB imageurl field:", rawSearchArticle.imageurl);
+            console.log("Raw DB image_url field:", rawSearchArticle.image_url);
+            console.log("Mapped article imageUrl:", searchArticle.imageUrl);
+            console.log("=== END DEBUG ===");
+          }
+          setAllArticlesForSearch(mappedArticles);
         }
       } catch (error) {
         console.error("Error fetching all articles for search:", error);
