@@ -141,11 +141,14 @@ const Index = () => {
 
   // Filter articles for display, but keep the full list for reference
   const filteredArticles = React.useMemo(() => {
-    let result = articles;
+    let result: Article[];
 
     // Apply search filter first - search across ALL articles, not just current issue
     if (searchQuery.trim()) {
       result = searchArticles(allArticlesForSearch, searchQuery);
+    } else {
+      // If no search query, use current issue articles
+      result = articles;
     }
 
     // Then apply read filter if enabled
