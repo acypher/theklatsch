@@ -179,15 +179,10 @@ const Index = () => {
       />
       <main className="container mx-auto px-4 py-8">
         <HomeLogo />
-
         {showMaintenancePage ? (
           <MaintenancePage />
         ) : (
           <>
-            {/* Temporary Logo Uploader - Remove after testing */}
-            <div className="mb-8">
-              <LogoUploader />
-            </div>
             <div ref={articleListRef}>
               <ArticleList 
                 articles={filteredArticles}
