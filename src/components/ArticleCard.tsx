@@ -83,8 +83,11 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   }, [article.id, isAuthenticated, user]);
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'No date';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return date.toLocaleDateString(undefined, options);
   };
 
   const getImageUrl = (url: string) => {
