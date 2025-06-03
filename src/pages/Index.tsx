@@ -154,7 +154,7 @@ const Index = () => {
     }
 
     return result;
-  }, [articles, searchQuery, filterEnabled, readArticles, isAuthenticated]);
+  }, [articles, allArticlesForSearch, searchQuery, filterEnabled, readArticles, isAuthenticated]);
 
   // Search handlers
   const handleSearch = (query: string) => {
