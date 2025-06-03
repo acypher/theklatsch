@@ -133,11 +133,14 @@ const Index = () => {
           const searchArticle = mappedArticles.find(a => a.id === 'e835c19f-06ce-4612-85db-6f1e1ba2575e');
           const rawSearchArticle = allArticles.find(a => a.id === 'e835c19f-06ce-4612-85db-6f1e1ba2575e');
           
-          console.log("Search result article mapped:", searchArticle);
-          console.log("Search result article raw from DB:", rawSearchArticle);
-          console.log("Raw database imageurl field:", rawSearchArticle?.imageurl);
-          console.log("Mapped imageUrl field:", searchArticle?.imageUrl);
-          console.log("Mapped search articles sample:", mappedArticles.slice(0, 2));
+          if (searchArticle && rawSearchArticle) {
+            console.log("=== SEARCH ARTICLE DEBUG ===");
+            console.log("Raw DB article:", rawSearchArticle);
+            console.log("Raw DB imageurl field:", rawSearchArticle.imageurl);
+            console.log("Mapped article imageUrl:", searchArticle.imageUrl);
+            console.log("Are they the same?", rawSearchArticle.imageurl === searchArticle.imageUrl);
+            console.log("=== END DEBUG ===");
+          }
           setAllArticlesForSearch(mappedArticles);
         }
       } catch (error) {
