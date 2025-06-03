@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import ArticleList from "@/components/ArticleList";
-import SearchBar from "@/components/SearchBar";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +14,48 @@ import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
 import { mapArticleFromDb } from "@/lib/data/utils";
 import { LogoUploader } from "@/components/LogoUploader";
+
+// Mock SearchBar component
+const SearchBar = ({ onSearch, onClear, currentQuery, isShowingResults }: any) => {
+  return (
+    <div>
+      <input
+        type="text"
+        placeholder="Search articles..."
+        value={currentQuery}
+        onChange={(e) => onSearch(e.target.value)}
+      />
+      <button onClick={onClear}>Clear</button>
+      {isShowingResults && <p>Showing search results</p>}
+    </div>
+  );
+};
+
+// Mock TableOfContents component
+const TableOfContents = ({
+  articles,
+  currentIssue,
+  isLoading,
+  onArticleClick,
+  selectedKeyword,
+  onKeywordClear,
+  onKeywordSelect,
+  searchQuery,
+  readArticleIds,
+  filterUnreadOnly,
+}: any) => {
+  return (
+    <div>
+      <h3>Table of Contents</h3>
+      {articles &&
+        articles.map((article: any) => (
+          <div key={article.id}>
+            {article.title}
+          </div>
+        ))}
+    </div>
+  );
+};
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -171,10 +212,19 @@ const Index = () => {
   console.log("Index - All articles:", articles.map(a => a.id));
   console.log("Index - Filtered articles:", filteredArticles.map(a => a.id));
 
+  const displayedArticles = filteredArticles;
+  const selectedKeyword = undefined;
+  const handleArticleClick = () => {};
+  const handleKeywordClear = () => {};
+  const handleKeywordSelect = () => {};
+  const readArticleIds: Set<any> = new Set();
+  const filterUnreadOnly = false;
+  const isLoading = false;
+
   return (
     <div className="min-h-screen">
-      <Navbar 
-        onLogoClick={() => setShowMaintenancePage(false)} 
+      <Navbar
+        onLogoClick={() => setShowMaintenancePage(false)}
         currentIssue={currentIssue}
         onSearch={handleSearch}
         onClearSearch={handleClearSearch}
@@ -186,8 +236,28 @@ const Index = () => {
           <MaintenancePage />
         ) : (
           <>
+            <SearchBar
+              onSearch={handleSearch}
+              onClear={handleClearSearch}
+              currentQuery={searchQuery}
+              isShowingResults={!!searchQuery}
+            />
             <div ref={articleListRef}>
-              <ArticleList 
+              <div className={searchQuery ? 'border-2 border-pink-500 rounded-lg' : ''}>
+                <TableOfContents
+                  articles={displayedArticles}
+                  currentIssue={currentIssue}
+                  isLoading={isLoading}
+                  onArticleClick={handleArticleClick}
+                  selectedKeyword={selectedKeyword}
+                  onKeywordClear={handleKeywordClear}
+                  onKeywordSelect={handleKeywordSelect}
+                  searchQuery={searchQuery}
+                  readArticleIds={readArticleIds}
+                  filterUnreadOnly={filterUnreadOnly}
+                />
+              </div>
+              <ArticleList
                 articles={filteredArticles}
                 allArticles={articles}
                 loading={loading}

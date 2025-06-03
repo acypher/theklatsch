@@ -9,13 +9,15 @@ interface SearchBarProps {
   onClear: () => void;
   placeholder?: string;
   currentQuery?: string;
+  isShowingResults?: boolean;
 }
 
 const SearchBar = ({ 
   onSearch, 
   onClear, 
   placeholder = "Search articles by title, content, or keywords...",
-  currentQuery = ""
+  currentQuery = "",
+  isShowingResults = false
 }: SearchBarProps) => {
   const [query, setQuery] = useState(currentQuery);
 
@@ -32,7 +34,7 @@ const SearchBar = ({
   };
 
   return (
-    <div className="p-2">
+    <div className={`p-2 ${isShowingResults ? 'border-2 border-pink-500 rounded-lg' : ''}`}>
       <form onSubmit={handleSubmit}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -56,14 +58,6 @@ const SearchBar = ({
           )}
         </div>
       </form>
-      {currentQuery && (
-        <div className="mt-2 text-sm text-muted-foreground">
-          Showing results for: <span className="font-medium">"{currentQuery}"</span>
-          <Button variant="link" size="sm" onClick={handleClear} className="ml-2 p-0 h-auto">
-            Clear search
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
