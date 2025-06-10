@@ -72,10 +72,3 @@
 .markdown-editor .wmde-markdown {
   @apply bg-background text-foreground;
 }
-
-/* Pink border for search box when showing search results */
-#searchBox.search-active {
-  border: 3px solid #ff1493;
-  border-radius: 0.5rem;
-  box-shadow: 0 0 0 1px #ff1493;
-}

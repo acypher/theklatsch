@@ -9,15 +9,13 @@ interface SearchBarProps {
   onClear: () => void;
   placeholder?: string;
   currentQuery?: string;
-  className?: string;
 }
 
 const SearchBar = ({ 
   onSearch, 
   onClear, 
   placeholder = "Search articles by title, content, or keywords...",
-  currentQuery = "",
-  className = ""
+  currentQuery = ""
 }: SearchBarProps) => {
   const [query, setQuery] = useState(currentQuery);
 
@@ -34,7 +32,7 @@ const SearchBar = ({
   };
 
   return (
-    <div id="searchBox" className={`p-2 ${className}`}>
+    <div id="searchBox" className="p-2">
       <form onSubmit={handleSubmit}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
