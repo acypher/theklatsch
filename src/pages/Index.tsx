@@ -114,22 +114,32 @@ const Index = () => {
         }
 
         if (allArticles) {
-          setAllArticlesForSearch(allArticles.map(article => ({
-            id: article.id,
-            title: article.title || '',
-            description: article.description || '',
-            more_content: article.more_content || '',
-            imageUrl: article.imageurl || '',
-            month: article.month || '',
-            year: article.year || '',
-            keywords: article.keywords || [],
-            author: article.author || '',
-            createdAt: article.created_at,
-            updatedAt: article.updated_at,
-            displayPosition: article.display_position || 0,
-            deleted: article.deleted || false,
-            sourceUrl: article.url || ''
-          })));
+          const mappedArticles = allArticles.map(article => {
+            console.log(`Mapping article ${article.id} - imageurl from DB:`, article.imageurl, `image_url from DB:`, article.image_url);
+            return {
+              id: article.id,
+              title: article.title || '',
+              description: article.description || '',
+              more_content: article.more_content || '',
+              imageUrl: article.imageurl || '',
+              month: article.month || '',
+              year: article.year || '',
+              keywords: article.keywords || [],
+              author: article.author || '',
+              createdAt: article.created_at,
+              updatedAt: article.updated_at,
+              displayPosition: article.display_position || 0,
+              deleted: article.deleted || false,
+              sourceUrl: article.url || ''
+            };
+          });
+
+          if (mappedArticles.length > 0) {
+            console.log("=== ARTICLE MAPPING DEBUG ===");
+            console.log("First mapped article:", mappedArticles[0]);
+            console.log("=== END DEBUG ===");
+          }
+          setAllArticlesForSearch(mappedArticles);
         }
       } catch (error) {
         console.error("Error fetching all articles for search:", error);
