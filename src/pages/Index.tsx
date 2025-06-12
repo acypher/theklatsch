@@ -115,22 +115,20 @@ const Index = () => {
 
         if (allArticles) {
           const mappedArticles = allArticles.map(article => {
-            console.log(`Mapping article ${article.id} - imageurl from DB:`, article.imageurl, "image_url from DB:", article.image_url);
+            console.log(`Mapping article ${article.id} - imageurl from DB:`, article.imageurl);
             return {
               id: article.id,
               title: article.title || '',
               description: article.description || '',
               more_content: article.more_content || '',
-              imageUrl: article.imageurl || '', // Use imageurl instead of image_url
-              month: article.month || '',
-              year: article.year || '',
-              keywords: article.keywords || [],
+              imageUrl: article.imageurl || '', // Use imageurl field from DB
               author: article.author || '',
-              created_at: article.created_at,
-              updated_at: article.updated_at,
-              display_position: article.display_position || 0,
-              deleted: article.deleted || false,
-              sourceUrl: article.url || ''
+              keywords: article.keywords || [],
+              sourceUrl: article.sourceurl || '', // Use sourceurl field from DB
+              createdAt: article.created_at, // Map created_at to createdAt
+              updatedAt: article.created_at, // Use created_at for updatedAt as well
+              displayPosition: article.display_position || 0,
+              deleted: article.deleted || false
             };
           });
 
@@ -141,7 +139,6 @@ const Index = () => {
             console.log("=== SEARCH ARTICLE DEBUG ===");
             console.log("Raw DB article:", rawSearchArticle);
             console.log("Raw DB imageurl field:", rawSearchArticle.imageurl);
-            console.log("Raw DB image_url field:", rawSearchArticle.image_url);
             console.log("Mapped article imageUrl:", searchArticle.imageUrl);
             console.log("=== END DEBUG ===");
           }
