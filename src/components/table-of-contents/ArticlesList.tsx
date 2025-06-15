@@ -79,8 +79,8 @@ const ArticlesList = ({
                 <span className="relative">
                   {hasUnreadComments ? (
                     <span 
-                      className={`bg-yellow-300 text-black rounded-full px-2 font-medium min-w-6 flex items-center justify-center relative ${
-                        isRecentlyUpdated ? "ring-2 ring-blue-500 ring-offset-1" : ""
+                      className={`rounded-full px-2 font-medium min-w-6 flex items-center justify-center relative border-2 border-orange-500 ${
+                        isRecentlyUpdated ? "bg-blue-500 text-white" : "bg-white text-black"
                       }`}
                       title={isRecentlyUpdated ? "Recently updated with unread comments!" : "You have unread comments!"}
                     >
@@ -88,9 +88,9 @@ const ArticlesList = ({
                     </span>
                   ) : (
                     <span 
-                      className={`font-medium min-w-6 flex items-center justify-center ${
+                      className={`font-medium min-w-6 flex items-center justify-center rounded-full ${
                         isRecentlyUpdated 
-                          ? "border-2 border-blue-500 rounded-full bg-blue-50" 
+                          ? "bg-blue-500 text-white px-2" 
                           : ""
                       } ${isArticleRead ? "text-muted-foreground/50" : "text-muted-foreground"}`}
                       title={isRecentlyUpdated ? "Recently updated" : undefined}
