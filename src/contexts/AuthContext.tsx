@@ -29,6 +29,9 @@ type AuthContextType = {
     error: Error | null;
     data: Profile | null;
   }>;
+  resetPassword: (email: string) => Promise<{
+    error: Error | null;
+  }>;
   loading: boolean;
   profileLoading: boolean;
   isAuthenticated: boolean;
@@ -200,6 +203,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`,
+      });
+      
+      if (error) {
+        toast.error("Failed to send reset email: " + error.message);
+        return { error };
+      }
+      
+      toast.success("Password reset email sent! Check your inbox.");
+      return { error: null };
+    } catch (error) {
+      console.error("Error sending reset email:", error);
+      toast.error("Failed to send reset email");
+      return { error: error as Error };
+    }
+  };
+
   const isAuthenticated = !!user;
 
   return (
@@ -211,6 +234,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signUp, 
       signOut,
       updateProfile,
+      resetPassword,
       loading,
       profileLoading,
       isAuthenticated 

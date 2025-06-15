@@ -16,6 +16,9 @@ const Profile = () => {
   const [username, setUsername] = useState(profile?.username || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -81,6 +84,41 @@ const Profile = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+    
+    setIsChangingPassword(true);
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) {
+        toast.error("Failed to update password: " + error.message);
+      } else {
+        toast.success("Password updated successfully");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (error) {
+      console.error("Error updating password:", error);
+      toast.error("Failed to update password");
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -169,6 +207,58 @@ const Profile = () => {
                   </>
                 ) : (
                   "Save Changes"
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Change Password</CardTitle>
+            <CardDescription>Update your account password</CardDescription>
+          </CardHeader>
+          
+          <form onSubmit={handlePasswordChange}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input 
+                  id="newPassword" 
+                  type="password"
+                  value={newPassword} 
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  minLength={6}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input 
+                  id="confirmPassword" 
+                  type="password"
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                  minLength={6}
+                />
+              </div>
+            </CardContent>
+            
+            <CardFooter>
+              <Button 
+                type="submit" 
+                disabled={isChangingPassword || !newPassword || !confirmPassword}
+                className="w-full"
+              >
+                {isChangingPassword ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating Password...
+                  </>
+                ) : (
+                  "Update Password"
                 )}
               </Button>
             </CardFooter>
