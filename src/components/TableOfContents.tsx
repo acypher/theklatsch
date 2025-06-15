@@ -126,8 +126,14 @@ const TableOfContents = ({
 
   return (
     <Card 
-      className={`${className || ""} relative ${searchQuery ? 'border-2 border-pink-400 ring-2 ring-pink-400' : ''}`} 
-      style={{ height: `${maxHeight}px`, maxHeight: `${maxHeight}px`, display: 'flex', flexDirection: 'column' }}
+      className={`${className || ""} relative ${searchQuery ? 'border-2 ring-2' : ''}`} 
+      style={{ 
+        height: `${maxHeight}px`, 
+        maxHeight: `${maxHeight}px`, 
+        display: 'flex', 
+        flexDirection: 'column',
+        ...(searchQuery ? { borderColor: '#FAEBD7', '--tw-ring-color': '#FAEBD7' } : {})
+      }}
     >
       <CardHeader className="pb-2">
         <div className="flex flex-row flex-wrap items-center justify-between gap-2">
