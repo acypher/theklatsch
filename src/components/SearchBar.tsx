@@ -41,7 +41,7 @@ const SearchBar = ({
             placeholder={placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-10 pr-10"
+            className={`pl-10 pr-10 ${query ? 'border-pink-500 ring-pink-500 focus-visible:ring-pink-500' : ''}`}
           />
           {query && (
             <Button
