@@ -217,6 +217,7 @@ const Index = () => {
                 filterEnabled={filterEnabled}
                 onFilterToggle={setFilterEnabled}
                 currentIssue={currentIssue}
+                searchQuery={searchQuery}
               />
             </div>
             <StorefrontImage />

@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import { Article } from "@/lib/types";
 import DraggableArticle from "./DraggableArticle";
@@ -22,6 +21,7 @@ interface ArticlesGridProps {
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
   currentIssue?: string;
+  searchQuery?: string;
 }
 
 const ArticlesGrid = ({ 
@@ -38,21 +38,22 @@ const ArticlesGrid = ({
   onDragEnd,
   onDragOver,
   onDrop,
-  currentIssue
+  currentIssue,
+  searchQuery = ""
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const scrollToArticle = (articleId: string) => {
     const articleElement = articleRefs.current.get(articleId);
-    
+
     if (articleElement) {
       const navbar = document.querySelector('nav');
       const navbarHeight = navbar ? navbar.offsetHeight : 0;
       const extraPadding = 20;
       const yOffset = -(navbarHeight + extraPadding);
-      
+
       const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      
+
       window.scrollTo({
         top: y,
         behavior: 'smooth'
@@ -77,7 +78,7 @@ const ArticlesGrid = ({
 
     // Add event listener for the custom event
     window.addEventListener(COMMENTS_UPDATED_EVENT as any, handleCommentsUpdated);
-    
+
     // Clean up the event listener when the component unmounts
     return () => {
       window.removeEventListener(COMMENTS_UPDATED_EVENT as any, handleCommentsUpdated);
@@ -97,9 +98,10 @@ const ArticlesGrid = ({
           filterEnabled={filterEnabled}
           onFilterToggle={onFilterToggle}
           currentIssue={currentIssue}
+          searchQuery={searchQuery}
         />
       </div>
-      
+
       {displayArticles.map((article) => (
         <DraggableArticle
           key={article.id}

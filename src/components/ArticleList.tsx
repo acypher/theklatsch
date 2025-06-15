@@ -19,6 +19,7 @@ interface ArticleListProps {
   onFilterToggle?: (checked: boolean) => void;
   allArticles?: Article[]; // The complete list of articles
   currentIssue?: string; // Current issue prop
+  searchQuery?: string;
 }
 
 const ArticleList = ({ 
@@ -31,25 +32,26 @@ const ArticleList = ({
   filterEnabled = false,
   onFilterToggle,
   allArticles, // Original complete list of articles
-  currentIssue
+  currentIssue,
+  searchQuery = ""
 }: ArticleListProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
-  
+
   useEffect(() => {
     setLocalArticles(initialArticles);
-    
+
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
       setIsLoggedIn(!!data.session);
     };
-    
+
     checkAuth();
-    
+
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setIsLoggedIn(!!session);
     });
-    
+
     return () => {
       authListener.subscription.unsubscribe();
     };
@@ -76,7 +78,7 @@ const ArticleList = ({
         keyword={selectedKeyword || ""} 
         onClear={onKeywordClear || (() => {})} 
       />
-      
+
       <ArticlesGrid 
         articles={localArticles}
         allArticles={allArticles || initialArticles} // Pass the complete list
@@ -92,8 +94,9 @@ const ArticleList = ({
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         currentIssue={currentIssue}
+        searchQuery={searchQuery}
       />
-      
+
       {hasChanges && (
         <UnsavedChangesPrompt 
           onCancel={handleCancelChanges}
