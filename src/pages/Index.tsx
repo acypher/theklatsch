@@ -220,19 +220,6 @@ const Index = () => {
               />
             </div>
             <StorefrontImage />
-             <TableOfContents 
-          articles={filteredArticles}
-          allArticles={allArticlesForSearch} 
-          onArticleClick={handleArticleClick}
-          className="lg:sticky lg:top-4"
-          readArticles={readArticles}
-          hideRead={hideRead}
-          commentCounts={commentCounts}
-          filterEnabled={hideRead}
-          onFilterToggle={setHideRead}
-          currentIssue={displayIssue}
-          searchQuery={searchQuery}
-        />
           </>
         )}
       </main>

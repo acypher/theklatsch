@@ -126,7 +126,7 @@ const TableOfContents = ({
 
   return (
     <Card 
-      className={`${className || ""} relative ${searchQuery ? 'border-pink-400 ring-pink-400' : ''}`} 
+      className={`${className || ""} relative ${searchQuery ? 'border-2 border-pink-400 ring-2 ring-pink-400' : ''}`} 
       style={{ height: `${maxHeight}px`, maxHeight: `${maxHeight}px`, display: 'flex', flexDirection: 'column' }}
     >
       <CardHeader className="pb-2">
