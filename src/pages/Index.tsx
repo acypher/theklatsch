@@ -15,6 +15,7 @@ import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
 import { mapArticleFromDb } from "@/lib/data/utils";
 import { LogoUploader } from "@/components/LogoUploader";
+import TableOfContents from "@/components/TableOfContents"; //Import TableOfContents Component
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -181,6 +182,16 @@ const Index = () => {
   console.log("Index - All articles:", articles.map(a => a.id));
   console.log("Index - Filtered articles:", filteredArticles.map(a => a.id));
 
+  const [hideRead, setHideRead] = useState(false);
+  const [commentCounts, setCommentCounts] = useState({});
+  const [displayIssue, setDisplayIssue] = useState("April 2025");
+
+    // Example handler (replace with your actual implementation)
+    const handleArticleClick = (articleId: string) => {
+      console.log(`Article clicked: ${articleId}`);
+    };
+
+
   return (
     <div className="min-h-screen">
       <Navbar 
@@ -209,6 +220,19 @@ const Index = () => {
               />
             </div>
             <StorefrontImage />
+             <TableOfContents 
+          articles={filteredArticles}
+          allArticles={allArticlesForSearch} 
+          onArticleClick={handleArticleClick}
+          className="lg:sticky lg:top-4"
+          readArticles={readArticles}
+          hideRead={hideRead}
+          commentCounts={commentCounts}
+          filterEnabled={hideRead}
+          onFilterToggle={setHideRead}
+          currentIssue={displayIssue}
+          searchQuery={searchQuery}
+        />
           </>
         )}
       </main>

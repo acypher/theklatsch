@@ -24,6 +24,7 @@ interface TableOfContentsProps {
   filterEnabled?: boolean;
   onFilterToggle?: (checked: boolean) => void;
   currentIssue?: string;
+  searchQuery?: string;
 }
 
 const TableOfContents = ({ 
@@ -37,6 +38,7 @@ const TableOfContents = ({
   filterEnabled = false,
   onFilterToggle,
   currentIssue: propCurrentIssue,
+  searchQuery = "",
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
   const maxHeight = useContentsHeight();
@@ -124,7 +126,7 @@ const TableOfContents = ({
 
   return (
     <Card 
-      className={`${className || ""} relative`} 
+      className={`${className || ""} relative ${searchQuery ? 'border-pink-400 ring-pink-400' : ''}`} 
       style={{ height: `${maxHeight}px`, maxHeight: `${maxHeight}px`, display: 'flex', flexDirection: 'column' }}
     >
       <CardHeader className="pb-2">
