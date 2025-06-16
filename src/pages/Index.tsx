@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
 import ArticleList from "@/components/ArticleList";
@@ -10,12 +11,12 @@ import { HomeLogo } from "@/components/home/HomeLogo";
 import { MaintenancePage } from "@/components/home/MaintenancePage";
 import { StorefrontImage } from "@/components/home/StorefrontImage";
 import { useReadArticles } from "@/hooks/useReadArticles";
-import { useLocation } from "react-router-dom";
 import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
 import { mapArticleFromDb } from "@/lib/data/utils";
 import { LogoUploader } from "@/components/LogoUploader";
 import TableOfContents from "@/components/TableOfContents"; //Import TableOfContents Component
+import PasswordReset from "@/components/auth/PasswordReset";
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
@@ -26,8 +27,17 @@ const Index = () => {
   const articleListRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated);
+
+  // Check if this is a password reset request
+  const isPasswordReset = searchParams.has('access_token') && searchParams.has('refresh_token');
+
+  // If it's a password reset, show the password reset component
+  if (isPasswordReset) {
+    return <PasswordReset />;
+  }
 
   useEffect(() => {
     const loadCurrentIssue = async () => {
