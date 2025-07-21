@@ -149,14 +149,6 @@ const EditArticleForm = () => {
       {/* Top buttons */}
       <div className="mb-6 flex gap-2">
         <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => navigate(`/article/${id}`)} 
-          className="flex-1"
-        >
-          Cancel
-        </Button>
-        <Button 
           type="submit" 
           disabled={isSubmitting} 
           className="flex-1"
@@ -168,10 +160,6 @@ const EditArticleForm = () => {
             </>
           ) : "Update Article"}
         </Button>
-      </div>
-
-      {/* Bottom buttons will be added by ArticleForm */}
-      <div className="pt-4 flex gap-2">
         <Button 
           type="button" 
           variant="outline" 

@@ -48,14 +48,22 @@ const ArticleForm = ({
         <SourceUrlField />
         <ContentField />
         
-        <div className="pt-4">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+        <div className="pt-4 flex gap-2">
+          <Button type="submit" disabled={isSubmitting} className="flex-1">
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                 {submitButtonText === "Publish Article" ? "Publishing..." : "Updating..."}
               </>
             ) : submitButtonText}
+          </Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => window.history.back()} 
+            className="flex-1"
+          >
+            Cancel
           </Button>
         </div>
       </form>
