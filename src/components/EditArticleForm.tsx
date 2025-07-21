@@ -146,12 +146,37 @@ const EditArticleForm = () => {
       isSubmitting={isSubmitting}
       submitButtonText="Update Article"
     >
-      <div className="mb-2">
+      {/* Top buttons */}
+      <div className="mb-6 flex gap-2">
         <Button 
           type="button" 
           variant="outline" 
           onClick={() => navigate(`/article/${id}`)} 
-          className="w-full"
+          className="flex-1"
+        >
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting} 
+          className="flex-1"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+              Updating...
+            </>
+          ) : "Update Article"}
+        </Button>
+      </div>
+
+      {/* Bottom buttons will be added by ArticleForm */}
+      <div className="pt-4 flex gap-2">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={() => navigate(`/article/${id}`)} 
+          className="flex-1"
         >
           Cancel
         </Button>
