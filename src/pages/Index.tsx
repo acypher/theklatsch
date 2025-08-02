@@ -126,7 +126,7 @@ const Index = () => {
 
         if (allArticles) {
           const mappedArticles = allArticles.map(article => {
-            console.log(`Mapping article ${article.id} - imageurl from DB:`, article.imageurl, `image_url from DB:`, article.image_url);
+            console.log(`Mapping article ${article.id} - imageurl from DB:`, article.imageurl);
             return {
               id: article.id,
               title: article.title || '',
@@ -138,10 +138,10 @@ const Index = () => {
               keywords: article.keywords || [],
               author: article.author || '',
               createdAt: article.created_at,
-              updatedAt: article.updated_at,
+              updatedAt: article.created_at, // Using created_at since updated_at doesn't exist
               displayPosition: article.display_position || 0,
               deleted: article.deleted || false,
-              sourceUrl: article.url || ''
+              sourceUrl: article.sourceurl || '' // Using sourceurl instead of url
             };
           });
 

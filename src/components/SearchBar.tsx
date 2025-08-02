@@ -42,7 +42,7 @@ const SearchBar = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className={`pl-10 pr-10 ${query ? 'border-2 ring-2' : ''}`}
-            style={query ? { borderColor: '#FAEBD7', '--tw-ring-color': '#FAEBD7' } : {}}
+            style={query ? { borderColor: '#FAEBD7', ['--tw-ring-color' as any]: '#FAEBD7' } : {}}
           />
           {query && (
             <Button
