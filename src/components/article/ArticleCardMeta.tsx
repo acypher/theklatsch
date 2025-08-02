@@ -7,7 +7,7 @@ interface ArticleCardMetaProps {
 
 const ArticleCardMeta = ({ author, createdAt, formatDate }: ArticleCardMetaProps) => {
   return (
-    <p className="text-muted-foreground text-sm mb-2 hover:text-primary transition-colors cursor-pointer">
+    <p className="text-muted-foreground text-sm mb-2">
       By {author} • {formatDate(createdAt)}
     </p>
   );

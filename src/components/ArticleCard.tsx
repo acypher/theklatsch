@@ -135,41 +135,44 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={article.id}>
       <ReadCheckbox articleId={article.id} />
 
-      <CardHeader className="p-0">
-        <ArticleCardHeader 
-          articleId={article.id}
-          imageUrl={article.imageUrl}
-          title={article.title}
-          isGif={isGif}
-          getImageUrl={getImageUrl}
-        />
-      </CardHeader>
-      <CardContent className="flex-grow pt-6">
-        <Link to={`/article/${article.id}`} className="block">
-          <div className="line-clamp-2 hover:text-primary transition-colors mb-2 prose-sm prose">
-            <ReactMarkdown 
-              remarkPlugins={[remarkGfm]}
-              components={customRenderers}
-            >
-              {article.title}
-            </ReactMarkdown>
-          </div>
-        </Link>
-        <ArticleCardMeta 
-          author={article.author}
-          createdAt={article.createdAt}
-          formatDate={formatDate}
-        />
-        <Link to={`/article/${article.id}`} className="block">
-          <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper hover:text-primary/80 transition-colors cursor-pointer">
-            <ReactMarkdown 
-              remarkPlugins={[remarkGfm]}
-              components={customRenderers}
-            >
-              {article.description}
-            </ReactMarkdown>
-          </div>
-        </Link>
+      <Link to={`/article/${article.id}`} className="block group">
+        <div className="hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg">
+          <CardHeader className="p-0">
+            <ArticleCardHeader 
+              articleId={article.id}
+              imageUrl={article.imageUrl}
+              title={article.title}
+              isGif={isGif}
+              getImageUrl={getImageUrl}
+            />
+          </CardHeader>
+          <CardContent className="pt-6 pb-0">
+            <div className="line-clamp-2 mb-2 prose-sm prose">
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={customRenderers}
+              >
+                {article.title}
+              </ReactMarkdown>
+            </div>
+            <ArticleCardMeta 
+              author={article.author}
+              createdAt={article.createdAt}
+              formatDate={formatDate}
+            />
+            <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper">
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={customRenderers}
+              >
+                {article.description}
+              </ReactMarkdown>
+            </div>
+          </CardContent>
+        </div>
+      </Link>
+      
+      <CardContent className="pt-0">
 
         <ArticleCardFooter 
           keywords={article.keywords}
