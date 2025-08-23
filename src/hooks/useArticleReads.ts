@@ -27,8 +27,6 @@ export const useArticleReads = (articleId: string) => {
           .eq('article_id', articleId)
           .maybeSingle();
 
-        console.log(`Fetched read state - articleId: ${articleId}, data:`, data);
-
         if (isMounted.current && !error) {
           setIsRead(data?.read ?? false);
           initialFetchDone.current = true;
