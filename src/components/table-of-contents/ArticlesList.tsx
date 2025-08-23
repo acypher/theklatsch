@@ -57,8 +57,8 @@ const ArticlesList = ({
           const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
           const hasUnreadComments = counts.viewedCommentCount < counts.commentCount;
 
-          // Check if article was recently updated
-          const isRecentlyUpdated = updatedArticles[article.id] !== undefined;
+          // Check if article was recently updated (only show blue circle if already read AND updated)
+          const isRecentlyUpdated = isArticleRead && updatedArticles[article.id] !== undefined;
 
           return (
             <li 
