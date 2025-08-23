@@ -141,9 +141,13 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         to={`/article/${article.id}`} 
         className="block group"
         onClick={() => {
+          console.log(`Article clicked - articleId: ${article.id}, isAuthenticated: ${isAuthenticated}, isRead: ${isRead}`);
           // Mark as read when clicking to open article (if not already read and user is authenticated)
           if (isAuthenticated && !isRead) {
+            console.log(`Auto-marking article as read - articleId: ${article.id}`);
             toggleReadState();
+          } else {
+            console.log(`Not marking as read - either not authenticated (${isAuthenticated}) or already read (${isRead})`);
           }
         }}
       >
