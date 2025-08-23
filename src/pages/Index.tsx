@@ -126,7 +126,6 @@ const Index = () => {
 
         if (allArticles) {
           const mappedArticles = allArticles.map(article => {
-            console.log(`Mapping article ${article.id} - imageurl from DB:`, article.imageurl);
             return {
               id: article.id,
               title: article.title || '',
