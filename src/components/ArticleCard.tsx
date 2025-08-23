@@ -13,6 +13,7 @@ import ReadCheckbox from './article/ReadCheckbox';
 import { useAuth } from "@/contexts/AuthContext";
 import VideoViewer from "./VideoViewer";
 import { isVideoUrl } from "@/lib/search";
+import { useArticleReads } from "@/hooks/useArticleReads";
 
 interface ArticleCardProps {
   article: Article;
@@ -25,6 +26,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { user, isAuthenticated } = useAuth();
+  const { isRead, toggleReadState } = useArticleReads(article.id);
 
   const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
   const hasVideo = isVideoUrl(article.sourceUrl);
@@ -135,7 +137,16 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={article.id}>
       <ReadCheckbox articleId={article.id} />
 
-      <Link to={`/article/${article.id}`} className="block group">
+      <Link 
+        to={`/article/${article.id}`} 
+        className="block group"
+        onClick={() => {
+          // Mark as read when clicking to open article (if not already read and user is authenticated)
+          if (isAuthenticated && !isRead) {
+            toggleReadState();
+          }
+        }}
+      >
         <div className="hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg">
           <CardHeader className="p-0">
             <ArticleCardHeader 
