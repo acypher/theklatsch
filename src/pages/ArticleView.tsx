@@ -6,12 +6,16 @@ import ArticleDetail from "@/components/ArticleDetail";
 import { getCurrentIssue } from "@/lib/data/issue/currentIssue";
 import { getArticleById } from "@/lib/data";
 import { Article } from "@/lib/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { useArticleReads } from "@/hooks/useArticleReads";
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
   const [currentIssue, setCurrentIssue] = useState<string>("May 2025");
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
+  const { isRead, toggleReadState } = useArticleReads(id || "");
   
   useEffect(() => {
     // Save scroll position before navigating to article
@@ -40,6 +44,12 @@ const ArticleView = () => {
             
             // Update or create Open Graph meta tags
             updateMetaTags(articleData);
+            
+            // Auto-mark as read when article is displayed
+            if (isAuthenticated && !isRead) {
+              console.log(`Auto-marking article as read - articleId: ${id}`);
+              toggleReadState();
+            }
           }
         } catch (error) {
           console.error("Error fetching article for meta tags:", error);
@@ -60,7 +70,7 @@ const ArticleView = () => {
       const metaTags = document.querySelectorAll('meta[property^="og:"]');
       metaTags.forEach(tag => tag.remove());
     };
-  }, [id]);
+  }, [id, isAuthenticated, isRead, toggleReadState]);
 
   const updateMetaTags = (article: Article) => {
     // Helper function to create or update meta tags
