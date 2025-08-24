@@ -61,6 +61,7 @@ const ArticlesGrid = ({
     }
   };
 
+  // Always use allArticles for ToC, but filter for display cards
   const displayArticles = hideRead 
     ? articles.filter(article => !readArticles.has(article.id))
     : articles;
@@ -89,7 +90,7 @@ const ArticlesGrid = ({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div className="h-full">
         <TableOfContents 
-          articles={articles}
+          articles={allArticles}
           allArticles={allArticles} // Always pass the complete list for correct numbering
           onArticleClick={scrollToArticle}
           readArticles={readArticles}
