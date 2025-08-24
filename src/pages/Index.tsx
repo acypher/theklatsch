@@ -40,6 +40,9 @@ const Index = () => {
   }
 
   useEffect(() => {
+    // Set the home page title
+    document.title = "The Klatsch";
+    
     const loadCurrentIssue = async () => {
       const issueData = await checkAndFixDisplayIssue();
       setCurrentIssue(issueData.text);
