@@ -40,6 +40,7 @@ const ArticleView = () => {
             setArticle(articleData);
             
             // Update page title using the article title
+            console.log(`ArticleView: Setting title to '${articleData.title} | The Klatsch'`);
             document.title = `${articleData.title} | The Klatsch`;
             
             // Update or create Open Graph meta tags

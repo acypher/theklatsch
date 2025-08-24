@@ -53,6 +53,7 @@ const Index = () => {
 
   // Additional effect to ensure title is always correct on this page
   useEffect(() => {
+    console.log("Index: Setting title to 'The Klatsch'");
     document.title = "The Klatsch";
   }, [location]);
 
