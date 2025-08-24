@@ -97,10 +97,11 @@ const TableOfContents = ({
       onFilterToggle(checked);
     }
     
-    // Then recalculate hasUnreadComments based on commentCounts
-    const hasAnyUnreadComments = Object.values(commentCounts).some(
-      counts => counts.viewedCommentCount < counts.commentCount
-    );
+    // Then recalculate hasUnreadComments based on ALL articles
+    const hasAnyUnreadComments = articles.some(article => {
+      const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
+      return counts.viewedCommentCount < counts.commentCount;
+    });
     
     setHasUnreadComments(hasAnyUnreadComments);
   };
@@ -166,9 +167,10 @@ const TableOfContents = ({
             updatedArticles={updatedArticles}
             onCommentsStateChanged={() => {
               // Recalculate hasUnreadComments when comment state changes
-              const hasAnyUnreadComments = Object.values(commentCounts).some(
-                counts => counts.viewedCommentCount < counts.commentCount
-              );
+              const hasAnyUnreadComments = articles.some(article => {
+                const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
+                return counts.viewedCommentCount < counts.commentCount;
+              });
               setHasUnreadComments(hasAnyUnreadComments);
             }}
           />
