@@ -41,6 +41,7 @@ const Index = () => {
 
   useEffect(() => {
     // Set the home page title
+    console.log("Index: Setting title to 'The Klatsch'");
     document.title = "The Klatsch";
     
     const loadCurrentIssue = async () => {
@@ -53,9 +54,15 @@ const Index = () => {
 
   // Additional effect to ensure title is always correct on this page
   useEffect(() => {
-    console.log("Index: Setting title to 'The Klatsch'");
+    console.log("Index: Ensuring title remains 'The Klatsch'");
     document.title = "The Klatsch";
   }, [location]);
+
+  // Effect to set title when component mounts or updates
+  useEffect(() => {
+    console.log("Index: Setting title on component update");
+    document.title = "The Klatsch";
+  });
 
   useEffect(() => {
     const loadMaintenanceMode = async () => {
