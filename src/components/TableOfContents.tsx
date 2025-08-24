@@ -47,6 +47,11 @@ const TableOfContents = ({
   const [hasUnreadUpdates, setHasUnreadUpdates] = useState(false);
   const { updatedArticles } = useArticleUpdates();
   
+  // Filter articles if hideRead is true
+  const displayArticles = hideRead 
+    ? articles.filter(article => !readArticles.has(article.id))
+    : articles;
+  
   // Initialize issue key for recommendations based on currentIssue prop
   useEffect(() => {
     if (propCurrentIssue) {
@@ -63,37 +68,27 @@ const TableOfContents = ({
     }
   }, [propCurrentIssue]);
 
-  // Check for unread comments in all articles (not just filtered ones)
+  // Check for unread comments - only in displayed articles
   useEffect(() => {
-    // Check if any article in the commentCounts has unread comments
-    const checkForUnreadComments = () => {
-      for (const articleId in commentCounts) {
-        const counts = commentCounts[articleId];
-        if (counts.viewedCommentCount < counts.commentCount) {
-          return true;
-        }
-      }
-      return false;
-    };
+    const hasAnyUnreadComments = displayArticles.some(article => {
+      const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
+      return counts.viewedCommentCount < counts.commentCount;
+    });
     
-    // Set hasUnreadComments based on the check
-    setHasUnreadComments(checkForUnreadComments());
-  }, [commentCounts]);
+    setHasUnreadComments(hasAnyUnreadComments);
+  }, [commentCounts, displayArticles]);
 
-  // Check for unread updates
+  // Check for unread updates - only for articles that are read AND updated
   useEffect(() => {
-    const hasAnyUnreadUpdates = Object.keys(updatedArticles).length > 0;
+    const hasAnyUnreadUpdates = displayArticles.some(article => 
+      readArticles.has(article.id) && updatedArticles[article.id] !== undefined
+    );
     setHasUnreadUpdates(hasAnyUnreadUpdates);
-  }, [updatedArticles]);
+  }, [updatedArticles, displayArticles, readArticles]);
 
   // Only call useRecommendations once we have an issue key
   const { recommendations, loading, isSaving, handleSaveRecommendations } = 
     useRecommendations(issueKey);
-
-  // Filter articles if hideRead is true
-  const displayArticles = hideRead 
-    ? articles.filter(article => !readArticles.has(article.id))
-    : articles;
 
   // Event handler for filter toggle that will ensure we recalculate hasUnreadComments
   const handleFilterToggle = (checked: boolean) => {
