@@ -70,7 +70,8 @@ const ArticleList = ({
   } = useDragAndDrop(localArticles, setLocalArticles);
 
   if (loading) return <LoadingState />;
-  if (!loading && initialArticles.length === 0) return <NoArticlesFound />;
+  
+  // Always render the grid to show ToC, even if no articles match current filters
 
   return (
     <div className="space-y-6">

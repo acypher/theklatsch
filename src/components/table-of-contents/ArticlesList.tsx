@@ -42,6 +42,18 @@ const ArticlesList = ({
     // Don't clear the updated state here - only clear when article page is opened
   };
 
+  // If no articles to display due to filters, show a message
+  if (articles.length === 0) {
+    return (
+      <div style={{ height: maxHeight }} className="overflow-auto h-full flex items-center justify-center">
+        <div className="p-4 text-center text-muted-foreground">
+          <p className="text-sm">All articles in this issue have been read.</p>
+          <p className="text-xs mt-1">Toggle the filter to see all articles.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ height: maxHeight }} className="overflow-auto h-full">
       <ul className="space-y-2">
