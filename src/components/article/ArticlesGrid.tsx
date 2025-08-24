@@ -88,6 +88,7 @@ const ArticlesGrid = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* ToC column - always visible */}
       <div className="h-full">
         <TableOfContents 
           articles={allArticles}
@@ -103,6 +104,7 @@ const ArticlesGrid = ({
         />
       </div>
 
+      {/* Article cards - only show if there are articles to display */}
       {displayArticles.map((article) => (
         <DraggableArticle
           key={article.id}
