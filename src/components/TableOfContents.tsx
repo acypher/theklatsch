@@ -68,23 +68,23 @@ const TableOfContents = ({
     }
   }, [propCurrentIssue]);
 
-  // Check for unread comments - only in displayed articles
+  // Check for unread comments - in ALL articles, not just displayed ones
   useEffect(() => {
-    const hasAnyUnreadComments = displayArticles.some(article => {
+    const hasAnyUnreadComments = articles.some(article => {
       const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
       return counts.viewedCommentCount < counts.commentCount;
     });
     
     setHasUnreadComments(hasAnyUnreadComments);
-  }, [commentCounts, displayArticles]);
+  }, [commentCounts, articles]);
 
-  // Check for unread updates - only for articles that are read AND updated
+  // Check for unread updates - in ALL articles that are read AND updated
   useEffect(() => {
-    const hasAnyUnreadUpdates = displayArticles.some(article => 
+    const hasAnyUnreadUpdates = articles.some(article => 
       readArticles.has(article.id) && updatedArticles[article.id] !== undefined
     );
     setHasUnreadUpdates(hasAnyUnreadUpdates);
-  }, [updatedArticles, displayArticles, readArticles]);
+  }, [updatedArticles, articles, readArticles]);
 
   // Only call useRecommendations once we have an issue key
   const { recommendations, loading, isSaving, handleSaveRecommendations } = 

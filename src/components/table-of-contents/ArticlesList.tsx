@@ -79,7 +79,7 @@ const ArticlesList = ({
                 <span className="relative">
                   {hasUnreadComments ? (
                     <span 
-                      className={`rounded-full px-2 font-medium min-w-6 flex items-center justify-center relative border-2 border-orange-500 ${
+                      className={`rounded-full px-2 font-medium min-w-6 flex items-center justify-center relative border-2 border-yellow-300 ${
                         isRecentlyUpdated ? "bg-blue-500 text-white" : "bg-white text-black"
                       }`}
                       title={isRecentlyUpdated ? "Recently updated with unread comments!" : "You have unread comments!"}
