@@ -70,13 +70,13 @@ const TableOfContents = ({
 
   // Check for unread comments - in ALL articles, not just displayed ones
   useEffect(() => {
-    const hasAnyUnreadComments = articles.some(article => {
+    const hasAnyUnreadComments = allArticles.some(article => {
       const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
       return counts.viewedCommentCount < counts.commentCount;
     });
     
     setHasUnreadComments(hasAnyUnreadComments);
-  }, [commentCounts, articles]);
+  }, [commentCounts, allArticles]);
 
   // Check for unread updates - in ALL articles that are read AND updated
   useEffect(() => {
@@ -98,7 +98,7 @@ const TableOfContents = ({
     }
     
     // Then recalculate hasUnreadComments based on ALL articles
-    const hasAnyUnreadComments = articles.some(article => {
+    const hasAnyUnreadComments = allArticles.some(article => {
       const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
       return counts.viewedCommentCount < counts.commentCount;
     });
@@ -167,7 +167,7 @@ const TableOfContents = ({
             updatedArticles={updatedArticles}
             onCommentsStateChanged={() => {
               // Recalculate hasUnreadComments when comment state changes
-              const hasAnyUnreadComments = articles.some(article => {
+              const hasAnyUnreadComments = allArticles.some(article => {
                 const counts = commentCounts[article.id] || { commentCount: 0, viewedCommentCount: 0 };
                 return counts.viewedCommentCount < counts.commentCount;
               });
