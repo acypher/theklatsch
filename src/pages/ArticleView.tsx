@@ -17,7 +17,7 @@ const ArticleView = () => {
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
   const { isRead, toggleReadState } = useArticleReads(id || "");
-  const { preferences } = useUserPreferences();
+  const { preferences, loading: preferencesLoading } = useUserPreferences();
   
   useEffect(() => {
     // Save scroll position before navigating to article
@@ -49,7 +49,7 @@ const ArticleView = () => {
             updateMetaTags(articleData);
             
             // Auto-mark as read when article is displayed (only if preference is enabled)
-            console.log(`ArticleView: Checking auto-mark - isAuthenticated: ${isAuthenticated}, isRead: ${isRead}, auto_mark_read: ${preferences.auto_mark_read}, loading: ${loading}`);
+            console.log(`ArticleView: Checking auto-mark - isAuthenticated: ${isAuthenticated}, isRead: ${isRead}, auto_mark_read: ${preferences.auto_mark_read}, preferencesLoading: ${preferencesLoading}`);
             if (isAuthenticated && !isRead && preferences.auto_mark_read) {
               console.log(`Auto-marking article as read - articleId: ${id}`);
               toggleReadState();
@@ -72,7 +72,7 @@ const ArticleView = () => {
       const metaTags = document.querySelectorAll('meta[property^="og:"]');
       metaTags.forEach(tag => tag.remove());
     };
-  }, [id, isAuthenticated, isRead, toggleReadState, preferences.auto_mark_read]);
+  }, [id, isAuthenticated, isRead, toggleReadState, preferences.auto_mark_read, preferencesLoading]);
 
   const updateMetaTags = (article: Article) => {
     // Helper function to create or update meta tags
