@@ -47,13 +47,6 @@ const ArticleView = () => {
             
             // Update or create Open Graph meta tags
             updateMetaTags(articleData);
-            
-            // Auto-mark as read when article is displayed (only if preference is enabled)
-            console.log(`ArticleView: Checking auto-mark - isAuthenticated: ${isAuthenticated}, isRead: ${isRead}, auto_mark_read: ${preferences.auto_mark_read}, preferencesLoading: ${preferencesLoading}`);
-            if (isAuthenticated && !isRead && preferences.auto_mark_read) {
-              console.log(`Auto-marking article as read - articleId: ${id}`);
-              toggleReadState();
-            }
           }
         } catch (error) {
           console.error("Error fetching article for meta tags:", error);
@@ -72,7 +65,25 @@ const ArticleView = () => {
       const metaTags = document.querySelectorAll('meta[property^="og:"]');
       metaTags.forEach(tag => tag.remove());
     };
-  }, [id, isAuthenticated, isRead, toggleReadState, preferences.auto_mark_read, preferencesLoading]);
+  }, [id]);
+
+  // Separate effect for auto-marking as read
+  useEffect(() => {
+    console.log(`ArticleView: Auto-mark effect triggered - id: ${id}, isAuthenticated: ${isAuthenticated}, isRead: ${isRead}, auto_mark_read: ${preferences.auto_mark_read}, preferencesLoading: ${preferencesLoading}`);
+    
+    // Only proceed if preferences are loaded and article exists
+    if (!preferencesLoading && id && article) {
+      console.log(`ArticleView: Checking auto-mark conditions - isAuthenticated: ${isAuthenticated}, isRead: ${isRead}, auto_mark_read: ${preferences.auto_mark_read}`);
+      if (isAuthenticated && !isRead && preferences.auto_mark_read) {
+        console.log(`Auto-marking article as read - articleId: ${id}`);
+        toggleReadState();
+      } else {
+        console.log(`Not auto-marking - either not authenticated, already read, or preference disabled`);
+      }
+    } else {
+      console.log(`Skipping auto-mark check - preferencesLoading: ${preferencesLoading}, id: ${id}, article: ${!!article}`);
+    }
+  }, [id, isAuthenticated, isRead, toggleReadState, preferences.auto_mark_read, preferencesLoading, article]);
 
   const updateMetaTags = (article: Article) => {
     // Helper function to create or update meta tags
