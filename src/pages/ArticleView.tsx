@@ -49,6 +49,7 @@ const ArticleView = () => {
             updateMetaTags(articleData);
             
             // Auto-mark as read when article is displayed (only if preference is enabled)
+            console.log(`ArticleView: Checking auto-mark - isAuthenticated: ${isAuthenticated}, isRead: ${isRead}, auto_mark_read: ${preferences.auto_mark_read}, loading: ${loading}`);
             if (isAuthenticated && !isRead && preferences.auto_mark_read) {
               console.log(`Auto-marking article as read - articleId: ${id}`);
               toggleReadState();
