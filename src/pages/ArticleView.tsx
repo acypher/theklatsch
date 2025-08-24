@@ -8,6 +8,7 @@ import { getArticleById } from "@/lib/data";
 import { Article } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useArticleReads } from "@/hooks/useArticleReads";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 const ArticleView = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,7 @@ const ArticleView = () => {
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
   const { isRead, toggleReadState } = useArticleReads(id || "");
+  const { preferences } = useUserPreferences();
   
   useEffect(() => {
     // Save scroll position before navigating to article
@@ -46,8 +48,8 @@ const ArticleView = () => {
             // Update or create Open Graph meta tags
             updateMetaTags(articleData);
             
-            // Auto-mark as read when article is displayed
-            if (isAuthenticated && !isRead) {
+            // Auto-mark as read when article is displayed (only if preference is enabled)
+            if (isAuthenticated && !isRead && preferences.auto_mark_read) {
               console.log(`Auto-marking article as read - articleId: ${id}`);
               toggleReadState();
             }
@@ -69,7 +71,7 @@ const ArticleView = () => {
       const metaTags = document.querySelectorAll('meta[property^="og:"]');
       metaTags.forEach(tag => tag.remove());
     };
-  }, [id, isAuthenticated, isRead, toggleReadState]);
+  }, [id, isAuthenticated, isRead, toggleReadState, preferences.auto_mark_read]);
 
   const updateMetaTags = (article: Article) => {
     // Helper function to create or update meta tags

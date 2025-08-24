@@ -4,14 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 const Profile = () => {
   const { user, profile, updateProfile, profileLoading } = useAuth();
+  const { preferences, loading: preferencesLoading, updatePreferences } = useUserPreferences();
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState(profile?.username || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,13 +125,13 @@ const Profile = () => {
     }
   };
 
-  if (profileLoading || isCreatingProfile) {
+  if (profileLoading || isCreatingProfile || preferencesLoading) {
     return (
       <>
         <Navbar />
         <div className="flex justify-center items-center min-h-[70vh]">
           <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="ml-2">{isCreatingProfile ? "Creating your profile..." : "Loading profile..."}</p>
+          <p className="ml-2">{isCreatingProfile ? "Creating your profile..." : "Loading..."}</p>
         </div>
       </>
     );
@@ -211,6 +214,33 @@ const Profile = () => {
               </Button>
             </CardFooter>
           </form>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Reading Preferences</CardTitle>
+            <CardDescription>Manage how articles are marked as read</CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="auto-mark-read"
+                checked={preferences.auto_mark_read}
+                onCheckedChange={(checked) => {
+                  if (typeof checked === 'boolean') {
+                    updatePreferences({ auto_mark_read: checked });
+                  }
+                }}
+              />
+              <Label htmlFor="auto-mark-read" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Automatically mark opened articles as read
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              When enabled, articles will be automatically marked as read when you open them. You can still manually mark articles using the checkbox on each article card.
+            </p>
+          </CardContent>
         </Card>
 
         <Card className="mt-6">
