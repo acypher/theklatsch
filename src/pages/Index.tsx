@@ -51,6 +51,11 @@ const Index = () => {
     loadCurrentIssue();
   }, []);
 
+  // Additional effect to ensure title is always correct on this page
+  useEffect(() => {
+    document.title = "The Klatsch";
+  }, [location]);
+
   useEffect(() => {
     const loadMaintenanceMode = async () => {
       const mode = await getMaintenanceMode();

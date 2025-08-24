@@ -61,11 +61,9 @@ const ArticleView = () => {
     
     fetchArticle();
     
-    // Clean up meta tags and title when unmounting
+    // Clean up meta tags when unmounting, but don't change title here
+    // Let the destination page handle its own title
     return () => {
-      // Reset title to default
-      document.title = "The Klatsch";
-      
       // Remove Open Graph meta tags
       const metaTags = document.querySelectorAll('meta[property^="og:"]');
       metaTags.forEach(tag => tag.remove());
