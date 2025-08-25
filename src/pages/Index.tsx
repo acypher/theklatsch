@@ -198,6 +198,10 @@ const Index = () => {
   // Search handlers
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    // When starting a search, show all articles (not just unread)
+    if (query.trim()) {
+      setHideRead(false);
+    }
   };
 
   const handleClearSearch = () => {
