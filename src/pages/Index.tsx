@@ -200,7 +200,7 @@ const Index = () => {
     setSearchQuery(query);
     // When starting a search, show all articles (not just unread)
     if (query.trim()) {
-      setHideRead(false);
+      setFilterEnabled(false);
     }
   };
 
