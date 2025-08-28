@@ -43,7 +43,11 @@ export const getAllArticles = async (): Promise<Article[]> => {
     }
 
     if (articles && articles.length > 0) {
-      return articles.map(mapArticleFromDb);
+      console.log("DEBUG: About to map", articles.length, "articles");
+      const mappedArticles = articles.map(mapArticleFromDb);
+      console.log("DEBUG: Mapped articles count:", mappedArticles.length);
+      console.log("DEBUG: First mapped article:", mappedArticles[0]);
+      return mappedArticles;
     } else {
       console.log("No articles found for the current issue");
       return [];
