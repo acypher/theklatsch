@@ -47,14 +47,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profileLoading, setProfileLoading] = useState(true);
   const navigate = useNavigate();
 
-  const fetchProfile = async (userId: string) => {
+  // Cache management
+  const CACHE_KEY = 'auth_profile_cache';
+  
+  const getCachedProfile = (): Profile | null => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const setCachedProfile = (profile: Profile | null) => {
+    if (profile) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(profile));
+    } else {
+      localStorage.removeItem(CACHE_KEY);
+    }
+  };
+
+  const fetchProfile = async (userId: string, forceRefresh: boolean = false) => {
+    // Check cache first unless forcing refresh
+    if (!forceRefresh) {
+      const cachedProfile = getCachedProfile();
+      if (cachedProfile && cachedProfile.id === userId) {
+        setProfile(cachedProfile);
+        setProfileLoading(false);
+        return;
+      }
+    }
+
     setProfileLoading(true);
     try {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .maybeSingle(); // Using maybeSingle instead of single
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching profile:", error);
@@ -66,6 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           avatar_url: data.avatar_url
         };
         setProfile(profileData);
+        setCachedProfile(profileData);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -154,6 +185,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setSession(null);
       setProfile(null);
+      setCachedProfile(null); // Clear cache on sign out
       navigate("/auth");
     } catch (error) {
       console.error("Error signing out:", error);
@@ -194,6 +226,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       };
       
       setProfile(updatedProfile);
+      setCachedProfile(updatedProfile); // Update cache when profile is updated
       toast.success("Profile updated successfully");
       return { error: null, data: updatedProfile };
     } catch (error) {
