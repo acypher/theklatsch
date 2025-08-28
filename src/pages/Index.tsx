@@ -77,14 +77,8 @@ const Index = () => {
     const fetchArticles = async () => {
       setLoading(true);
       try {
-        console.log("DEBUG: About to call getAllArticles()");
         const articlesData = await getAllArticles();
-        console.log("DEBUG: getAllArticles returned:", articlesData?.length || 0, "articles");
-        if (articlesData && articlesData.length > 0) {
-          console.log("DEBUG: First article from getAllArticles:", articlesData[0]);
-        }
         setArticles(articlesData);
-        console.log("DEBUG: Articles state should now be set");
       } catch (error) {
         console.error("Error fetching articles:", error);
       } finally {

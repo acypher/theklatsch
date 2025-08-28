@@ -28,26 +28,17 @@ export const getAllArticles = async (): Promise<Article[]> => {
     
     // Apply month/year filter if available, but also include articles with "list" keyword
     if (month !== null && year !== null) {
-      const filterString = `and(month.eq.${month},year.eq.${year}),keywords.cs.{"list"}`;
-      console.log("DEBUG: Filter string:", filterString);
-      query = query.or(filterString);
+      query = query.or(`and(month.eq.${month},year.eq.${year}),keywords.cs.{"list"}`);
     }
     
-    console.log("DEBUG: About to execute query...");
     const { data: articles, error } = await query;
-    
-    console.log("DEBUG: Query result:", { articles: articles?.length || 0, error });
 
     if (error) {
       throw new Error(error.message);
     }
 
     if (articles && articles.length > 0) {
-      console.log("DEBUG: About to map", articles.length, "articles");
-      const mappedArticles = articles.map(mapArticleFromDb);
-      console.log("DEBUG: Mapped articles count:", mappedArticles.length);
-      console.log("DEBUG: First mapped article:", mappedArticles[0]);
-      return mappedArticles;
+      return articles.map(mapArticleFromDb);
     } else {
       console.log("No articles found for the current issue");
       return [];
