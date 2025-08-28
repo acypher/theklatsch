@@ -28,10 +28,15 @@ export const getAllArticles = async (): Promise<Article[]> => {
     
     // Apply month/year filter if available, but also include articles with "list" keyword
     if (month !== null && year !== null) {
-      query = query.or(`and(month.eq.${month},year.eq.${year}),keywords.cs.{"list"}`);
+      const filterString = `and(month.eq.${month},year.eq.${year}),keywords.cs.{"list"}`;
+      console.log("DEBUG: Filter string:", filterString);
+      query = query.or(filterString);
     }
     
+    console.log("DEBUG: About to execute query...");
     const { data: articles, error } = await query;
+    
+    console.log("DEBUG: Query result:", { articles: articles?.length || 0, error });
 
     if (error) {
       throw new Error(error.message);
