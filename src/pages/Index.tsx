@@ -45,7 +45,7 @@ const Index = () => {
     document.title = "The Klatsch";
     
     const loadCurrentIssue = async () => {
-      const issueData = await checkAndFixDisplayIssue();
+      const issueData = await getCurrentIssue();
       setCurrentIssue(issueData.text);
     };
 

@@ -27,7 +27,7 @@ export const getDefaultIssue = async (): Promise<string> => {
   }
 };
 
-export const checkAndFixDisplayIssue = async (): Promise<{ text: string, wasFixed: boolean }> => {
+export const getCurrentIssue = async (): Promise<{ text: string }> => {
   try {
     const { data, error } = await supabase
       .from('issue')
@@ -37,72 +37,56 @@ export const checkAndFixDisplayIssue = async (): Promise<{ text: string, wasFixe
     
     if (error) {
       console.error("Error fetching display issue:", error);
-      toast.error("Failed to fetch display issue");
-      return { text: await getLatestIssue(), wasFixed: false };
+      return { text: await getLatestIssue() };
     }
     
-    console.log("Current display issue value:", data?.value);
-    
-    let needsFix = false;
-    let currentText = await getLatestIssue(); // Dynamic fallback
-    
-    if (data?.value) {
-      try {
-        if (typeof data.value === 'string') {
-          currentText = data.value.replace(/^"|"$/g, '');
-        } else if (typeof data.value === 'object') {
-          const stringValue = JSON.stringify(data.value);
-          currentText = stringValue.replace(/^"|"$/g, '').replace(/\\"/g, '');
-        }
-        
-        // Only fix if the value is clearly invalid, not just different from latest
-        if (currentText.includes("Unknown") || currentText.includes('\\"') || 
-            currentText === "null" || currentText === "undefined" || 
-            currentText.trim() === "" || currentText === '""') {
-          needsFix = true;
-        }
-      } catch (e) {
-        console.error("Error parsing issue value:", e);
-        needsFix = true;
-      }
-    } else {
-      needsFix = true;
-    }
-    
-    if (needsFix) {
+    // If no data exists, set it to latest issue
+    if (!data?.value) {
       const latestIssue = await getLatestIssue();
-      console.log("Fixing display issue value...");
-      
-      const { error: updateError } = await supabase
+      await supabase
         .from('issue')
         .update({ value: JSON.stringify(latestIssue) })
         .eq('key', 'display_issue');
-      
-      if (updateError) {
-        console.error("Error updating display issue value:", updateError);
-        toast.error("Failed to fix display issue value");
-        return { text: latestIssue, wasFixed: false };
-      }
-      
-      toast.success("Display issue value has been fixed");
-      return { text: latestIssue, wasFixed: true };
+      return { text: latestIssue };
     }
     
-    return { text: currentText, wasFixed: false };
+    // Parse the stored value
+    let currentText: string;
+    try {
+      if (typeof data.value === 'string') {
+        currentText = data.value.replace(/^"|"$/g, '');
+      } else {
+        currentText = JSON.stringify(data.value).replace(/^"|"$/g, '').replace(/\\"/g, '');
+      }
+      
+      // Only return latest issue if the stored value is clearly corrupted
+      if (currentText.includes("Unknown") || currentText === "null" || 
+          currentText === "undefined" || currentText.trim() === "" || 
+          currentText === '""' || currentText.includes('\\"')) {
+        const latestIssue = await getLatestIssue();
+        await supabase
+          .from('issue')
+          .update({ value: JSON.stringify(latestIssue) })
+          .eq('key', 'display_issue');
+        return { text: latestIssue };
+      }
+      
+      return { text: currentText };
+    } catch (e) {
+      console.error("Error parsing issue value:", e);
+      const latestIssue = await getLatestIssue();
+      return { text: latestIssue };
+    }
   } catch (error) {
-    console.error("Unexpected error checking/fixing display issue:", error);
-    return { text: await getLatestIssue(), wasFixed: false };
+    console.error("Error in getCurrentIssue:", error);
+    return { text: await getLatestIssue() };
   }
 };
 
-export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
-  try {
-    const { text } = await checkAndFixDisplayIssue();
-    return { text };
-  } catch (error) {
-    console.error("Error in getCurrentIssue:", error);
-    return { text: await getLatestIssue() }; // Dynamic fallback
-  }
+// Legacy function for backward compatibility - now just calls getCurrentIssue
+export const checkAndFixDisplayIssue = async (): Promise<{ text: string, wasFixed: boolean }> => {
+  const result = await getCurrentIssue();
+  return { text: result.text, wasFixed: false };
 };
 
 export const updateCurrentMonthYear = async (month: number, year: number): Promise<boolean> => {
