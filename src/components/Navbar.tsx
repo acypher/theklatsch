@@ -77,24 +77,45 @@ const Navbar = ({
     }
   };
 
-  const handleIssueChange = async (issueText: string) => {
-    setLoading(true);
-    try {
-      const success = await setCurrentIssue(issueText);
-      if (success) {
-        toast.success(`Switched to ${issueText}`);
-        // Use location reload for more reliable state reset
-        setTimeout(() => {
-          window.location.reload();
-        }, 200);
+const handleIssueChange = async (issueText: string) => {
+  setLoading(true);
+  try {
+    const success = await setCurrentIssue(issueText);
+    if (success) {
+      toast.success(`Switched to ${issueText}`);
+      
+      // Wait a bit longer for the database update to propagate
+      // and verify the update before reloading
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Verify the update was successful before reloading
+      const { data, error } = await supabase
+        .from('issue')
+        .select('value')
+        .eq('key', 'display_issue')
+        .single();
+      
+      if (error) {
+        console.error("Error verifying issue update:", error);
+        toast.error("Failed to verify issue change");
+        return;
       }
-    } catch (error) {
-      console.error("Error changing issue:", error);
-      toast.error("Failed to change issue");
-    } finally {
-      setLoading(false);
+      
+      const currentValue = JSON.parse(data.value);
+      if (currentValue === issueText) {
+        window.location.reload();
+      } else {
+        console.error("Issue update verification failed:", currentValue, "vs", issueText);
+        toast.error("Issue change was not saved properly");
+      }
     }
-  };
+  } catch (error) {
+    console.error("Error changing issue:", error);
+    toast.error("Failed to change issue");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleArchiveClick = (archiveIssue: string | null) => {
     if (archiveIssue) {
