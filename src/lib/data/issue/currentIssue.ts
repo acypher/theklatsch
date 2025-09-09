@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getLatestIssue } from "./latestIssue";
 
 export const getDefaultIssue = async (): Promise<string> => {
   try {
@@ -7,22 +8,22 @@ export const getDefaultIssue = async (): Promise<string> => {
       .from('issue')
       .select('value')
       .eq('key', 'default_issue')
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error getting default issue:", error);
-      return "September 2025";  // Updated fallback value
+      return await getLatestIssue();  // Use latest issue as fallback
     }
     
     // Clean up the value for consistent format
     const cleanValue = typeof data?.value === 'string' 
       ? data.value.replace(/^"|"$/g, '')
-      : "September 2025";
+      : await getLatestIssue();
     
-    return cleanValue || "September 2025";
+    return cleanValue || await getLatestIssue();
   } catch (error) {
     console.error("Unexpected error retrieving default issue:", error);
-    return "September 2025";
+    return await getLatestIssue();
   }
 };
 
@@ -32,18 +33,18 @@ export const checkAndFixDisplayIssue = async (): Promise<{ text: string, wasFixe
       .from('issue')
       .select('value')
       .eq('key', 'display_issue')
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error fetching display issue:", error);
       toast.error("Failed to fetch display issue");
-      return { text: await getDefaultIssue(), wasFixed: false };
+      return { text: await getLatestIssue(), wasFixed: false };
     }
     
     console.log("Current display issue value:", data?.value);
     
     let needsFix = false;
-    let currentText = "September 2025"; // Default fallback
+    let currentText = await getLatestIssue(); // Dynamic fallback
     
     if (data?.value) {
       try {
@@ -67,28 +68,28 @@ export const checkAndFixDisplayIssue = async (): Promise<{ text: string, wasFixe
     }
     
     if (needsFix) {
-      const defaultIssue = await getDefaultIssue();
+      const latestIssue = await getLatestIssue();
       console.log("Fixing display issue value...");
       
       const { error: updateError } = await supabase
         .from('issue')
-        .update({ value: JSON.stringify(defaultIssue) })
+        .update({ value: JSON.stringify(latestIssue) })
         .eq('key', 'display_issue');
       
       if (updateError) {
         console.error("Error updating display issue value:", updateError);
         toast.error("Failed to fix display issue value");
-        return { text: defaultIssue, wasFixed: false };
+        return { text: latestIssue, wasFixed: false };
       }
       
       toast.success("Display issue value has been fixed");
-      return { text: defaultIssue, wasFixed: true };
+      return { text: latestIssue, wasFixed: true };
     }
     
     return { text: currentText, wasFixed: false };
   } catch (error) {
     console.error("Unexpected error checking/fixing display issue:", error);
-    return { text: await getDefaultIssue(), wasFixed: false };
+    return { text: await getLatestIssue(), wasFixed: false };
   }
 };
 
@@ -98,7 +99,7 @@ export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
     return { text };
   } catch (error) {
     console.error("Error in getCurrentIssue:", error);
-    return { text: "September 2025" }; // Default fallback
+    return { text: await getLatestIssue() }; // Dynamic fallback
   }
 };
 
@@ -137,7 +138,7 @@ export const checkDisplayIssueValue = async () => {
       .from('issue')
       .select('value')
       .eq('key', 'display_issue')
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error fetching display issue:", error);
