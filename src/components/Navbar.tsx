@@ -105,7 +105,8 @@ const handleIssueChange = async (issueText: string) => {
       const yearData = data.find(item => item.key === 'display_year');
       
       const parts = issueText.trim().split(' ');
-      const expectedMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].indexOf(parts[0]) + 1;
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const expectedMonth = monthNames.indexOf(parts[0]) + 1;
       const expectedYear = parseInt(parts[1]);
       
       if (issueData?.value === issueText && 
@@ -131,7 +132,6 @@ const handleIssueChange = async (issueText: string) => {
     setLoading(false);
   }
 };
-
 
   const handleArchiveClick = (archiveIssue: string | null) => {
     if (archiveIssue) {
