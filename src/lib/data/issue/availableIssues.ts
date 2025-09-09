@@ -96,14 +96,43 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
 
 export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
   try {
-    // Don't use JSON.stringify - store the string directly
-    const { error } = await supabase
-      .from('issue')
-      .update({ value: issueText })  // Changed from JSON.stringify(issueText)
-      .eq('key', 'display_issue');
+    // Parse the issueText to extract month and year
+    const parts = issueText.trim().split(' ');
+    if (parts.length !== 2) {
+      throw new Error(`Invalid issue format: ${issueText}`);
+    }
     
-    if (error) {
-      throw new Error(error.message);
+    const monthName = parts[0];
+    const year = parseInt(parts[1]);
+    
+    const monthNames = [
+      'January', 'February', 'March', 'April', 
+      'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December'
+    ];
+    
+    const month = monthNames.indexOf(monthName) + 1;
+    
+    if (month === 0 || isNaN(year)) {
+      throw new Error(`Invalid month or year in: ${issueText}`);
+    }
+    
+    // Update all three fields
+    const updates = [
+      { key: 'display_issue', value: issueText },
+      { key: 'display_month', value: month.toString() },
+      { key: 'display_year', value: year.toString() }
+    ];
+    
+    for (const update of updates) {
+      const { error } = await supabase
+        .from('issue')
+        .update({ value: update.value })
+        .eq('key', update.key);
+      
+      if (error) {
+        throw new Error(`Error updating ${update.key}: ${error.message}`);
+      }
     }
     
     return true;
