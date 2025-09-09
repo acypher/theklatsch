@@ -77,6 +77,7 @@ const Navbar = ({
     }
   };
 
+
 const handleIssueChange = async (issueText: string) => {
   setLoading(true);
   try {
@@ -133,6 +134,9 @@ const handleIssueChange = async (issueText: string) => {
   }
 };
 
+
+
+  
   const handleArchiveClick = (archiveIssue: string | null) => {
     if (archiveIssue) {
       // Treat archives like issue changes instead of opening URLs
