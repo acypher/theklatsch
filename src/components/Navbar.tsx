@@ -85,7 +85,6 @@ const handleIssueChange = async (issueText: string) => {
       toast.success(`Switched to ${issueText}`);
       
       // Wait a bit longer for the database update to propagate
-      // and verify the update before reloading
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Verify the update was successful before reloading
@@ -101,7 +100,8 @@ const handleIssueChange = async (issueText: string) => {
         return;
       }
       
-      const currentValue = JSON.parse(data.value);
+      // No JSON.parse needed since we're storing the string directly now
+      const currentValue = data.value;
       if (currentValue === issueText) {
         window.location.reload();
       } else {

@@ -96,11 +96,12 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
 
 export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
   try {
+    // Don't use JSON.stringify - store the string directly
     const { error } = await supabase
       .from('issue')
-      .update({ value: JSON.stringify(issueText) })
+      .update({ value: issueText })  // Changed from JSON.stringify(issueText)
       .eq('key', 'display_issue');
-
+    
     if (error) {
       throw new Error(error.message);
     }
