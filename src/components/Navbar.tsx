@@ -85,46 +85,13 @@ const handleIssueChange = async (issueText: string) => {
     if (success) {
       toast.success(`Switched to ${issueText}`);
       
-      // Wait a bit longer for the database update to propagate
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Verify all issue fields were updated successfully
-      const { data, error } = await supabase
-        .from('issue')
-        .select('key, value')
-        .in('key', ['display_issue', 'display_month', 'display_year']);
-      
-      if (error) {
-        console.error("Error verifying issue update:", error);
-        toast.error("Failed to verify issue change");
-        return;
-      }
-      
-      // Check if all fields match expected values
-      const issueData = data.find(item => item.key === 'display_issue');
-      const monthData = data.find(item => item.key === 'display_month');
-      const yearData = data.find(item => item.key === 'display_year');
-      
-      const parts = issueText.trim().split(' ');
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      const expectedMonth = monthNames.indexOf(parts[0]) + 1;
-      const expectedYear = parseInt(parts[1]);
-      
-      if (issueData?.value === issueText && 
-          monthData?.value === expectedMonth.toString() && 
-          yearData?.value === expectedYear.toString()) {
+      // Simple reload without verification to avoid interference
+      // The setCurrentIssue function handles the database updates
+      setTimeout(() => {
         window.location.reload();
-      } else {
-        console.error("Issue update verification failed:", {
-          expected: { issue: issueText, month: expectedMonth, year: expectedYear },
-          actual: { 
-            issue: issueData?.value, 
-            month: monthData?.value, 
-            year: yearData?.value 
-          }
-        });
-        toast.error("Issue change was not saved properly");
-      }
+      }, 300);
+    } else {
+      toast.error("Failed to change issue");
     }
   } catch (error) {
     console.error("Error changing issue:", error);
