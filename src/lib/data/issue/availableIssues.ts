@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getLatestIssue } from "./latestIssue";
+import { toast } from "sonner";
+import { format, addMonths } from "date-fns";
 
 export interface Issue {
   month: number;
@@ -9,97 +10,134 @@ export interface Issue {
 
 export const getAvailableIssues = async (): Promise<Issue[]> => {
   try {
-    // Get back issues from the database
-    const { data: backIssues, error } = await supabase
-      .from('back_issues')
-      .select('display_issue')
-      .order('id', { ascending: false });
+    // Get distinct month/year combinations from non-deleted articles
+    const { data: articlesData, error: articlesError } = await supabase
+      .from('articles')
+      .select('month, year')
+      .eq('deleted', false)
+      .not('month', 'is', null)
+      .not('year', 'is', null);
 
-    if (error) {
-      console.error("Error fetching back issues:", error);
-      return [];
+    if (articlesError) {
+      throw new Error(articlesError.message);
     }
 
-    const issues: Issue[] = [];
+    // Get back issues to include historical archives
+    const { data: backIssues, error: backIssuesError } = await supabase
+      .from('back_issues')
+      .select('display_issue');
+
+    if (backIssuesError) {
+      console.error("Error fetching back issues:", backIssuesError);
+    }
+
+    // Create a map to avoid duplicates
+    const issueMap = new Map<string, Issue>();
     
-    // Add back issues
-    if (backIssues) {
-      for (const backIssue of backIssues) {
-        if (backIssue.display_issue) {
-          const parts = backIssue.display_issue.trim().split(' ');
-          if (parts.length === 2) {
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            const monthIndex = monthNames.indexOf(parts[0]);
-            const year = parseInt(parts[1]);
-            
-            if (monthIndex !== -1 && !isNaN(year)) {
-              issues.push({
-                month: monthIndex + 1,
-                year: year,
+    // Convert month numbers to names
+    const monthNames = [
+      'January', 'February', 'March', 'April', 
+      'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December'
+    ];
+
+    // Process articles data
+    articlesData?.forEach(article => {
+      if (article.month && article.year) {
+        const key = `${article.month}-${article.year}`;
+        if (!issueMap.has(key)) {
+          const monthName = monthNames[article.month - 1] || 'Unknown';
+          issueMap.set(key, {
+            month: article.month,
+            year: article.year,
+            text: `${monthName} ${article.year}`
+          });
+        }
+      }
+    });
+
+    // Process back issues data
+    backIssues?.forEach(backIssue => {
+      if (backIssue.display_issue) {
+        const parts = backIssue.display_issue.trim().split(' ');
+        if (parts.length === 2) {
+          const monthName = parts[0];
+          const year = parseInt(parts[1]);
+          const month = monthNames.indexOf(monthName) + 1;
+          
+          if (month > 0 && !isNaN(year)) {
+            const key = `${month}-${year}`;
+            if (!issueMap.has(key)) {
+              issueMap.set(key, {
+                month,
+                year,
                 text: backIssue.display_issue
               });
             }
           }
         }
       }
-    }
+    });
 
-    // Remove duplicates and sort by year/month descending
-    const uniqueIssues = issues.filter((issue, index, self) => 
-      index === self.findIndex(i => i.text === issue.text)
-    );
-    
-    return uniqueIssues.sort((a, b) => {
-      if (a.year !== b.year) return b.year - a.year;
-      return b.month - a.month;
+    // Convert map to array and sort by year (descending) and month (descending)
+    return Array.from(issueMap.values()).sort((a, b) => {
+      if (a.year !== b.year) {
+        return b.year - a.year; // Most recent year first
+      }
+      return b.month - a.month; // Most recent month first
     });
   } catch (error) {
-    console.error("Error in getAvailableIssues:", error);
+    console.error("Error fetching available issues:", error);
+    toast.error("Failed to load available issues");
     return [];
   }
 };
 
 export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
   try {
+    // Parse the issueText to extract month and year
     const parts = issueText.trim().split(' ');
-    if (parts.length !== 2) return false;
+    if (parts.length !== 2) {
+      throw new Error(`Invalid issue format: ${issueText}`);
+    }
     
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const monthIndex = monthNames.indexOf(parts[0]);
+    const monthName = parts[0];
     const year = parseInt(parts[1]);
     
-    if (monthIndex === -1 || isNaN(year)) return false;
+    const monthNames = [
+      'January', 'February', 'March', 'April', 
+      'May', 'June', 'July', 'August',
+      'September', 'October', 'November', 'December'
+    ];
     
-    const month = monthIndex + 1;
+    const month = monthNames.indexOf(monthName) + 1;
     
-    // Update all three values in parallel
-    const [issueResult, monthResult, yearResult] = await Promise.all([
-      supabase
+    if (month === 0 || isNaN(year)) {
+      throw new Error(`Invalid month or year in: ${issueText}`);
+    }
+    
+    // Update all three fields
+    const updates = [
+      { key: 'display_issue', value: issueText },
+      { key: 'display_month', value: month.toString() },
+      { key: 'display_year', value: year.toString() }
+    ];
+    
+    for (const update of updates) {
+      const { error } = await supabase
         .from('issue')
-        .update({ value: issueText })
-        .eq('key', 'display_issue'),
-      supabase
-        .from('issue') 
-        .update({ value: month.toString() })
-        .eq('key', 'display_month'),
-      supabase
-        .from('issue')
-        .update({ value: year.toString() })
-        .eq('key', 'display_year')
-    ]);
-    
-    if (issueResult.error || monthResult.error || yearResult.error) {
-      console.error("Error updating issue values:", {
-        issue: issueResult.error,
-        month: monthResult.error, 
-        year: yearResult.error
-      });
-      return false;
+        .update({ value: update.value })
+        .eq('key', update.key);
+      
+      if (error) {
+        throw new Error(`Error updating ${update.key}: ${error.message}`);
+      }
     }
     
     return true;
   } catch (error) {
-    console.error("Error in setCurrentIssue:", error);
+    console.error("Error updating current issue:", error);
+    toast.error("Failed to update current issue");
     return false;
   }
 };
