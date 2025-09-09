@@ -11,18 +11,18 @@ export const getDefaultIssue = async (): Promise<string> => {
     
     if (error) {
       console.error("Error getting default issue:", error);
-      return "April 2025";  // Fallback value
+      return "September 2025";  // Updated fallback value
     }
     
     // Clean up the value for consistent format
     const cleanValue = typeof data?.value === 'string' 
       ? data.value.replace(/^"|"$/g, '')
-      : "April 2025";
+      : "September 2025";
     
-    return cleanValue || "April 2025";
+    return cleanValue || "September 2025";
   } catch (error) {
     console.error("Unexpected error retrieving default issue:", error);
-    return "April 2025";
+    return "September 2025";
   }
 };
 
@@ -43,7 +43,7 @@ export const checkAndFixDisplayIssue = async (): Promise<{ text: string, wasFixe
     console.log("Current display issue value:", data?.value);
     
     let needsFix = false;
-    let currentText = "April 2025"; // Default fallback
+    let currentText = "September 2025"; // Default fallback
     
     if (data?.value) {
       try {
@@ -98,7 +98,7 @@ export const getCurrentIssue = async (): Promise<{ text: string } | null> => {
     return { text };
   } catch (error) {
     console.error("Error in getCurrentIssue:", error);
-    return { text: "April 2025" }; // Default fallback
+    return { text: "September 2025" }; // Default fallback
   }
 };
 

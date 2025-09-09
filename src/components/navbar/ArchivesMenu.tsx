@@ -17,7 +17,7 @@ interface BackIssue {
 interface ArchivesMenuProps {
   backIssues: BackIssue[];
   loadingArchives: boolean;
-  onArchiveClick: (url: string | null) => void;
+  onArchiveClick: (issueText: string | null) => void;
 }
 
 const ArchivesMenu = ({ backIssues, loadingArchives, onArchiveClick }: ArchivesMenuProps) => {
@@ -44,7 +44,7 @@ const ArchivesMenu = ({ backIssues, loadingArchives, onArchiveClick }: ArchivesM
             <DropdownMenuItem
               key={issue.id}
               className="cursor-pointer"
-              onClick={() => onArchiveClick(issue.url)}
+              onClick={() => onArchiveClick(issue.display_issue)}
             >
               {issue.display_issue || `Archive ${issue.id}`}
             </DropdownMenuItem>

@@ -83,20 +83,25 @@ const Navbar = ({
       const success = await setCurrentIssue(issueText);
       if (success) {
         toast.success(`Switched to ${issueText}`);
-        window.location.reload();
+        // Force a hard reload to ensure clean state
+        setTimeout(() => {
+          window.location.href = window.location.pathname;
+        }, 100);
       }
     } catch (error) {
       console.error("Error changing issue:", error);
+      toast.error("Failed to change issue");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleArchiveClick = (url: string | null) => {
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+  const handleArchiveClick = (archiveIssue: string | null) => {
+    if (archiveIssue) {
+      // Treat archives like issue changes instead of opening URLs
+      handleIssueChange(archiveIssue);
     } else {
-      toast.warning("No URL available for this archive");
+      toast.warning("No issue information available for this archive");
     }
   };
 
