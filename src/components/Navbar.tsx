@@ -83,10 +83,10 @@ const Navbar = ({
       const success = await setCurrentIssue(issueText);
       if (success) {
         toast.success(`Switched to ${issueText}`);
-        // Force a hard reload to ensure clean state
+        // Use location reload for more reliable state reset
         setTimeout(() => {
-          window.location.href = window.location.pathname;
-        }, 100);
+          window.location.reload();
+        }, 200);
       }
     } catch (error) {
       console.error("Error changing issue:", error);

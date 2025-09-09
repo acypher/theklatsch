@@ -12,15 +12,24 @@ export interface Issue {
 export const getAvailableIssues = async (): Promise<Issue[]> => {
   try {
     // Get distinct month/year combinations from non-deleted articles
-    const { data, error } = await supabase
+    const { data: articlesData, error: articlesError } = await supabase
       .from('articles')
       .select('month, year')
       .eq('deleted', false)
       .not('month', 'is', null)
       .not('year', 'is', null);
 
-    if (error) {
-      throw new Error(error.message);
+    if (articlesError) {
+      throw new Error(articlesError.message);
+    }
+
+    // Get back issues to include historical archives
+    const { data: backIssues, error: backIssuesError } = await supabase
+      .from('back_issues')
+      .select('display_issue');
+
+    if (backIssuesError) {
+      console.error("Error fetching back issues:", backIssuesError);
     }
 
     // Create a map to avoid duplicates
@@ -33,21 +42,8 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
       'September', 'October', 'November', 'December'
     ];
 
-    // Add next month's issue as the first entry
-    const today = new Date();
-    const nextMonth = addMonths(today, 1);
-    const nextMonthNum = nextMonth.getMonth() + 1; // 1-12
-    const nextMonthYear = nextMonth.getFullYear();
-    const nextMonthName = format(nextMonth, 'MMMM');
-
-    issueMap.set(`${nextMonthNum}-${nextMonthYear}`, {
-      month: nextMonthNum,
-      year: nextMonthYear,
-      text: `${nextMonthName} ${nextMonthYear}`
-    });
-
-    // Process and deduplicate the issues
-    data.forEach(article => {
+    // Process articles data
+    articlesData?.forEach(article => {
       if (article.month && article.year) {
         const key = `${article.month}-${article.year}`;
         if (!issueMap.has(key)) {
@@ -57,6 +53,29 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
             year: article.year,
             text: `${monthName} ${article.year}`
           });
+        }
+      }
+    });
+
+    // Process back issues data
+    backIssues?.forEach(backIssue => {
+      if (backIssue.display_issue) {
+        const parts = backIssue.display_issue.trim().split(' ');
+        if (parts.length === 2) {
+          const monthName = parts[0];
+          const year = parseInt(parts[1]);
+          const month = monthNames.indexOf(monthName) + 1;
+          
+          if (month > 0 && !isNaN(year)) {
+            const key = `${month}-${year}`;
+            if (!issueMap.has(key)) {
+              issueMap.set(key, {
+                month,
+                year,
+                text: backIssue.display_issue
+              });
+            }
+          }
         }
       }
     });
