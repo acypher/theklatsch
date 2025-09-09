@@ -55,8 +55,10 @@ export const checkAndFixDisplayIssue = async (): Promise<{ text: string, wasFixe
           currentText = stringValue.replace(/^"|"$/g, '').replace(/\\"/g, '');
         }
         
+        // Only fix if the value is clearly invalid, not just different from latest
         if (currentText.includes("Unknown") || currentText.includes('\\"') || 
-            currentText === "null" || currentText === "undefined") {
+            currentText === "null" || currentText === "undefined" || 
+            currentText.trim() === "" || currentText === '""') {
           needsFix = true;
         }
       } catch (e) {
