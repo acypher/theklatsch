@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 
 const Auth = () => {
   const { user, signIn, resetPassword, loading } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -162,14 +163,24 @@ const Auth = () => {
                 >
                   {isSubmitting ? "Signing in..." : "Sign In"}
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  className="w-full text-sm" 
-                  onClick={() => setShowForgotPassword(true)}
-                >
-                  Forgot your password?
-                </Button>
+                <div className="flex gap-2 w-full">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    className="flex-1 text-sm" 
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Forgot your password?
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="flex-1 text-sm" 
+                    onClick={() => navigate("/")}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </CardFooter>
             </form>
           )}
