@@ -129,13 +129,23 @@ export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
     ];
     
     for (const update of updates) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('issue')
         .update({ value: update.value })
-        .eq('key', update.key);
+        .eq('key', update.key)
+        .select();
       
       if (error) {
         throw new Error(`Error updating ${update.key}: ${error.message}`);
+      }
+      
+      if (!data || data.length === 0) {
+        const { error: insertError } = await supabase
+          .from('issue')
+          .insert({ key: update.key, value: update.value });
+        if (insertError) {
+          throw new Error(`Error inserting ${update.key}: ${insertError.message}`);
+        }
       }
     }
     
