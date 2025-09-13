@@ -9,11 +9,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface ArticleContentProps {
   description: string;
   moreContent?: string | null;
+  summary?: string | null;
   sourceUrl?: string | null;
   onBackClick?: () => void;
 }
 
-const ArticleContent = ({ description, moreContent, sourceUrl, onBackClick }: ArticleContentProps) => {
+const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackClick }: ArticleContentProps) => {
   const navigate = useNavigate();
   
   // Markdown component renderer customization
@@ -61,6 +62,20 @@ const ArticleContent = ({ description, moreContent, sourceUrl, onBackClick }: Ar
                 components={customRenderers}
               >
                 {moreContent}
+              </ReactMarkdown>
+            </div>
+          </div>
+        )}
+        
+        {summary && (
+          <div className="mt-8 pt-8 border-t">
+            <h2 className="text-2xl font-bold mb-4">Summary</h2>
+            <div className="prose prose-lg max-w-none markdown-wrapper">
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]} 
+                components={customRenderers}
+              >
+                {summary}
               </ReactMarkdown>
             </div>
           </div>
