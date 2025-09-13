@@ -47,8 +47,8 @@ const ArticleForm = ({
         <KeywordsField />
         <ImageField />
         <SourceUrlField />
-        <SummaryField />
         <ContentField />
+        <SummaryField />
         
         <div className="pt-4 flex gap-2">
           <Button type="submit" disabled={isSubmitting} className="flex-1">
