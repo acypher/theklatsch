@@ -31,33 +31,55 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
   try {
     const { data, error } = await supabase
       .from('issue')
-      .select('value, updated_at, created_at')
+      .select('value')
       .eq('key', 'display_issue')
-      .order('updated_at', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(1)
       .maybeSingle();
     
     if (error) {
       console.error("Error fetching display issue:", error);
-      throw error;
+      return { text: await getLatestIssue() };
+    }
+    
+    // If no data exists, set it to latest issue
+    if (!data?.value) {
+      const latestIssue = await getLatestIssue();
+      await supabase
+        .from('issue')
+        .update({ value: JSON.stringify(latestIssue) })
+        .eq('key', 'display_issue');
+      return { text: latestIssue };
     }
     
     // Parse the stored value
-    if (data?.value) {
-      let currentText: string;
+    let currentText: string;
+    try {
       if (typeof data.value === 'string') {
         currentText = data.value.replace(/^"|"$/g, '');
       } else {
         currentText = JSON.stringify(data.value).replace(/^"|"$/g, '').replace(/\\"/g, '');
       }
+      
+      // Only return latest issue if the stored value is clearly corrupted
+      if (currentText.includes("Unknown") || currentText === "null" || 
+          currentText === "undefined" || currentText.trim() === "" || 
+          currentText === '""' || currentText.includes('\\"')) {
+        const latestIssue = await getLatestIssue();
+        await supabase
+          .from('issue')
+          .update({ value: JSON.stringify(latestIssue) })
+          .eq('key', 'display_issue');
+        return { text: latestIssue };
+      }
+      
       return { text: currentText };
+    } catch (e) {
+      console.error("Error parsing issue value:", e);
+      const latestIssue = await getLatestIssue();
+      return { text: latestIssue };
     }
-    
-    throw new Error("No display_issue found");
   } catch (error) {
     console.error("Error in getCurrentIssue:", error);
-    throw error;
+    return { text: await getLatestIssue() };
   }
 };
 
@@ -71,7 +93,7 @@ export const updateCurrentMonthYear = async (month: number, year: number): Promi
   try {
     const { error: monthError } = await supabase
       .from('issue')
-      .update({ value: month.toString(), updated_at: new Date().toISOString() })
+      .update({ value: JSON.stringify(month.toString()) })
       .eq('key', 'display_month');
     
     if (monthError) {
@@ -81,7 +103,7 @@ export const updateCurrentMonthYear = async (month: number, year: number): Promi
     
     const { error: yearError } = await supabase
       .from('issue')
-      .update({ value: year.toString(), updated_at: new Date().toISOString() })
+      .update({ value: JSON.stringify(year.toString()) })
       .eq('key', 'display_year');
     
     if (yearError) {

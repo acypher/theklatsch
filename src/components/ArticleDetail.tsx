@@ -185,7 +185,6 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
           <ArticleContent 
             description={article.description} 
             moreContent={article.more_content}
-            summary={article.summary}
             sourceUrl={article.sourceUrl}
             onBackClick={handleNavigateBack}
           />

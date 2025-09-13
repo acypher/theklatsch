@@ -6,16 +6,11 @@ import { parseIssueString } from "./issueHelper";
 import { getCurrentIssue } from "../issue/currentIssue";
 
 // Function to fetch all articles from Supabase
-export const getAllArticles = async (overrideIssue?: string): Promise<Article[]> => {
+export const getAllArticles = async (): Promise<Article[]> => {
   try {
-    let currentIssue: string;
-    
-    if (overrideIssue) {
-      currentIssue = overrideIssue;
-    } else {
-      const currentIssueData = await getCurrentIssue();
-      currentIssue = currentIssueData.text;
-    }
+    // Get current issue to filter articles
+    const currentIssueData = await getCurrentIssue();
+    const currentIssue = currentIssueData?.text || "April 2025";
     
     console.log("Current issue for filtering articles:", currentIssue);
     

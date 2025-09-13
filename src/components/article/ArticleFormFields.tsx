@@ -180,31 +180,6 @@ export const SourceUrlField = () => {
   );
 };
 
-export const SummaryField = () => {
-  const { control } = useFormContext<ArticleFormValues>();
-  
-  return (
-    <Controller
-      control={control}
-      name="summary"
-      render={({ field }) => (
-        <FieldWrapper 
-          name="summary" 
-          label="Summary"
-          description="A brief summary of the article in Markdown format"
-        >
-          <MarkdownEditor
-            value={field.value}
-            onChange={(value) => field.onChange(value || "")}
-            placeholder="Add a brief summary..."
-            height={150}
-          />
-        </FieldWrapper>
-      )}
-    />
-  );
-};
-
 export const ContentField = () => {
   const { control } = useFormContext<ArticleFormValues>();
   

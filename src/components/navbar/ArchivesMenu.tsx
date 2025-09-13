@@ -36,7 +36,7 @@ const ArchivesMenu = ({ backIssues, loadingArchives, onArchiveClick }: ArchivesM
           <ChevronDown className="h-4 w-4 ml-1" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56 bg-background max-h-96 overflow-y-auto">
+      <DropdownMenuContent align="start" className="w-56 bg-background">
         {loadingArchives ? (
           <DropdownMenuItem disabled>Loading archives...</DropdownMenuItem>
         ) : sortedBackIssues.length > 0 ? (

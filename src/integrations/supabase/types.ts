@@ -118,7 +118,6 @@ export type Database = {
           month: number | null
           more_content: string | null
           sourceurl: string | null
-          summary: string | null
           title: string
           user_id: string | null
           year: number | null
@@ -136,7 +135,6 @@ export type Database = {
           month?: number | null
           more_content?: string | null
           sourceurl?: string | null
-          summary?: string | null
           title: string
           user_id?: string | null
           year?: number | null
@@ -154,7 +152,6 @@ export type Database = {
           month?: number | null
           more_content?: string | null
           sourceurl?: string | null
-          summary?: string | null
           title?: string
           user_id?: string | null
           year?: number | null

@@ -8,7 +8,6 @@ export const articleFormSchema = z.object({
   keywords: z.string().optional().describe("Space-separated keywords"),
   imageUrl: z.string().optional(),
   sourceUrl: z.string().optional(),
-  summary: z.string().optional(),
   more_content: z.string().optional(),
 });
 
@@ -24,6 +23,5 @@ export const defaultFormValues: ArticleFormValues = {
   keywords: "",
   imageUrl: "",
   sourceUrl: "",
-  summary: "",
   more_content: ""
 };

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, addMonths } from "date-fns";
@@ -93,20 +94,16 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
   }
 };
 
-export const setCurrentIssue = async (issueString: string): Promise<boolean> => {
+export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
   try {
-    console.log("Setting current issue to:", issueString);
-    
-    // Parse the issueString to extract month and year
-    const cleaned = issueString.replace(/["']/g, '').trim();
-    const parts = cleaned.split(' ');
+    // Parse the issueText to extract month and year
+    const parts = issueText.trim().split(' ');
     if (parts.length !== 2) {
-      console.error("Invalid issue format:", issueString);
-      return false;
+      throw new Error(`Invalid issue format: ${issueText}`);
     }
     
-    const rawMonth = parts[0];
-    const year = parseInt(parts[1], 10);
+    const monthName = parts[0];
+    const year = parseInt(parts[1]);
     
     const monthNames = [
       'January', 'February', 'March', 'April', 
@@ -114,58 +111,34 @@ export const setCurrentIssue = async (issueString: string): Promise<boolean> => 
       'September', 'October', 'November', 'December'
     ];
     
-    const monthIndex = monthNames.findIndex(
-      (name) => name.toLowerCase() === rawMonth.toLowerCase()
-    );
-    const month = monthIndex + 1;
+    const month = monthNames.indexOf(monthName) + 1;
     
     if (month === 0 || isNaN(year)) {
-      console.error("Invalid month or year in:", issueString);
-      return false;
+      throw new Error(`Invalid month or year in: ${issueText}`);
     }
     
-    // Prepare updates for all three keys - store as plain strings, not JSON
+    // Update all three fields
     const updates = [
+      { key: 'display_issue', value: issueText },
       { key: 'display_month', value: month.toString() },
-      { key: 'display_year', value: year.toString() },
-      { key: 'display_issue', value: issueString }
+      { key: 'display_year', value: year.toString() }
     ];
-
-    // Execute all updates sequentially to ensure consistency
+    
     for (const update of updates) {
       const { error } = await supabase
         .from('issue')
-        .update({ value: update.value, updated_at: new Date().toISOString() })
+        .update({ value: update.value })
         .eq('key', update.key);
       
       if (error) {
-        console.error(`Error updating ${update.key}:`, error);
-        
-        // If the update failed, try inserting the record
-        const { error: insertError } = await supabase
-          .from('issue')
-          .insert({
-            key: update.key,
-            value: update.value
-          });
-        
-        if (insertError) {
-          console.error(`Error inserting ${update.key}:`, insertError);
-          return false;
-        }
+        throw new Error(`Error updating ${update.key}: ${error.message}`);
       }
     }
-
-    console.log("Successfully updated all issue values");
-    
-    // Dispatch custom event to notify UI
-    window.dispatchEvent(new CustomEvent('issue:changed', { 
-      detail: { issueText: issueString } 
-    }));
     
     return true;
   } catch (error) {
-    console.error("Error in setCurrentIssue:", error);
+    console.error("Error updating current issue:", error);
+    toast.error("Failed to update current issue");
     return false;
   }
 };

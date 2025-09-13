@@ -77,16 +77,37 @@ const Navbar = ({
     }
   };
 
-
 const handleIssueChange = async (issueText: string) => {
   setLoading(true);
   try {
     const success = await setCurrentIssue(issueText);
     if (success) {
       toast.success(`Switched to ${issueText}`);
-      // No reload needed - the custom event will update the UI
-    } else {
-      toast.error("Failed to change issue");
+      
+      // Wait a bit longer for the database update to propagate
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Verify the update was successful before reloading
+      const { data, error } = await supabase
+        .from('issue')
+        .select('value')
+        .eq('key', 'display_issue')
+        .single();
+      
+      if (error) {
+        console.error("Error verifying issue update:", error);
+        toast.error("Failed to verify issue change");
+        return;
+      }
+      
+      // No JSON.parse needed since we're storing the string directly now
+      const currentValue = data.value;
+      if (currentValue === issueText) {
+        window.location.reload();
+      } else {
+        console.error("Issue update verification failed:", currentValue, "vs", issueText);
+        toast.error("Issue change was not saved properly");
+      }
     }
   } catch (error) {
     console.error("Error changing issue:", error);
@@ -96,9 +117,6 @@ const handleIssueChange = async (issueText: string) => {
   }
 };
 
-
-
-  
   const handleArchiveClick = (archiveIssue: string | null) => {
     if (archiveIssue) {
       // Treat archives like issue changes instead of opening URLs

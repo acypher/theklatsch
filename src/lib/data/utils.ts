@@ -17,7 +17,6 @@ export const mapArticleFromDb = (article: any): Article => ({
   imageUrl: article.imageurl,
   sourceUrl: article.sourceurl,
   createdAt: article.created_at,
-  summary: article.summary,
   more_content: article.more_content,
   deleted: article.deleted,
   deletedAt: article.deleted_at,

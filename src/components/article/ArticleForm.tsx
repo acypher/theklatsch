@@ -11,7 +11,6 @@ import {
   KeywordsField,
   ImageField,
   SourceUrlField,
-  SummaryField,
   ContentField
 } from "@/components/article/ArticleFormFields";
 
@@ -48,7 +47,6 @@ const ArticleForm = ({
         <ImageField />
         <SourceUrlField />
         <ContentField />
-        <SummaryField />
         
         <div className="pt-4 flex gap-2">
           <Button type="submit" disabled={isSubmitting} className="flex-1">

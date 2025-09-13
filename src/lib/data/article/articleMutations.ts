@@ -31,7 +31,6 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       keywords: article.keywords,
       imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
-      summary: article.summary,
       more_content: article.more_content,
       user_id: (await supabase.auth.getUser()).data.user?.id,
       month: latestMonth,
@@ -98,7 +97,6 @@ export const updateArticle = async (
       keywords: article.keywords,
       imageurl: article.imageUrl,
       sourceurl: article.sourceUrl,
-      summary: article.summary,
       more_content: article.more_content,
       display_position: position
     };
