@@ -47,7 +47,7 @@ const ArticlesList = ({
     return (
       <div style={{ height: maxHeight }} className="overflow-auto h-full flex items-center justify-center">
         <div className="p-4 text-center text-muted-foreground">
-          <p className="text-sm">All articles in this issue have been read.</p>
+          <p className="text-sm">All articles in this issue have been marked with a check.</p>
           <p className="text-xs mt-1">Toggle the filter to see all articles.</p>
         </div>
       </div>
