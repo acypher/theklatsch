@@ -45,7 +45,7 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
       const latestIssue = await getLatestIssue();
       await supabase
         .from('issue')
-        .update({ value: JSON.stringify(latestIssue) })
+        .update({ value: latestIssue })
         .eq('key', 'display_issue');
       return { text: latestIssue };
     }
@@ -59,17 +59,21 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
         currentText = JSON.stringify(data.value).replace(/^"|"$/g, '').replace(/\\"/g, '');
       }
       
-      // Only return latest issue if the stored value is clearly corrupted
-      if (currentText.includes("Unknown") || currentText === "null" || 
-          currentText === "undefined" || currentText.trim() === "" || 
-          currentText === '""' || currentText.includes('\\"')) {
-        const latestIssue = await getLatestIssue();
-        await supabase
-          .from('issue')
-          .update({ value: JSON.stringify(latestIssue) })
-          .eq('key', 'display_issue');
-        return { text: latestIssue };
-      }
+       // Only return latest issue if the stored value is clearly corrupted
+       if (
+         currentText.includes("Unknown") ||
+         currentText === "null" ||
+         currentText === "undefined" ||
+         currentText.trim() === "" ||
+         currentText === '""'
+       ) {
+         const latestIssue = await getLatestIssue();
+         await supabase
+           .from('issue')
+           .update({ value: latestIssue })
+           .eq('key', 'display_issue');
+         return { text: latestIssue };
+       }
       
       return { text: currentText };
     } catch (e) {

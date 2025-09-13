@@ -120,12 +120,12 @@ export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
       throw new Error(`Invalid month or year in: ${issueText}`);
     }
     
-    // Normalize display text and update all three fields using JSON strings for consistency
+    // Normalize display text and update all three fields using plain strings
     const normalizedText = `${monthNames[monthIndex]} ${year}`;
     const updates = [
-      { key: 'display_issue', value: JSON.stringify(normalizedText) },
-      { key: 'display_month', value: JSON.stringify(month.toString()) },
-      { key: 'display_year', value: JSON.stringify(year.toString()) }
+      { key: 'display_issue', value: normalizedText },
+      { key: 'display_month', value: month.toString() },
+      { key: 'display_year', value: year.toString() }
     ];
     
     for (const update of updates) {
