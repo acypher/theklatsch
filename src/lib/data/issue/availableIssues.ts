@@ -95,14 +95,15 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
 
 export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
   try {
-    // Parse the issueText to extract month and year
-    const parts = issueText.trim().split(' ');
+    // Parse the issueText to extract month and year (robust to quotes/casing)
+    const cleaned = issueText.replace(/["']/g, '').trim();
+    const parts = cleaned.split(' ');
     if (parts.length !== 2) {
       throw new Error(`Invalid issue format: ${issueText}`);
     }
     
-    const monthName = parts[0];
-    const year = parseInt(parts[1]);
+    const rawMonth = parts[0];
+    const year = parseInt(parts[1], 10);
     
     const monthNames = [
       'January', 'February', 'March', 'April', 
@@ -110,7 +111,10 @@ export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
       'September', 'October', 'November', 'December'
     ];
     
-    const month = monthNames.indexOf(monthName) + 1;
+    const monthIndex = monthNames.findIndex(
+      (name) => name.toLowerCase() === rawMonth.toLowerCase()
+    );
+    const month = monthIndex + 1;
     
     if (month === 0 || isNaN(year)) {
       throw new Error(`Invalid month or year in: ${issueText}`);
