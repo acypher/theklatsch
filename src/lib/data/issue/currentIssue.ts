@@ -40,53 +40,24 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
     
     if (error) {
       console.error("Error fetching display issue:", error);
-      return { text: await getLatestIssue() };
-    }
-    
-    // If no data exists, set it to latest issue
-    if (!data?.value) {
-      const latestIssue = await getLatestIssue();
-      await supabase
-        .from('issue')
-        .update({ value: latestIssue, updated_at: new Date().toISOString() })
-        .eq('key', 'display_issue');
-      return { text: latestIssue };
+      throw error;
     }
     
     // Parse the stored value
-    let currentText: string;
-    try {
+    if (data?.value) {
+      let currentText: string;
       if (typeof data.value === 'string') {
         currentText = data.value.replace(/^"|"$/g, '');
       } else {
         currentText = JSON.stringify(data.value).replace(/^"|"$/g, '').replace(/\\"/g, '');
       }
-      
-       // Only return latest issue if the stored value is clearly corrupted
-       if (
-         currentText.includes("Unknown") ||
-         currentText === "null" ||
-         currentText === "undefined" ||
-         currentText.trim() === "" ||
-         currentText === '""'
-       ) {
-         const latestIssue = await getLatestIssue();
-         await supabase
-           .from('issue')
-           .update({ value: latestIssue, updated_at: new Date().toISOString() })
-           .eq('key', 'display_issue');
-         return { text: latestIssue };
-       }
-      
       return { text: currentText };
-    } catch (e) {
-      console.error("Error parsing issue value:", e);
-      const latestIssue = await getLatestIssue();
-      return { text: latestIssue };
     }
+    
+    throw new Error("No display_issue found");
   } catch (error) {
     console.error("Error in getCurrentIssue:", error);
-    return { text: await getLatestIssue() };
+    throw error;
   }
 };
 

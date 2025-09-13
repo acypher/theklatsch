@@ -93,13 +93,16 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
   }
 };
 
-export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
+export const setCurrentIssue = async (issueString: string): Promise<boolean> => {
   try {
-    // Parse the issueText to extract month and year (robust to quotes/casing)
-    const cleaned = issueText.replace(/["']/g, '').trim();
+    console.log("Setting current issue to:", issueString);
+    
+    // Parse the issueString to extract month and year
+    const cleaned = issueString.replace(/["']/g, '').trim();
     const parts = cleaned.split(' ');
     if (parts.length !== 2) {
-      throw new Error(`Invalid issue format: ${issueText}`);
+      console.error("Invalid issue format:", issueString);
+      return false;
     }
     
     const rawMonth = parts[0];
@@ -117,42 +120,52 @@ export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
     const month = monthIndex + 1;
     
     if (month === 0 || isNaN(year)) {
-      throw new Error(`Invalid month or year in: ${issueText}`);
+      console.error("Invalid month or year in:", issueString);
+      return false;
     }
     
-    // Normalize display text and update all three fields using plain strings
-    const normalizedText = `${monthNames[monthIndex]} ${year}`;
+    // Prepare updates for all three keys - store as plain strings, not JSON
     const updates = [
-      { key: 'display_issue', value: normalizedText },
       { key: 'display_month', value: month.toString() },
-      { key: 'display_year', value: year.toString() }
+      { key: 'display_year', value: year.toString() },
+      { key: 'display_issue', value: issueString }
     ];
-    
+
+    // Execute all updates sequentially to ensure consistency
     for (const update of updates) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('issue')
         .update({ value: update.value, updated_at: new Date().toISOString() })
-        .eq('key', update.key)
-        .select();
+        .eq('key', update.key);
       
       if (error) {
-        throw new Error(`Error updating ${update.key}: ${error.message}`);
-      }
-      
-      if (!data || data.length === 0) {
+        console.error(`Error updating ${update.key}:`, error);
+        
+        // If the update failed, try inserting the record
         const { error: insertError } = await supabase
           .from('issue')
-          .insert({ key: update.key, value: update.value });
+          .insert({
+            key: update.key,
+            value: update.value
+          });
+        
         if (insertError) {
-          throw new Error(`Error inserting ${update.key}: ${insertError.message}`);
+          console.error(`Error inserting ${update.key}:`, insertError);
+          return false;
         }
       }
     }
+
+    console.log("Successfully updated all issue values");
+    
+    // Dispatch custom event to notify UI
+    window.dispatchEvent(new CustomEvent('issue:changed', { 
+      detail: { issueText: issueString } 
+    }));
     
     return true;
   } catch (error) {
-    console.error("Error updating current issue:", error);
-    toast.error("Failed to update current issue");
+    console.error("Error in setCurrentIssue:", error);
     return false;
   }
 };

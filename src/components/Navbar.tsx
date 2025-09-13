@@ -84,12 +84,7 @@ const handleIssueChange = async (issueText: string) => {
     const success = await setCurrentIssue(issueText);
     if (success) {
       toast.success(`Switched to ${issueText}`);
-      
-      // Simple reload without verification to avoid interference
-      // The setCurrentIssue function handles the database updates
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
+      // No reload needed - the custom event will update the UI
     } else {
       toast.error("Failed to change issue");
     }

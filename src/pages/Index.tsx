@@ -45,11 +45,43 @@ const Index = () => {
     document.title = "The Klatsch";
     
     const loadCurrentIssue = async () => {
-      const issueData = await getCurrentIssue();
-      setCurrentIssue(issueData.text);
+      try {
+        const issueData = await getCurrentIssue();
+        setCurrentIssue(issueData.text);
+      } catch (error) {
+        console.error("Error loading current issue:", error);
+        setCurrentIssue("April 2025"); // Default fallback
+      }
     };
 
     loadCurrentIssue();
+    
+    // Listen for issue changes
+    const handleIssueChange = (event: CustomEvent) => {
+      const newIssue = event.detail.issueText;
+      setCurrentIssue(newIssue);
+      
+      // Refetch articles for the new issue
+      const fetchArticlesForNewIssue = async () => {
+        setLoading(true);
+        try {
+          const articlesData = await getAllArticles(newIssue);
+          setArticles(articlesData);
+        } catch (error) {
+          console.error("Error fetching articles for new issue:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchArticlesForNewIssue();
+    };
+    
+    window.addEventListener('issue:changed', handleIssueChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('issue:changed', handleIssueChange as EventListener);
+    };
   }, []);
 
   // Additional effect to ensure title is always correct on this page
