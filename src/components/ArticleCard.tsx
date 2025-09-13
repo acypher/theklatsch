@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useState, useEffect } from "react";
 import CommentDialog from "./comments/CommentDialog";
+import SummaryDialog from "./article/SummaryDialog";
 import { supabase } from "@/integrations/supabase/client";
 import ArticleCardHeader from "./article/ArticleCardHeader";
 import ArticleCardMeta from "./article/ArticleCardMeta";
@@ -21,6 +22,8 @@ interface ArticleCardProps {
 
 const ArticleCard = ({ article }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [currentArticle, setCurrentArticle] = useState(article);
   const [commentCount, setCommentCount] = useState(0);
   const [viewedCommentCount, setViewedCommentCount] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,8 +31,8 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   const { user, isAuthenticated } = useAuth();
   const { isRead, toggleReadState } = useArticleReads(article.id);
 
-  const isGif = article.imageUrl.toLowerCase().endsWith('.gif');
-  const hasVideo = isVideoUrl(article.sourceUrl);
+  const isGif = currentArticle.imageUrl.toLowerCase().endsWith('.gif');
+  const hasVideo = isVideoUrl(currentArticle.sourceUrl);
 
   const fetchCommentData = async () => {
     try {
@@ -111,6 +114,14 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     fetchCommentData();
   };
 
+  const handleSummaryClose = () => {
+    setShowSummary(false);
+  };
+
+  const handleSummaryUpdate = (updatedSummary: string) => {
+    setCurrentArticle(prev => ({ ...prev, summary: updatedSummary }));
+  };
+
   const customRenderers = {
     a: ({ node, ...props }: any) => (
       <span 
@@ -134,14 +145,14 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={article.id}>
-      <ReadCheckbox articleId={article.id} />
+    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={currentArticle.id}>
+      <ReadCheckbox articleId={currentArticle.id} />
 
       <Link 
-        to={`/article/${article.id}`} 
+        to={`/article/${currentArticle.id}`}
         className="block group"
         onClick={() => {
-          console.log(`Article clicked - articleId: ${article.id}, isAuthenticated: ${isAuthenticated}, isRead: ${isRead}`);
+          console.log(`Article clicked - articleId: ${currentArticle.id}, isAuthenticated: ${isAuthenticated}, isRead: ${isRead}`);
           // Note: Auto-marking is now handled by ArticleView component based on user preferences
           // No auto-marking here - let users control this via their preference setting
         }}
@@ -149,9 +160,9 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         <div className="hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg">
           <CardHeader className="p-0">
             <ArticleCardHeader 
-              articleId={article.id}
-              imageUrl={article.imageUrl}
-              title={article.title}
+              articleId={currentArticle.id}
+              imageUrl={currentArticle.imageUrl}
+              title={currentArticle.title}
               isGif={isGif}
               getImageUrl={getImageUrl}
             />
@@ -162,12 +173,12 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
                 remarkPlugins={[remarkGfm]}
                 components={customRenderers}
               >
-                {article.title}
+                {currentArticle.title}
               </ReactMarkdown>
             </div>
             <ArticleCardMeta 
-              author={article.author}
-              createdAt={article.createdAt}
+              author={currentArticle.author}
+              createdAt={currentArticle.createdAt}
               formatDate={formatDate}
             />
             <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper">
@@ -175,7 +186,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
                 remarkPlugins={[remarkGfm]}
                 components={customRenderers}
               >
-                {article.description}
+                {currentArticle.description}
               </ReactMarkdown>
             </div>
           </CardContent>
@@ -185,11 +196,16 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
       <CardContent className="pt-0">
 
         <ArticleCardFooter 
-          keywords={article.keywords}
+          keywords={currentArticle.keywords}
           onCommentsClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             setShowComments(true);
+          }}
+          onSummaryClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowSummary(true);
           }}
           isLoading={isLoading}
           hasError={hasError}
@@ -198,10 +214,18 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
         />
         {showComments && (
           <CommentDialog 
-            articleId={article.id} 
-            articleTitle={article.title}
+            articleId={currentArticle.id} 
+            articleTitle={currentArticle.title}
             isOpen={showComments}
             onClose={handleCommentsClose}
+          />
+        )}
+        {showSummary && (
+          <SummaryDialog 
+            article={currentArticle}
+            isOpen={showSummary}
+            onClose={handleSummaryClose}
+            onSummaryUpdate={handleSummaryUpdate}
           />
         )}
       </CardContent>
