@@ -78,44 +78,364 @@ const Navbar = ({
   };
 
 const handleIssueChange = async (issueText: string) => {
+
   setLoading(true);
+
   try {
-    const success = await setCurrentIssue(issueText);
-    if (success) {
-      toast.success(`Switched to ${issueText}`);
-      
+
+@@ -87,25 +581,40 @@
+
       // Wait a bit longer for the database update to propagate
+
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
+
+
+
       // Verify the update was successful before reloading
+
+
+      // Verify all issue fields were updated successfully
+
       const { data, error } = await supabase
+
         .from('issue')
+
+
         .select('value')
+
+
         .eq('key', 'display_issue')
+
+
         .single();
-      
+
+
+        .select('key, value')
+
+
+        .in('key', ['display_issue', 'display_month', 'display_year']);
+
+
+
       if (error) {
+
         console.error("Error verifying issue update:", error);
+
         toast.error("Failed to verify issue change");
+
         return;
+
       }
-      
+
+
+
+
       // No JSON.parse needed since we're storing the string directly now
+
+
       const currentValue = data.value;
+
+
       if (currentValue === issueText) {
+
+
+      // Check if all fields match expected values
+
+
+      const issueData = data.find(item => item.key === 'display_issue');
+
+
+      const monthData = data.find(item => item.key === 'display_month');
+
+
+      const yearData = data.find(item => item.key === 'display_year');
+
+
+      
+
+
+      const parts = issueText.trim().split(' ');
+
+
+      const expectedMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].indexOf(parts[0]) + 1;
+
+
+      const expectedYear = parseInt(parts[1]);
+
+
+      
+
+
+      if (issueData?.value === issueText && 
+
+
+          monthData?.value === expectedMonth.toString() && 
+
+
+          yearData?.value === expectedYear.toString()) {
+
         window.location.reload();
+
       } else {
+
+
         console.error("Issue update verification failed:", currentValue, "vs", issueText);
+
+
+        console.error("Issue update verification failed:", {
+
+
+          expected: { issue: issueText, month: expectedMonth, year: expectedYear },
+
+
+          actual: { 
+
+
+            issue: issueData?.value, 
+
+
+            month: monthData?.value, 
+
+
+            year: yearData?.value 
+
+
+          }
+
+
+        });
+
         toast.error("Issue change was not saved properly");
+
       }
+
     }
-  } catch (error) {
-    console.error("Error changing issue:", error);
-    toast.error("Failed to change issue");
-  } finally {
-    setLoading(false);
+
+@@ -117,110 +626,111 @@
+
   }
+
 };
+
+
+
+
+
+
+  const handleArchiveClick = (archiveIssue: string | null) => {
+
+    if (archiveIssue) {
+
+      // Treat archives like issue changes instead of opening URLs
+
+      handleIssueChange(archiveIssue);
+
+    } else {
+
+      toast.warning("No issue information available for this archive");
+
+    }
+
+  };
+
+
+
+  useEffect(() => {
+
+    const fetchBackIssues = async () => {
+
+      setLoadingArchives(true);
+
+      try {
+
+        const { data, error } = await supabase
+
+          .from('back_issues')
+
+          .select('id, display_issue, url')
+
+          .order('id', { ascending: false });
+
+
+
+        if (error) throw error;
+
+        setBackIssues(data || []);
+
+      } catch (error) {
+
+        console.error("Error fetching back issues:", error);
+
+        toast.error("Failed to load archives");
+
+      } finally {
+
+        setLoadingArchives(false);
+
+      }
+
+    };
+
+
+
+    fetchBackIssues();
+
+  }, []); // Removed the user dependency to load archives for all users
+
+
+
+  return (
+
+    <nav className="border-b shadow-sm py-4">
+
+      <div className="container mx-auto px-4 flex justify-between items-center">
+
+        <div className="flex items-center gap-4">
+
+          <Link 
+
+            to="/" 
+
+            className="text-2xl font-bold text-primary flex items-center gap-2"
+
+            onClick={handleLogoClick}
+
+          >
+
+            The Klatsch
+
+            {currentIssue && (
+
+              <IssueSelector 
+
+                currentIssue={currentIssue}
+
+                issues={issues}
+
+                loading={loading}
+
+                onIssueChange={handleIssueChange}
+
+              />
+
+            )}
+
+          </Link>
+
+
+
+          {/* Removed the user condition to show archives to all users */}
+
+          <ArchivesMenu
+
+            backIssues={backIssues}
+
+            loadingArchives={loadingArchives}
+
+            onArchiveClick={handleArchiveClick}
+
+          />
+
+        </div>
+
+
+
+        <div className="flex items-center gap-4">
+
+          {onSearch && onClearSearch && (
+
+            <div className={`${user ? 'flex-1 max-w-lg' : 'max-w-md'}`}>
+
+              <SearchBar
+
+                onSearch={onSearch}
+
+                onClear={onClearSearch}
+
+                currentQuery={searchQuery}
+
+                placeholder="Search articles..."
+
+              />
+
+            </div>
+
+          )}
+
+          {showReadFilter && user && onFilterToggle && (
+
+            <ReadFilter 
+
+              enabled={filterEnabled} 
+
+              onToggle={onFilterToggle}
+
+            />
+
+          )}
+
+          {user ? (
+
+            <>
+
+              <Button asChild variant="default">
+
+                <Link to="/create" className="flex items-center gap-2">
+
+                  <PenLine size={18} />
+
+                  Write Article
+
+                </Link>
+
+              </Button>
+
+
+
+              <UserMenu
+
+                profile={profile}
+
+                userEmail={user.email}
+
+                getUserInitials={getUserInitials}
+
+                signOut={signOut}
+
+              />
+
+            </>
+
+          ) : (
+
+            <Button asChild variant="default">
+
+              <Link to="/auth" className="flex items-center gap-2">
+
+                <LogIn size={18} />
+
+                Sign In
+
+              </Link>
+
+            </Button>
+
+          )}
+
+        </div>
+
+      </div>
+
+    </nav>
+
+  );
+
+};
+
+
+
+export default Navbar;
 
   const handleArchiveClick = (archiveIssue: string | null) => {
     if (archiveIssue) {
