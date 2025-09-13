@@ -66,6 +66,7 @@ const EditArticleForm = () => {
           keywords: keywordsString,
           imageUrl: article.imageUrl,
           sourceUrl: article.sourceUrl || "",
+          summary: article.summary || "",
           more_content: article.more_content || ""
         });
       } catch (error) {
@@ -112,6 +113,7 @@ const EditArticleForm = () => {
         keywords: keywordsArray,
         imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl,
+        summary: data.summary,
         more_content: data.more_content,
         updatedAt: new Date().toISOString()
       }, {

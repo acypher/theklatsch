@@ -11,6 +11,7 @@ import {
   KeywordsField,
   ImageField,
   SourceUrlField,
+  SummaryField,
   ContentField
 } from "@/components/article/ArticleFormFields";
 
@@ -46,6 +47,7 @@ const ArticleForm = ({
         <KeywordsField />
         <ImageField />
         <SourceUrlField />
+        <SummaryField />
         <ContentField />
         
         <div className="pt-4 flex gap-2">
