@@ -83,9 +83,6 @@ const SummaryDialog = ({ article, isOpen, onClose, onSummaryUpdate }: SummaryDia
         </DialogHeader>
         
         <div className="space-y-4">
-          <div className="text-sm text-muted-foreground font-medium">
-            {article.title}
-          </div>
           
           {isEditing ? (
             <div className="space-y-4">
