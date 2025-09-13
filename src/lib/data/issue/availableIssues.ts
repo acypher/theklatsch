@@ -131,7 +131,7 @@ export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
     for (const update of updates) {
       const { data, error } = await supabase
         .from('issue')
-        .update({ value: update.value })
+        .update({ value: update.value, updated_at: new Date().toISOString() })
         .eq('key', update.key)
         .select();
       
