@@ -16,7 +16,7 @@ const ReadFilter = ({ enabled, onToggle }: ReadFilterProps) => {
       className="text-xs whitespace-nowrap"
     >
       {enabled && <Filter size={16} className="mr-1" />}
-      {enabled ? "Showing checked" : "Showing all"}
+      {enabled ? "Showing unchecked" : "Showing all"}
     </Button>
   );
 };
