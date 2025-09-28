@@ -37,7 +37,6 @@ const ArticleCardFooter = ({
         size="sm" 
         onClick={onSummaryClick}
         className={`flex items-center gap-1 text-xs ${!hasSummary ? 'text-muted-foreground opacity-50' : ''}`}
-        disabled={!hasSummary}
       >
         <FileText className="h-4 w-4" />
         Summary
