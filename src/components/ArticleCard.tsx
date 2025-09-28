@@ -211,6 +211,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           hasError={hasError}
           commentCount={commentCount}
           viewedCommentCount={isAuthenticated ? viewedCommentCount : undefined}
+          hasSummary={!!currentArticle.summary?.trim()}
         />
         {showComments && (
           <CommentDialog 

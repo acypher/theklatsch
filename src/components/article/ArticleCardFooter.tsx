@@ -11,6 +11,7 @@ interface ArticleCardFooterProps {
   hasError: boolean;
   commentCount: number;
   viewedCommentCount?: number;
+  hasSummary: boolean;
 }
 
 const ArticleCardFooter = ({
@@ -20,7 +21,8 @@ const ArticleCardFooter = ({
   isLoading,
   hasError,
   commentCount,
-  viewedCommentCount
+  viewedCommentCount,
+  hasSummary
 }: ArticleCardFooterProps) => (
   <div className="space-y-3">
     <div className="flex flex-wrap gap-2">
@@ -34,7 +36,8 @@ const ArticleCardFooter = ({
         variant="ghost" 
         size="sm" 
         onClick={onSummaryClick}
-        className="flex items-center gap-1 text-xs"
+        className={`flex items-center gap-1 text-xs ${!hasSummary ? 'text-muted-foreground opacity-50' : ''}`}
+        disabled={!hasSummary}
       >
         <FileText className="h-4 w-4" />
         Summary
