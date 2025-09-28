@@ -50,19 +50,34 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
       return { text: latestIssue };
     }
     
-    // Parse the stored value
-    let currentText: string;
+    // Parse and normalize the stored JSONB string value reliably
     try {
-      if (typeof data.value === 'string') {
-        currentText = data.value.replace(/^"|"$/g, '');
-      } else {
-        currentText = JSON.stringify(data.value).replace(/^"|"$/g, '').replace(/\\"/g, '');
+      const raw = data.value as any;
+      let currentText: string | null = null;
+
+      if (typeof raw === 'string') {
+        // Try to JSON.parse if it's a JSON-string like "\"October 2025\""
+        try {
+          const parsed = JSON.parse(raw);
+          if (typeof parsed === 'string') currentText = parsed;
+        } catch {
+          currentText = raw;
+        }
       }
-      
-      // Only return latest issue if the stored value is clearly corrupted
-      if (currentText.includes("Unknown") || currentText === "null" || 
-          currentText === "undefined" || currentText.trim() === "" || 
-          currentText === '""' || currentText.includes('\\"')) {
+
+      if (currentText == null && raw != null) {
+        // Fallback: coerce to string (handles cases where value is returned as JSON already)
+        currentText = String(raw);
+      }
+
+      // Final cleanup: strip wrapping quotes and unescape any \" remnants
+      currentText = (currentText || '')
+        .replace(/^"+|"+$/g, '')
+        .replace(/\\"/g, '"')
+        .trim();
+
+      // Only fallback if clearly invalid after normalization
+      if (!currentText || currentText === 'null' || currentText === 'undefined' || currentText.includes('Unknown')) {
         const latestIssue = await getLatestIssue();
         await supabase
           .from('issue')
@@ -70,7 +85,7 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
           .eq('key', 'display_issue');
         return { text: latestIssue };
       }
-      
+
       return { text: currentText };
     } catch (e) {
       console.error("Error parsing issue value:", e);
