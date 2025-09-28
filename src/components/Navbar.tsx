@@ -156,11 +156,10 @@ const handleIssueChange = async (issueText: string) => {
           </Link>
           
           {/* Removed the user condition to show archives to all users */}
-          <ArchivesMenu
-            backIssues={backIssues}
-            loadingArchives={loadingArchives}
-            onArchiveClick={handleArchiveClick}
-          />
+            <ArchivesMenu 
+              backIssues={backIssues}
+              loadingArchives={loadingArchives}
+            />
         </div>
         
         <div className="flex items-center gap-4">

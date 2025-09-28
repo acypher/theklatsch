@@ -17,12 +17,17 @@ interface BackIssue {
 interface ArchivesMenuProps {
   backIssues: BackIssue[];
   loadingArchives: boolean;
-  onArchiveClick: (issueText: string | null) => void;
 }
 
-const ArchivesMenu = ({ backIssues, loadingArchives, onArchiveClick }: ArchivesMenuProps) => {
+const ArchivesMenu = ({ backIssues, loadingArchives }: ArchivesMenuProps) => {
   // Sort the backIssues array in ascending order (oldest first)
   const sortedBackIssues = [...backIssues].sort((a, b) => a.id - b.id);
+
+  const handleArchiveClick = (issue: BackIssue) => {
+    if (issue.url) {
+      window.open(issue.url, '_blank');
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -40,12 +45,12 @@ const ArchivesMenu = ({ backIssues, loadingArchives, onArchiveClick }: ArchivesM
         {loadingArchives ? (
           <DropdownMenuItem disabled>Loading archives...</DropdownMenuItem>
         ) : sortedBackIssues.length > 0 ? (
-          sortedBackIssues.map((issue) => (
-            <DropdownMenuItem
-              key={issue.id}
-              className="cursor-pointer"
-              onClick={() => onArchiveClick(issue.display_issue)}
-            >
+           sortedBackIssues.map((issue) => (
+             <DropdownMenuItem
+               key={issue.id}
+               className="cursor-pointer"
+               onClick={() => handleArchiveClick(issue)}
+             >
               {issue.display_issue || `Archive ${issue.id}`}
             </DropdownMenuItem>
           ))
