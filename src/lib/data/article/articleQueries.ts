@@ -18,6 +18,7 @@ export const getAllArticles = async (): Promise<Article[]> => {
     const { month, year } = parseIssueString(currentIssue);
     
     console.log(`Filtering articles by month: ${month}, year: ${year}`);
+    console.log(`Current issue used for filtering: ${currentIssue}`);
     
     let query = supabase
       .from('articles')
@@ -26,9 +27,13 @@ export const getAllArticles = async (): Promise<Article[]> => {
       .order('display_position', { ascending: true })
       .order('created_at', { ascending: false });
     
-    // Apply month/year filter if available, but also include articles with "list" keyword
+    // Apply month/year filter if available, and always include articles with "list" keyword
     if (month !== null && year !== null) {
+      // Show articles from the specific month/year OR articles with "list" keyword (which should always appear)
       query = query.or(`and(month.eq.${month},year.eq.${year}),keywords.cs.{"list"}`);
+    } else {
+      // If no specific month/year, show articles with "list" keyword only
+      query = query.contains('keywords', ['list']);
     }
     
     const { data: articles, error } = await query;
