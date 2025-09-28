@@ -106,9 +106,9 @@ export const getLatestIssue = async (): Promise<string> => {
 export const updateLatestIssue = async (month: number, year: number): Promise<boolean> => {
   try {
     // Update latest_month
-    const { error: monthError } = await supabase
+  const { error: monthError } = await supabase
       .from('issue')
-      .update({ value: JSON.stringify(month.toString()) })
+      .update({ value: month })
       .eq('key', 'latest_month');
     
     if (monthError) {
@@ -117,9 +117,9 @@ export const updateLatestIssue = async (month: number, year: number): Promise<bo
     }
     
     // Update latest_year
-    const { error: yearError } = await supabase
+  const { error: yearError } = await supabase
       .from('issue')
-      .update({ value: JSON.stringify(year.toString()) })
+      .update({ value: year })
       .eq('key', 'latest_year');
     
     if (yearError) {

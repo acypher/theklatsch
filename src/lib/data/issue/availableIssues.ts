@@ -116,11 +116,11 @@ export const setCurrentIssue = async (issueText: string): Promise<boolean> => {
       throw new Error(`Invalid month or year in: ${issueText}`);
     }
     
-    // Update all three fields - store as JSON to match schema
+    // Update all three fields - store as raw JSONB (no double-stringify)
     const updates = [
-      { key: 'display_issue', value: JSON.stringify(issueText) },
-      { key: 'display_month', value: JSON.stringify(month.toString()) },
-      { key: 'display_year', value: JSON.stringify(year.toString()) }
+      { key: 'display_issue', value: issueText },
+      { key: 'display_month', value: month },
+      { key: 'display_year', value: year }
     ];
     
     for (const update of updates) {

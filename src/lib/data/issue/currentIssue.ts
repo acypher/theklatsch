@@ -45,7 +45,7 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
       const latestIssue = await getLatestIssue();
       await supabase
         .from('issue')
-        .update({ value: JSON.stringify(latestIssue) })
+        .update({ value: latestIssue })
         .eq('key', 'display_issue');
       return { text: latestIssue };
     }
@@ -81,7 +81,7 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
         const latestIssue = await getLatestIssue();
         await supabase
           .from('issue')
-          .update({ value: JSON.stringify(latestIssue) })
+          .update({ value: latestIssue })
           .eq('key', 'display_issue');
         return { text: latestIssue };
       }
@@ -108,7 +108,7 @@ export const updateCurrentMonthYear = async (month: number, year: number): Promi
   try {
     const { error: monthError } = await supabase
       .from('issue')
-      .update({ value: JSON.stringify(month.toString()) })
+      .update({ value: month })
       .eq('key', 'display_month');
     
     if (monthError) {
@@ -118,7 +118,7 @@ export const updateCurrentMonthYear = async (month: number, year: number): Promi
     
     const { error: yearError } = await supabase
       .from('issue')
-      .update({ value: JSON.stringify(year.toString()) })
+      .update({ value: year })
       .eq('key', 'display_year');
     
     if (yearError) {
