@@ -22,15 +22,6 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
       throw new Error(articlesError.message);
     }
 
-    // Get back issues to include historical archives
-    const { data: backIssues, error: backIssuesError } = await supabase
-      .from('back_issues')
-      .select('display_issue');
-
-    if (backIssuesError) {
-      console.error("Error fetching back issues:", backIssuesError);
-    }
-
     // Create a map to avoid duplicates
     const issueMap = new Map<string, Issue>();
     
@@ -41,39 +32,19 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
       'September', 'October', 'November', 'December'
     ];
 
-    // Process articles data
+    // Process articles data only (current format issues from April 2025+)
     articlesData?.forEach(article => {
       if (article.month && article.year) {
-        const key = `${article.month}-${article.year}`;
-        if (!issueMap.has(key)) {
-          const monthName = monthNames[article.month - 1] || 'Unknown';
-          issueMap.set(key, {
-            month: article.month,
-            year: article.year,
-            text: `${monthName} ${article.year}`
-          });
-        }
-      }
-    });
-
-    // Process back issues data
-    backIssues?.forEach(backIssue => {
-      if (backIssue.display_issue) {
-        const parts = backIssue.display_issue.trim().split(' ');
-        if (parts.length === 2) {
-          const monthName = parts[0];
-          const year = parseInt(parts[1]);
-          const month = monthNames.indexOf(monthName) + 1;
-          
-          if (month > 0 && !isNaN(year)) {
-            const key = `${month}-${year}`;
-            if (!issueMap.has(key)) {
-              issueMap.set(key, {
-                month,
-                year,
-                text: backIssue.display_issue
-              });
-            }
+        // Only include issues from April 2025 onwards (current format)
+        if (article.year > 2025 || (article.year === 2025 && article.month >= 4)) {
+          const key = `${article.month}-${article.year}`;
+          if (!issueMap.has(key)) {
+            const monthName = monthNames[article.month - 1] || 'Unknown';
+            issueMap.set(key, {
+              month: article.month,
+              year: article.year,
+              text: `${monthName} ${article.year}`
+            });
           }
         }
       }
