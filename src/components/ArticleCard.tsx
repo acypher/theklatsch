@@ -145,7 +145,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   return (
-    <Card className={`h-full flex flex-col hover:shadow-md transition-shadow article-card relative ${currentArticle.private ? 'border-t-red-600 border-t-[6px]' : ''}`} data-article-id={currentArticle.id}>
+    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={currentArticle.id}>
       <ReadCheckbox articleId={currentArticle.id} />
 
       <Link 
@@ -168,7 +168,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             />
           </CardHeader>
           <CardContent className="pt-6 pb-0">
-            <div className="line-clamp-2 mb-2 prose-sm prose">
+            <div className={`line-clamp-2 mb-2 prose-sm prose ${currentArticle.private ? 'border border-red-600 p-2 rounded' : ''}`}>
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 components={customRenderers}

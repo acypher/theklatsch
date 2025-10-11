@@ -149,7 +149,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   }
 
   return (
-    <div className={`container mx-auto px-4 py-8 ${article.private ? 'border-t-red-600 border-t-[6px]' : ''}`}>
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <Button 
           variant="ghost" 
