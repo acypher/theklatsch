@@ -168,7 +168,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             />
           </CardHeader>
           <CardContent className="pt-6 pb-0">
-            <div className={`line-clamp-2 mb-2 prose-sm prose ${currentArticle.private ? 'border border-red-600 p-2 rounded' : ''}`}>
+            <div className={`line-clamp-2 mb-2 prose-sm prose ${currentArticle.private ? 'border-b-2 border-b-red-600 pb-1' : ''}`}>
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 components={customRenderers}

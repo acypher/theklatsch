@@ -25,7 +25,7 @@ const EditArticle = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className={`text-3xl font-bold mb-2 ${article?.private ? 'border border-red-600 p-2 rounded inline-block' : ''}`}>
+          <h1 className={`text-3xl font-bold mb-2 ${article?.private ? 'border-b-2 border-b-red-600 pb-1 inline-block' : ''}`}>
             Edit Article
           </h1>
           <p className="text-muted-foreground mb-8">

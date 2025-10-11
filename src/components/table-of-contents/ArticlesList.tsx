@@ -111,7 +111,7 @@ const ArticlesList = ({
                     </span>
                   )}
                 </span>
-                <span className={`${isArticleRead ? "text-muted-foreground/50" : ""} ${article.private ? 'border border-red-600 px-1 rounded' : ''}`}>
+                <span className={`${isArticleRead ? "text-muted-foreground/50" : ""} ${article.private ? 'border-b-2 border-b-red-600 pb-1' : ''}`}>
                   {article.title}
                 </span>
               </button>

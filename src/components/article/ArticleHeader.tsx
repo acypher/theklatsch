@@ -41,7 +41,7 @@ const ArticleHeader = ({
   return (
     <div className="mb-8">
       <div className="flex justify-between items-start mb-4">
-        <h1 className={`text-3xl md:text-4xl font-bold prose prose-headings ${article.private ? 'border border-red-600 p-2 rounded' : ''}`}>
+        <h1 className={`text-3xl md:text-4xl font-bold prose prose-headings ${article.private ? 'border-b-2 border-b-red-600 pb-1' : ''}`}>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={customRenderers}>
             {article.title}
           </ReactMarkdown>
