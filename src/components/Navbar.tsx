@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,10 +35,13 @@ const Navbar = ({
   searchQuery = ""
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
+  const location = useLocation();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
   const [backIssues, setBackIssues] = useState<any[]>([]);
   const [loadingArchives, setLoadingArchives] = useState(false);
+  
+  const hideWriteButton = location.pathname.startsWith('/article') || location.pathname.startsWith('/edit-article');
 
   useEffect(() => {
     const loadIssues = async () => {
@@ -181,12 +184,14 @@ const handleIssueChange = async (issueText: string) => {
           )}
           {user ? (
             <>
-              <Button asChild variant="default">
-                <Link to="/create" className="flex items-center gap-2">
-                  <PenLine size={18} />
-                  Write Article
-                </Link>
-              </Button>
+              {!hideWriteButton && (
+                <Button asChild variant="default">
+                  <Link to="/create" className="flex items-center gap-2">
+                    <PenLine size={18} />
+                    Write Article
+                  </Link>
+                </Button>
+              )}
               
               <UserMenu
                 profile={profile}
