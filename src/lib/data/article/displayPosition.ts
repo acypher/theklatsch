@@ -27,7 +27,15 @@ export const determineDisplayPosition = async (keywords: string[], month: number
       return 1;
     }
     
-    // RULE 2: If it has an "ott" tag
+    // RULE 2: If it has a "lists" tag, place it at the very end (after all other articles)
+    if (keywords.includes('lists')) {
+      const maxPosition = articles.length > 0 
+        ? Math.max(...articles.map(a => a.display_position || 0)) + 1 
+        : 1;
+      return maxPosition;
+    }
+    
+    // RULE 3: If it has an "ott" tag
     if (keywords.includes('ott')) {
       // Find the position after the last article with 'venue' or 'ott' tags
       let position = 1;
@@ -60,7 +68,7 @@ export const determineDisplayPosition = async (keywords: string[], month: number
       }
     }
     
-    // RULE 3: If it has a "tmm" tag
+    // RULE 4: If it has a "tmm" tag
     if (keywords.includes('tmm')) {
       // Find the position after the last article with 'venue', 'ott', or 'tmm' tags
       let position = 1;
@@ -101,11 +109,25 @@ export const determineDisplayPosition = async (keywords: string[], month: number
       }
     }
     
-    // RULE 4: Otherwise, put it in the last position
-    const maxPosition = articles.length > 0 
-      ? Math.max(...articles.map(a => a.display_position || 0)) + 1 
-      : 1;
-    return maxPosition;
+    // RULE 5: Otherwise, place it before any "lists" articles
+    // Find the first "lists" article position, or use max position if none exist
+    let firstListsPosition = null;
+    for (let i = 0; i < articles.length; i++) {
+      const articleKeywords = articles[i].keywords || [];
+      if (articleKeywords.includes('lists')) {
+        firstListsPosition = articles[i].display_position || (i + 1);
+        break;
+      }
+    }
+    
+    if (firstListsPosition !== null) {
+      return firstListsPosition;
+    } else {
+      const maxPosition = articles.length > 0 
+        ? Math.max(...articles.map(a => a.display_position || 0)) + 1 
+        : 1;
+      return maxPosition;
+    }
   } catch (error) {
     console.error("Error in determineDisplayPosition:", error);
     return 999; // Default to a high position if there's an error
