@@ -73,7 +73,8 @@ const CreateArticleForm = () => {
         imageUrl: data.imageUrl || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
         sourceUrl: data.sourceUrl,
         summary: data.summary,
-        more_content: data.more_content
+        more_content: data.more_content,
+        private: data.private || false
       });
 
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);

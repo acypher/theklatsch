@@ -145,7 +145,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
   };
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={currentArticle.id}>
+    <Card className={`h-full flex flex-col hover:shadow-md transition-shadow article-card relative ${currentArticle.private ? 'border-t-red-600 border-t-[6px]' : ''}`} data-article-id={currentArticle.id}>
       <ReadCheckbox articleId={currentArticle.id} />
 
       <Link 

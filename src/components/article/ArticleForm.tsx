@@ -12,7 +12,8 @@ import {
   ImageField,
   SourceUrlField,
   SummaryField,
-  ContentField
+  ContentField,
+  PrivateField
 } from "@/components/article/ArticleFormFields";
 
 interface ArticleFormProps {
@@ -49,6 +50,8 @@ const ArticleForm = ({
         <SourceUrlField />
         <ContentField />
         <SummaryField />
+        
+        <PrivateField />
         
         <div className="pt-4 flex gap-2">
           <Button type="submit" disabled={isSubmitting} className="flex-1">

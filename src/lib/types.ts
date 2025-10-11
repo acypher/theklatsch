@@ -14,4 +14,5 @@ export interface Article {
   deletedAt?: string | null;
   displayPosition?: number | null;
   updatedAt?: string;
+  private?: boolean;
 }

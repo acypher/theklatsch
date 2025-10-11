@@ -67,7 +67,8 @@ const EditArticleForm = () => {
           imageUrl: article.imageUrl,
           sourceUrl: article.sourceUrl || "",
           summary: article.summary || "",
-          more_content: article.more_content || ""
+          more_content: article.more_content || "",
+          private: article.private || false
         });
       } catch (error) {
         toast.error("Failed to load article");
@@ -115,7 +116,8 @@ const EditArticleForm = () => {
         sourceUrl: data.sourceUrl,
         summary: data.summary,
         more_content: data.more_content,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        private: data.private || false
       }, {
         preservePosition: !venueChanged && !ottChanged,
         originalPosition: originalPosition

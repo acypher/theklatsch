@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      address_markers: {
+        Row: {
+          address_number: string | null
+          created_at: string | null
+          id: string
+          name: string | null
+          row_number: number
+          updated_at: string | null
+        }
+        Insert: {
+          address_number?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          row_number: number
+          updated_at?: string | null
+        }
+        Update: {
+          address_number?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          row_number?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       article_reads: {
         Row: {
           article_id: string
@@ -117,6 +144,7 @@ export type Database = {
           keywords: string[]
           month: number | null
           more_content: string | null
+          private: boolean
           sourceurl: string | null
           summary: string | null
           title: string
@@ -135,6 +163,7 @@ export type Database = {
           keywords?: string[]
           month?: number | null
           more_content?: string | null
+          private?: boolean
           sourceurl?: string | null
           summary?: string | null
           title: string
@@ -153,6 +182,7 @@ export type Database = {
           keywords?: string[]
           month?: number | null
           more_content?: string | null
+          private?: boolean
           sourceurl?: string | null
           summary?: string | null
           title?: string
@@ -219,6 +249,13 @@ export type Database = {
             referencedRelation: "comments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "comment_views_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       comments: {
@@ -280,27 +317,6 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
-        }
-        Relationships: []
-      }
-      issue_recommendations: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          issue: string
-          updated_at: string | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string | null
-          issue: string
-          updated_at?: string | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string | null
-          issue?: string
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -381,12 +397,57 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      comments_safe: {
+        Row: {
+          article_id: string | null
+          author_name: string | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          article_id?: string | null
+          author_name?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          article_id?: string | null
+          author_name?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       ensure_display_issue: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      find_text_anywhere: {
+        Args: { pattern: string; schemas?: string[] }
+        Returns: {
+          column_name: string
+          pk_col: string
+          pk_value: string
+          row_ref: string
+          snippet: string
+          table_name: string
+        }[]
       }
       get_default_issue: {
         Args: Record<PropertyKey, never>

@@ -228,3 +228,28 @@ export const ContentField = () => {
     />
   );
 };
+
+export const PrivateField = () => {
+  const { control } = useFormContext<ArticleFormValues>();
+  
+  return (
+    <Controller
+      control={control}
+      name="private"
+      render={({ field }) => (
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="private"
+            checked={field.value || false}
+            onChange={(e) => field.onChange(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300"
+          />
+          <label htmlFor="private" className="text-sm font-medium">
+            Private (only visible to registered users)
+          </label>
+        </div>
+      )}
+    />
+  );
+};

@@ -10,6 +10,7 @@ export const articleFormSchema = z.object({
   sourceUrl: z.string().optional(),
   summary: z.string().optional(),
   more_content: z.string().optional(),
+  private: z.boolean().optional(),
 });
 
 export type ArticleFormValues = z.infer<typeof articleFormSchema>;
@@ -25,5 +26,6 @@ export const defaultFormValues: ArticleFormValues = {
   imageUrl: "",
   sourceUrl: "",
   summary: "",
-  more_content: ""
+  more_content: "",
+  private: false
 };

@@ -28,7 +28,13 @@ export function searchArticles(
   const searchTerm = options.caseSensitive ? query : query.toLowerCase();
   const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
 
+  // Filter out private articles from search results
   return articles.filter(article => {
+    // Exclude private articles from search
+    if (article.private) {
+      return false;
+    }
+
     const searchableText = [
       options.searchTitle ? article.title : "",
       options.searchContent ? article.description : "",
