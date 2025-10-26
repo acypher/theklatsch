@@ -41,9 +41,12 @@ const ArticleCardFooter = ({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            window.open(sourceUrl, '_blank', 'noopener,noreferrer');
+            if (sourceUrl) {
+              window.open(sourceUrl, '_blank', 'noopener,noreferrer');
+            }
           }}
-          className="flex items-center gap-1 text-xs"
+          disabled={!sourceUrl}
+          className={`flex items-center gap-1 text-xs ${!sourceUrl ? 'text-muted-foreground opacity-50 cursor-not-allowed' : ''}`}
         >
           <ExternalLink className="h-4 w-4" />
           Source
