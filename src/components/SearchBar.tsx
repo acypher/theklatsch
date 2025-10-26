@@ -60,7 +60,7 @@ const SearchBar = ({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="absolute left-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 z-10"
+                className={`absolute left-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 z-10 ${localWholeWords ? 'bg-pink-200 hover:bg-pink-300' : ''}`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
               </Button>
