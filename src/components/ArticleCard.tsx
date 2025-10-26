@@ -212,6 +212,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           commentCount={commentCount}
           viewedCommentCount={isAuthenticated ? viewedCommentCount : undefined}
           hasSummary={!!currentArticle.summary?.trim()}
+          sourceUrl={currentArticle.sourceUrl}
         />
         {showComments && (
           <CommentDialog 

@@ -1,7 +1,7 @@
 
 import KeywordBadge from "../KeywordBadge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, FileText } from "lucide-react";
+import { MessageSquare, FileText, ExternalLink } from "lucide-react";
 
 interface ArticleCardFooterProps {
   keywords: string[];
@@ -12,6 +12,7 @@ interface ArticleCardFooterProps {
   commentCount: number;
   viewedCommentCount?: number;
   hasSummary: boolean;
+  sourceUrl: string;
 }
 
 const ArticleCardFooter = ({
@@ -22,7 +23,8 @@ const ArticleCardFooter = ({
   hasError,
   commentCount,
   viewedCommentCount,
-  hasSummary
+  hasSummary,
+  sourceUrl
 }: ArticleCardFooterProps) => (
   <div className="space-y-3">
     <div className="flex flex-wrap gap-2">
@@ -32,17 +34,32 @@ const ArticleCardFooter = ({
     </div>
     
     <div className="flex justify-between items-center">
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={onSummaryClick}
-        className={`flex items-center gap-1 text-xs ${!hasSummary ? 'text-muted-foreground opacity-50' : ''}`}
-      >
-        <FileText className="h-4 w-4" />
-        Summary
-      </Button>
+      <div className="flex gap-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(sourceUrl, '_blank', 'noopener,noreferrer');
+          }}
+          className="flex items-center gap-1 text-xs"
+        >
+          <ExternalLink className="h-4 w-4" />
+          Source
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onSummaryClick}
+          className={`flex items-center gap-1 text-xs ${!hasSummary ? 'text-muted-foreground opacity-50' : ''}`}
+        >
+          <FileText className="h-4 w-4" />
+          Summary
+        </Button>
+      </div>
       
-      <Button 
+      <Button
         variant="ghost" 
         size="sm" 
         onClick={onCommentsClick}
