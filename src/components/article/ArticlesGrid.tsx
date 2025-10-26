@@ -91,7 +91,7 @@ const ArticlesGrid = ({
       {/* ToC column - always visible */}
       <div className="h-full">
         <TableOfContents 
-          articles={allArticles}
+          articles={articles}
           allArticles={allArticles} // Always pass the complete list for correct numbering
           onArticleClick={scrollToArticle}
           readArticles={readArticles}
