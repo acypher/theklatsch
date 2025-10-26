@@ -21,8 +21,11 @@ export const defaultSearchOptions: SearchOptions = {
 export function searchArticles(
   articles: Article[],
   query: string,
-  options: SearchOptions = defaultSearchOptions
+  _options: SearchOptions = defaultSearchOptions
 ): Article[] {
+  // Merge provided options with defaults to ensure all flags are set
+  const options: SearchOptions = { ...defaultSearchOptions, ..._options };
+
   if (!query.trim()) {
     return articles;
   }
