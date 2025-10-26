@@ -24,6 +24,7 @@ const Index = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [wholeWords, setWholeWords] = useState(false);
   const articleListRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
   const location = useLocation();
@@ -181,7 +182,7 @@ const Index = () => {
 
     // Apply search filter first - search across ALL articles, not just current issue
     if (searchQuery.trim()) {
-      result = searchArticles(allArticlesForSearch, searchQuery);
+      result = searchArticles(allArticlesForSearch, searchQuery, { wholeWords });
     } else {
       // If no search query, use current issue articles
       result = articles;
@@ -193,11 +194,12 @@ const Index = () => {
     }
 
     return result;
-  }, [articles, allArticlesForSearch, searchQuery, filterEnabled, readArticles, isAuthenticated]);
+  }, [articles, allArticlesForSearch, searchQuery, wholeWords, filterEnabled, readArticles, isAuthenticated]);
 
   // Search handlers
-  const handleSearch = (query: string) => {
+  const handleSearch = (query: string, wholeWordsEnabled: boolean) => {
     setSearchQuery(query);
+    setWholeWords(wholeWordsEnabled);
     // When starting a search, show all articles (not just unread)
     if (query.trim()) {
       setFilterEnabled(false);
@@ -206,6 +208,7 @@ const Index = () => {
 
   const handleClearSearch = () => {
     setSearchQuery("");
+    setWholeWords(false);
   };
 
   console.log("Index - All articles:", articles.map(a => a.id));
@@ -229,6 +232,8 @@ const Index = () => {
         onSearch={handleSearch}
         onClearSearch={handleClearSearch}
         searchQuery={searchQuery}
+        wholeWords={wholeWords}
+        onWholeWordsChange={setWholeWords}
       />
       <main className="container mx-auto px-4 py-8">
         <HomeLogo />

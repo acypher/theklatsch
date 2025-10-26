@@ -6,6 +6,7 @@ export interface SearchOptions {
   searchKeywords?: boolean;
   searchAuthor?: boolean;
   caseSensitive?: boolean;
+  wholeWords?: boolean;
 }
 
 export const defaultSearchOptions: SearchOptions = {
@@ -14,6 +15,7 @@ export const defaultSearchOptions: SearchOptions = {
   searchKeywords: true,
   searchAuthor: true,
   caseSensitive: false,
+  wholeWords: false,
 };
 
 export function searchArticles(
@@ -25,12 +27,44 @@ export function searchArticles(
     return articles;
   }
 
-  const searchTerm = options.caseSensitive ? query : query.toLowerCase();
-  const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
+  // Check for keyword-only search (key:xxx syntax)
+  const keywordMatch = query.match(/^key:(.+)$/i);
+  if (keywordMatch) {
+    const keywordQuery = keywordMatch[1].trim();
+    const keywordSearch = options.caseSensitive ? keywordQuery : keywordQuery.toLowerCase();
+    
+    return articles.filter(article => {
+      if (article.private) return false;
+      
+      return article.keywords.some(keyword => {
+        const kw = options.caseSensitive ? keyword : keyword.toLowerCase();
+        if (options.wholeWords) {
+          return kw === keywordSearch;
+        }
+        return kw.includes(keywordSearch);
+      });
+    });
+  }
+
+  // Extract quoted phrases and regular words
+  const phrases: string[] = [];
+  const regularWords: string[] = [];
+  
+  const phraseRegex = /"([^"]+)"/g;
+  let match;
+  let remainingQuery = query;
+  
+  while ((match = phraseRegex.exec(query)) !== null) {
+    phrases.push(match[1]);
+    remainingQuery = remainingQuery.replace(match[0], '');
+  }
+  
+  // Split remaining query into words
+  const words = remainingQuery.trim().split(/\s+/).filter(word => word.length > 0);
+  regularWords.push(...words);
 
   // Filter out private articles from search results
   return articles.filter(article => {
-    // Exclude private articles from search
     if (article.private) {
       return false;
     }
@@ -45,10 +79,28 @@ export function searchArticles(
       .join(" ")
       .toLowerCase();
 
-    // Check if all search words are found in the searchable text
-    return searchWords.every(word => 
-      searchableText.includes(options.caseSensitive ? word : word.toLowerCase())
-    );
+    // Check all quoted phrases match
+    const phrasesMatch = phrases.every(phrase => {
+      const searchPhrase = options.caseSensitive ? phrase : phrase.toLowerCase();
+      return searchableText.includes(searchPhrase);
+    });
+
+    if (!phrasesMatch) return false;
+
+    // Check all regular words match
+    const wordsMatch = regularWords.every(word => {
+      const searchWord = options.caseSensitive ? word : word.toLowerCase();
+      
+      if (options.wholeWords) {
+        // Use word boundary regex for whole word matching
+        const wordBoundaryRegex = new RegExp(`\\b${searchWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, options.caseSensitive ? '' : 'i');
+        return wordBoundaryRegex.test(searchableText);
+      }
+      
+      return searchableText.includes(searchWord);
+    });
+
+    return wordsMatch;
   });
 }
 

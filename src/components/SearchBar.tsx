@@ -2,27 +2,33 @@ import { useState } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface SearchBarProps {
-  onSearch: (query: string) => void;
+  onSearch: (query: string, wholeWords: boolean) => void;
   onClear: () => void;
   placeholder?: string;
   currentQuery?: string;
+  wholeWords?: boolean;
+  onWholeWordsChange?: (wholeWords: boolean) => void;
 }
 
 const SearchBar = ({ 
   onSearch, 
   onClear, 
   placeholder = "Search articles by title, content, or keywords...",
-  currentQuery = ""
+  currentQuery = "",
+  wholeWords = false,
+  onWholeWordsChange
 }: SearchBarProps) => {
   const [query, setQuery] = useState(currentQuery);
+  const [localWholeWords, setLocalWholeWords] = useState(wholeWords);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      onSearch(query.trim());
+      onSearch(query.trim(), localWholeWords);
     }
   };
 
@@ -31,8 +37,16 @@ const SearchBar = ({
     onClear();
   };
 
+  const handleWholeWordsChange = (checked: boolean) => {
+    setLocalWholeWords(checked);
+    onWholeWordsChange?.(checked);
+    if (query.trim()) {
+      onSearch(query.trim(), checked);
+    }
+  };
+
   return (
-    <div id="searchBox" className="p-2">
+    <div id="searchBox" className="p-2 space-y-2">
       <form onSubmit={handleSubmit}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -57,14 +71,31 @@ const SearchBar = ({
           )}
         </div>
       </form>
+      
+      <div className="flex items-center gap-2">
+        <Checkbox 
+          id="wholeWords" 
+          checked={localWholeWords}
+          onCheckedChange={handleWholeWordsChange}
+        />
+        <Label htmlFor="wholeWords" className="text-sm cursor-pointer">
+          Match whole words only
+        </Label>
+      </div>
+
       {currentQuery && (
-        <div className="mt-2 text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           Showing results for: <span className="font-medium">"{currentQuery}"</span>
           <Button variant="link" size="sm" onClick={handleClear} className="ml-2 p-0 h-auto">
             Clear search
           </Button>
         </div>
       )}
+      
+      <div className="text-xs text-muted-foreground space-y-1">
+        <div>💡 Use <code className="bg-muted px-1 rounded">key:word</code> to search only keywords</div>
+        <div>💡 Use <code className="bg-muted px-1 rounded">"exact phrase"</code> to search for exact phrases</div>
+      </div>
     </div>
   );
 };

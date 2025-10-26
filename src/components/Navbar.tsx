@@ -19,9 +19,11 @@ interface NavbarProps {
   showReadFilter?: boolean;
   filterEnabled?: boolean;
   onFilterToggle?: (enabled: boolean) => void;
-  onSearch?: (query: string) => void;
+  onSearch?: (query: string, wholeWords: boolean) => void;
   onClearSearch?: () => void;
   searchQuery?: string;
+  wholeWords?: boolean;
+  onWholeWordsChange?: (wholeWords: boolean) => void;
 }
 
 const Navbar = ({ 
@@ -32,7 +34,9 @@ const Navbar = ({
   onFilterToggle,
   onSearch,
   onClearSearch,
-  searchQuery = ""
+  searchQuery = "",
+  wholeWords = false,
+  onWholeWordsChange
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
@@ -173,6 +177,8 @@ const handleIssueChange = async (issueText: string) => {
                 onClear={onClearSearch}
                 currentQuery={searchQuery}
                 placeholder="Search articles..."
+                wholeWords={wholeWords}
+                onWholeWordsChange={onWholeWordsChange}
               />
             </div>
           )}
