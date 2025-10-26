@@ -87,6 +87,11 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
     fetchCommentData();
   }, [article.id, isAuthenticated, user]);
 
+  // Sync currentArticle with article prop when it changes
+  useEffect(() => {
+    setCurrentArticle(article);
+  }, [article]);
+
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
