@@ -157,7 +157,9 @@ const Index = () => {
               updatedAt: article.created_at, // Using created_at since updated_at doesn't exist
               displayPosition: article.display_position || 0,
               deleted: article.deleted || false,
-              sourceUrl: article.sourceurl || '' // Using sourceurl instead of url
+              sourceUrl: article.sourceurl || '', // Using sourceurl instead of url
+              private: article.private || false,
+              summary: article.summary || ''
             };
           });
 
