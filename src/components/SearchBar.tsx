@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SearchBarProps {
   onSearch: (query: string, wholeWords: boolean) => void;
@@ -50,8 +54,8 @@ const SearchBar = ({
     <div id="searchBox" className="p-2 space-y-2">
       <form onSubmit={handleSubmit}>
         <div className="relative">
-          <Popover>
-            <PopoverTrigger asChild>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 type="button"
                 variant="ghost"
@@ -60,8 +64,8 @@ const SearchBar = ({
               >
                 <SlidersHorizontal className="h-4 w-4" />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 bg-background" align="start">
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80 p-4 bg-background" align="start">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Checkbox 
@@ -80,8 +84,8 @@ const SearchBar = ({
                   <div>💡 Use <code className="bg-muted px-1 rounded">"exact phrase"</code> to search for exact phrases</div>
                 </div>
               </div>
-            </PopoverContent>
-          </Popover>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Search className="absolute left-9 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
