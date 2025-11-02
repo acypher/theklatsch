@@ -185,6 +185,12 @@ const Index = () => {
     // Apply search filter first - search across ALL articles, not just current issue
     if (searchQuery.trim()) {
       result = searchArticles(allArticlesForSearch, searchQuery, { wholeWords });
+      // Sort search results by creation date, most recent first
+      result = result.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA; // Descending order (newest first)
+      });
     } else {
       // If no search query, use current issue articles
       result = articles;
