@@ -30,7 +30,8 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
     isLoading, 
     fetchError, 
     fetchComments,
-    updateComment 
+    updateComment,
+    deleteComment 
   } = useComments(articleId, isOpen);
 
   const handleLoginRedirect = () => {
@@ -49,6 +50,16 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
       await updateComment(commentId, newContent);
     } catch (error) {
       console.error("Failed to update comment:", error);
+      // Error is already handled in the useComments hook with toast notifications
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      // Call the deleteComment function from useComments which deletes from the database
+      await deleteComment(commentId);
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
       // Error is already handled in the useComments hook with toast notifications
     }
   };
@@ -114,6 +125,7 @@ const CommentDialog = ({ articleId, articleTitle, isOpen, onClose }: CommentDial
             fetchError={fetchError}
             onRetry={fetchComments}
             onUpdateComment={handleUpdateComment}
+            onDeleteComment={handleDeleteComment}
           />
         </div>
       </DialogContent>

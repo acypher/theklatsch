@@ -132,6 +132,43 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     }
   };
 
+  const deleteComment = async (commentId: string) => {
+    try {
+      // Verify the user is authenticated
+      if (!user) {
+        throw new Error("You must be logged in to delete a comment");
+      }
+      
+      // Delete the comment from the database
+      const { error } = await supabase
+        .from("comments")
+        .delete()
+        .eq("id", commentId)
+        .eq("user_id", user.id); // Ensure the user can only delete their own comments
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update the local comments state to remove the deleted comment
+      setComments(currentComments => 
+        currentComments.filter(comment => comment.id !== commentId)
+      );
+      
+      // Show success toast notification
+      toast.success("Comment deleted", {
+        description: "Your comment was successfully deleted"
+      });
+    } catch (error: any) {
+      console.error("Error deleting comment:", error);
+      // Show error toast notification
+      toast.error("Delete failed", {
+        description: error.message || "Failed to delete comment. Please try again."
+      });
+      throw error;
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       fetchComments();
@@ -143,6 +180,7 @@ export const useComments = (articleId: string, isOpen: boolean) => {
     isLoading,
     fetchError,
     fetchComments,
-    updateComment
+    updateComment,
+    deleteComment
   };
 };

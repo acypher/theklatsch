@@ -24,6 +24,7 @@ interface CommentListProps {
   fetchError: string | null;
   onRetry: () => void;
   onUpdateComment?: (commentId: string, newContent: string) => Promise<void>;
+  onDeleteComment?: (commentId: string) => Promise<void>;
 }
 
 const CommentList = ({ 
@@ -31,7 +32,8 @@ const CommentList = ({
   isLoading, 
   fetchError, 
   onRetry,
-  onUpdateComment 
+  onUpdateComment,
+  onDeleteComment 
 }: CommentListProps) => {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>(initialComments);
@@ -85,6 +87,20 @@ const CommentList = ({
     }
   };
   
+  const handleDeleteComment = (commentId: string) => {
+    // Update the local state immediately for UI feedback
+    setComments(comments.filter(comment => comment.id !== commentId));
+    setEditingCommentId(null);
+    setEditingContent("");
+    
+    // Call the parent's handler if provided (for database deletion)
+    if (onDeleteComment) {
+      onDeleteComment(commentId).catch(error => {
+        console.error("Failed to delete comment:", error);
+      });
+    }
+  };
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -129,6 +145,7 @@ const CommentList = ({
               initialContent={editingContent}
               onCancel={handleCancelEdit}
               onUpdate={(newContent) => handleUpdateComment(comment.id, newContent)}
+              onDelete={() => handleDeleteComment(comment.id)}
             />
           ) : (
             <>
