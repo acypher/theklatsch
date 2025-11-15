@@ -57,7 +57,7 @@ const ArticleForm = ({
           <Button 
             type="submit" 
             disabled={isSubmitting} 
-            className="flex-1 opacity-50 cursor-not-allowed"
+            className="flex-1"
           >
             {isSubmitting ? (
               <>
