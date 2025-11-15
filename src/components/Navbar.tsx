@@ -191,7 +191,11 @@ const handleIssueChange = async (issueText: string) => {
           {user ? (
             <>
               {!hideWriteButton && (
-                <Button asChild variant="default" className="opacity-50 cursor-not-allowed">
+                <Button 
+                  asChild 
+                  variant="default" 
+                  className={location.pathname === '/create' ? 'opacity-50 cursor-not-allowed' : ''}
+                >
                   <Link to="/create" className="flex items-center gap-2">
                     <PenLine size={18} />
                     Write Article
