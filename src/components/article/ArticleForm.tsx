@@ -54,7 +54,11 @@ const ArticleForm = ({
         <PrivateField />
         
         <div className="pt-4 flex gap-2">
-          <Button type="submit" disabled={isSubmitting} className="flex-1">
+          <Button 
+            type="submit" 
+            disabled={isSubmitting} 
+            className="flex-1 opacity-50 cursor-not-allowed"
+          >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 

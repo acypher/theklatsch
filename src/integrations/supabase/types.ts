@@ -434,10 +434,7 @@ export type Database = {
       }
     }
     Functions: {
-      ensure_display_issue: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      ensure_display_issue: { Args: never; Returns: string }
       find_text_anywhere: {
         Args: { pattern: string; schemas?: string[] }
         Returns: {
@@ -449,10 +446,7 @@ export type Database = {
           table_name: string
         }[]
       }
-      get_default_issue: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_default_issue: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
