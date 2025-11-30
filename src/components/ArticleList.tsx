@@ -20,6 +20,7 @@ interface ArticleListProps {
   allArticles?: Article[]; // The complete list of articles
   currentIssue?: string; // Current issue prop
   searchQuery?: string;
+  onKeywordClick?: (keyword: string) => void;
 }
 
 const ArticleList = ({ 
@@ -33,7 +34,8 @@ const ArticleList = ({
   onFilterToggle,
   allArticles, // Original complete list of articles
   currentIssue,
-  searchQuery = ""
+  searchQuery = "",
+  onKeywordClick
 }: ArticleListProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
@@ -96,6 +98,7 @@ const ArticleList = ({
         onDrop={handleDrop}
         currentIssue={currentIssue}
         searchQuery={searchQuery}
+        onKeywordClick={onKeywordClick}
       />
 
       {hasChanges && (

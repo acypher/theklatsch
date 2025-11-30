@@ -219,6 +219,10 @@ const Index = () => {
     setWholeWords(false);
   };
 
+  const handleKeywordClick = (keyword: string) => {
+    handleSearch(`key:${keyword}`, false);
+  };
+
   console.log("Index - All articles:", articles.map(a => a.id));
   console.log("Index - Filtered articles:", filteredArticles.map(a => a.id));
 
@@ -260,6 +264,7 @@ const Index = () => {
                 onFilterToggle={setFilterEnabled}
                 currentIssue={currentIssue}
                 searchQuery={searchQuery}
+                onKeywordClick={handleKeywordClick}
               />
             </div>
             <StorefrontImage />

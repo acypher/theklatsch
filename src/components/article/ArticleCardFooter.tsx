@@ -13,6 +13,7 @@ interface ArticleCardFooterProps {
   viewedCommentCount?: number;
   hasSummary: boolean;
   sourceUrl: string;
+  onKeywordClick?: (keyword: string) => void;
 }
 
 const ArticleCardFooter = ({
@@ -24,12 +25,19 @@ const ArticleCardFooter = ({
   commentCount,
   viewedCommentCount,
   hasSummary,
-  sourceUrl
+  sourceUrl,
+  onKeywordClick
 }: ArticleCardFooterProps) => (
   <div className="space-y-3">
     <div className="flex flex-wrap gap-2">
       {keywords.map((keyword, index) => (
-        <KeywordBadge key={index} keyword={keyword} />
+        <KeywordBadge 
+          key={index} 
+          keyword={keyword}
+          onClick={() => {
+            onKeywordClick?.(keyword);
+          }}
+        />
       ))}
     </div>
     

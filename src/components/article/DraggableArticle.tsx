@@ -13,6 +13,7 @@ interface DraggableArticleProps {
   onDragEnd: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
+  onKeywordClick?: (keyword: string) => void;
 }
 
 const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({ 
@@ -23,7 +24,8 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
   onDragStart,
   onDragEnd,
   onDragOver,
-  onDrop
+  onDrop,
+  onKeywordClick
 }, ref) => {
   return (
     <div
@@ -44,7 +46,7 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>
         )}
-        <ArticleCard article={article} />
+        <ArticleCard article={article} onKeywordClick={onKeywordClick} />
       </div>
     </div>
   );
