@@ -11,6 +11,7 @@ import { HomeLogo } from "@/components/home/HomeLogo";
 import { MaintenancePage } from "@/components/home/MaintenancePage";
 import { StorefrontImage } from "@/components/home/StorefrontImage";
 import { useReadArticles } from "@/hooks/useReadArticles";
+import { useArticleFavorites } from "@/hooks/useArticleFavorites";
 import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
 import { mapArticleFromDb } from "@/lib/data/utils";
@@ -31,6 +32,8 @@ const Index = () => {
   const [searchParams] = useSearchParams();
 
   const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated);
+  const { allFavorites } = useArticleFavorites();
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   // Check if this is a password reset request
   const isPasswordReset = searchParams.has('access_token') && searchParams.has('refresh_token');
@@ -182,8 +185,17 @@ const Index = () => {
   const filteredArticles = React.useMemo(() => {
     let result: Article[];
 
-    // Apply search filter first - search across ALL articles, not just current issue
-    if (searchQuery.trim()) {
+    // Apply favorites filter first if enabled
+    if (showFavoritesOnly && isAuthenticated) {
+      result = allArticlesForSearch.filter(article => allFavorites.has(article.id));
+      // Sort favorites by creation date, most recent first
+      result = result.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+      });
+    } else if (searchQuery.trim()) {
+      // Apply search filter - search across ALL articles, not just current issue
       result = searchArticles(allArticlesForSearch, searchQuery, { wholeWords });
       // Sort search results by creation date, most recent first
       result = result.sort((a, b) => {
@@ -192,17 +204,17 @@ const Index = () => {
         return dateB - dateA; // Descending order (newest first)
       });
     } else {
-      // If no search query, use current issue articles
+      // If no search query or favorites filter, use current issue articles
       result = articles;
     }
 
-    // Then apply read filter if enabled
-    if (filterEnabled && isAuthenticated) {
+    // Then apply read filter if enabled (but not when showing favorites)
+    if (filterEnabled && isAuthenticated && !showFavoritesOnly) {
       result = result.filter(article => !readArticles.has(article.id));
     }
 
     return result;
-  }, [articles, allArticlesForSearch, searchQuery, wholeWords, filterEnabled, readArticles, isAuthenticated]);
+  }, [articles, allArticlesForSearch, searchQuery, wholeWords, filterEnabled, readArticles, isAuthenticated, showFavoritesOnly, allFavorites]);
 
   // Search handlers
   const handleSearch = (query: string, wholeWordsEnabled: boolean) => {
@@ -221,6 +233,15 @@ const Index = () => {
 
   const handleKeywordClick = (keyword: string) => {
     handleSearch(`key:${keyword}`, false);
+  };
+
+  const handleFavoritesToggle = () => {
+    setShowFavoritesOnly(prev => !prev);
+    // When enabling favorites, disable read filter and clear search
+    if (!showFavoritesOnly) {
+      setFilterEnabled(false);
+      handleClearSearch();
+    }
   };
 
   console.log("Index - All articles:", articles.map(a => a.id));
@@ -246,6 +267,8 @@ const Index = () => {
         searchQuery={searchQuery}
         wholeWords={wholeWords}
         onWholeWordsChange={setWholeWords}
+        showFavoritesOnly={showFavoritesOnly}
+        onFavoritesToggle={handleFavoritesToggle}
       />
       <main className="container mx-auto px-4 py-8">
         <HomeLogo />
