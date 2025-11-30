@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { PenLine, LogIn } from "lucide-react";
+import { PenLine, LogIn, Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Issue, getAvailableIssues, setCurrentIssue } from "@/lib/data/issue/availableIssues";
 import { toast } from "sonner";
@@ -24,6 +24,8 @@ interface NavbarProps {
   searchQuery?: string;
   wholeWords?: boolean;
   onWholeWordsChange?: (wholeWords: boolean) => void;
+  showFavoritesOnly?: boolean;
+  onFavoritesToggle?: () => void;
 }
 
 const Navbar = ({ 
@@ -36,7 +38,9 @@ const Navbar = ({
   onClearSearch,
   searchQuery = "",
   wholeWords = false,
-  onWholeWordsChange
+  onWholeWordsChange,
+  showFavoritesOnly = false,
+  onFavoritesToggle
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
@@ -170,6 +174,17 @@ const handleIssueChange = async (issueText: string) => {
         </div>
         
         <div className="flex items-center gap-4">
+          {user && onFavoritesToggle && (
+            <Button
+              variant={showFavoritesOnly ? "default" : "ghost"}
+              size="icon"
+              onClick={onFavoritesToggle}
+              title={showFavoritesOnly ? "Show all articles" : "Show favorites only"}
+              className="transition-colors"
+            >
+              <Heart className={`h-5 w-5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+            </Button>
+          )}
           {onSearch && onClearSearch && (
             <div className={`${user ? 'flex-1 max-w-lg' : 'max-w-md'}`}>
               <SearchBar

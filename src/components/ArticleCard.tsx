@@ -11,6 +11,7 @@ import ArticleCardHeader from "./article/ArticleCardHeader";
 import ArticleCardMeta from "./article/ArticleCardMeta";
 import ArticleCardFooter from "./article/ArticleCardFooter";
 import ReadCheckbox from './article/ReadCheckbox';
+import FavoriteButton from './article/FavoriteButton';
 import { useAuth } from "@/contexts/AuthContext";
 import VideoViewer from "./VideoViewer";
 import { isVideoUrl } from "@/lib/search";
@@ -153,6 +154,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={currentArticle.id}>
       <ReadCheckbox articleId={currentArticle.id} />
+      <FavoriteButton articleId={currentArticle.id} />
 
       <Link 
         to={`/article/${currentArticle.id}`}
