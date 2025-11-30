@@ -22,6 +22,7 @@ interface ArticlesGridProps {
   onDrop: (e: React.DragEvent<HTMLDivElement>, targetItem: Article) => void;
   currentIssue?: string;
   searchQuery?: string;
+  onKeywordClick?: (keyword: string) => void;
 }
 
 const ArticlesGrid = ({ 
@@ -39,7 +40,8 @@ const ArticlesGrid = ({
   onDragOver,
   onDrop,
   currentIssue,
-  searchQuery = ""
+  searchQuery = "",
+  onKeywordClick
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -116,6 +118,7 @@ const ArticlesGrid = ({
           onDragEnd={onDragEnd}
           onDragOver={onDragOver}
           onDrop={onDrop}
+          onKeywordClick={onKeywordClick}
           ref={(el) => {
             if (el) articleRefs.current.set(article.id, el);
           }}

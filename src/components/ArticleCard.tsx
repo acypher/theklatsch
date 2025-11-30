@@ -18,9 +18,10 @@ import { useArticleReads } from "@/hooks/useArticleReads";
 
 interface ArticleCardProps {
   article: Article;
+  onKeywordClick?: (keyword: string) => void;
 }
 
-const ArticleCard = ({ article }: ArticleCardProps) => {
+const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [currentArticle, setCurrentArticle] = useState(article);
@@ -218,6 +219,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           viewedCommentCount={isAuthenticated ? viewedCommentCount : undefined}
           hasSummary={!!currentArticle.summary?.trim()}
           sourceUrl={currentArticle.sourceUrl}
+          onKeywordClick={onKeywordClick}
         />
         {showComments && (
           <CommentDialog 
