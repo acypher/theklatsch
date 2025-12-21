@@ -12,6 +12,7 @@ interface Comment {
   id: string;
   content: string;
   author_name: string;
+  author_email?: string;
   created_at: string;
   article_id: string;
   user_id?: string;

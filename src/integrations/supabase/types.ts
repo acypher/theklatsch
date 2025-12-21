@@ -278,11 +278,19 @@ export type Database = {
             referencedRelation: "comments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "comment_views_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       comments: {
         Row: {
           article_id: string
+          author_email: string | null
           author_name: string
           content: string | null
           created_at: string
@@ -291,6 +299,7 @@ export type Database = {
         }
         Insert: {
           article_id: string
+          author_email?: string | null
           author_name?: string
           content?: string | null
           created_at?: string
@@ -299,6 +308,7 @@ export type Database = {
         }
         Update: {
           article_id?: string
+          author_email?: string | null
           author_name?: string
           content?: string | null
           created_at?: string
@@ -390,27 +400,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
       vars: {
         Row: {
           created_at: string
@@ -437,7 +426,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      comments_safe: {
+        Row: {
+          article_id: string | null
+          author_name: string | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          article_id?: string | null
+          author_name?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          article_id?: string | null
+          author_name?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       ensure_display_issue: { Args: never; Returns: string }
@@ -453,16 +476,9 @@ export type Database = {
         }[]
       }
       get_default_issue: { Args: never; Returns: string }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -589,8 +605,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "moderator", "user"],
-    },
+    Enums: {},
   },
 } as const
