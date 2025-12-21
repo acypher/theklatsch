@@ -20,10 +20,19 @@ const IssueSelector = ({ currentIssue, issues, loading, onIssueChange }: IssueSe
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button 
-          id="currentIssue" 
+        <button
+          id="currentIssue"
           className="text-2xl font-bold text-primary ml-2 flex items-center"
           disabled={loading}
+          onClick={(e) => {
+            // Prevent the surrounding <Link> in Navbar from navigating
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onPointerDownCapture={(e) => {
+            // Ensure Radix trigger works without triggering parent navigation
+            e.stopPropagation();
+          }}
         >
           {currentIssue}
           <ChevronDown className="h-5 w-5 ml-1" />
@@ -35,7 +44,11 @@ const IssueSelector = ({ currentIssue, issues, loading, onIssueChange }: IssueSe
             <DropdownMenuItem
               key={`${issue.month}-${issue.year}`}
               className="cursor-pointer"
-              onClick={() => onIssueChange(issue.text)}
+              onSelect={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                await onIssueChange(issue.text);
+              }}
             >
               {issue.text}
             </DropdownMenuItem>
