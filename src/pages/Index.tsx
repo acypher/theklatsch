@@ -15,7 +15,7 @@ import { useArticleFavorites } from "@/hooks/useArticleFavorites";
 import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
 import { mapArticleFromDb } from "@/lib/data/utils";
-import { LogoUploader } from "@/components/LogoUploader";
+
 import TableOfContents from "@/components/TableOfContents"; //Import TableOfContents Component
 import PasswordReset from "@/components/auth/PasswordReset";
 
