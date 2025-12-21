@@ -278,19 +278,11 @@ export type Database = {
             referencedRelation: "comments"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "comment_views_comment_id_fkey"
-            columns: ["comment_id"]
-            isOneToOne: false
-            referencedRelation: "comments_safe"
-            referencedColumns: ["id"]
-          },
         ]
       }
       comments: {
         Row: {
           article_id: string
-          author_email: string | null
           author_name: string
           content: string | null
           created_at: string
@@ -299,7 +291,6 @@ export type Database = {
         }
         Insert: {
           article_id: string
-          author_email?: string | null
           author_name?: string
           content?: string | null
           created_at?: string
@@ -308,7 +299,6 @@ export type Database = {
         }
         Update: {
           article_id?: string
-          author_email?: string | null
           author_name?: string
           content?: string | null
           created_at?: string
@@ -426,41 +416,7 @@ export type Database = {
       }
     }
     Views: {
-      comments_safe: {
-        Row: {
-          article_id: string | null
-          author_name: string | null
-          content: string | null
-          created_at: string | null
-          id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          article_id?: string | null
-          author_name?: string | null
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          article_id?: string | null
-          author_name?: string | null
-          content?: string | null
-          created_at?: string | null
-          id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comments_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "articles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       ensure_display_issue: { Args: never; Returns: string }
