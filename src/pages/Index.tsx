@@ -20,7 +20,8 @@ import TableOfContents from "@/components/TableOfContents"; //Import TableOfCont
 import PasswordReset from "@/components/auth/PasswordReset";
 
 const Index = () => {
-  const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
+  const [currentIssue, setCurrentIssue] = useState<string | null>(null);
+  const [issueLoading, setIssueLoading] = useState(true);
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
@@ -49,8 +50,12 @@ const Index = () => {
     document.title = "The Klatsch";
     
     const loadCurrentIssue = async () => {
-      const issueData = await getCurrentIssue();
-      setCurrentIssue(issueData.text);
+      try {
+        const issueData = await getCurrentIssue();
+        setCurrentIssue(issueData.text);
+      } finally {
+        setIssueLoading(false);
+      }
     };
 
     loadCurrentIssue();
@@ -249,7 +254,15 @@ const Index = () => {
 
   const [hideRead, setHideRead] = useState(false);
   const [commentCounts, setCommentCounts] = useState({});
-  const [displayIssue, setDisplayIssue] = useState("April 2025");
+
+  // Show loading state until issue is fetched
+  if (issueLoading || currentIssue === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
     // Example handler (replace with your actual implementation)
     const handleArticleClick = (articleId: string) => {
