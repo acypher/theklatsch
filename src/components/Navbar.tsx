@@ -156,22 +156,21 @@ const handleIssueChange = async (issueText: string) => {
             onClick={handleLogoClick}
           >
             The Klatsch
+            {currentIssue && (
+              <IssueSelector 
+                currentIssue={currentIssue}
+                issues={issues}
+                loading={loading}
+                onIssueChange={handleIssueChange}
+              />
+            )}
           </Link>
-
-          {currentIssue && (
-            <IssueSelector 
-              currentIssue={currentIssue}
-              issues={issues}
-              loading={loading}
-              onIssueChange={handleIssueChange}
-            />
-          )}
           
           {/* Removed the user condition to show archives to all users */}
-          <ArchivesMenu 
-            backIssues={backIssues}
-            loadingArchives={loadingArchives}
-          />
+            <ArchivesMenu 
+              backIssues={backIssues}
+              loadingArchives={loadingArchives}
+            />
         </div>
         
         <div className="flex items-center gap-4">
