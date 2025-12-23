@@ -9,7 +9,7 @@ export const getLatestMonth = async (): Promise<number> => {
       .from('issue')
       .select('value')
       .eq('key', 'latest_month')
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error fetching latest month:", error);
@@ -42,7 +42,7 @@ export const getLatestYear = async (): Promise<number> => {
       .from('issue')
       .select('value')
       .eq('key', 'latest_year')
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error fetching latest year:", error);
@@ -75,7 +75,7 @@ export const getLatestIssue = async (): Promise<string> => {
       .from('issue')
       .select('value')
       .eq('key', 'latest_issue')
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error fetching latest issue:", error);
