@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PenLine, LogIn, Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Issue, getAvailableIssues, setCurrentIssue } from "@/lib/data/issue/availableIssues";
+import { Issue, getAvailableIssues } from "@/lib/data/issue/availableIssues";
 import { toast } from "sonner";
 import ReadFilter from "./article/ReadFilter";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,18 +92,16 @@ const Navbar = ({
 const handleIssueChange = async (issueText: string) => {
   setLoading(true);
   try {
-    const success = await setCurrentIssue(issueText);
-    if (success) {
-      toast.success(`Switched to ${issueText}`);
-      
-      // Simple reload without verification to avoid interference
-      // The setCurrentIssue function handles the database updates
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
-    } else {
-      toast.error("Failed to change issue");
-    }
+    // Issue selection is a *viewer preference*, not a global setting.
+    // Store locally so it works for both signed-in and signed-out users.
+    localStorage.setItem('selected_issue', issueText);
+
+    toast.success(`Switched to ${issueText}`);
+
+    // Reload so all data-fetching paths pick up the new selection.
+    setTimeout(() => {
+      window.location.reload();
+    }, 150);
   } catch (error) {
     console.error("Error changing issue:", error);
     toast.error("Failed to change issue");
@@ -156,15 +154,15 @@ const handleIssueChange = async (issueText: string) => {
             onClick={handleLogoClick}
           >
             The Klatsch
-            {currentIssue && (
-              <IssueSelector 
-                currentIssue={currentIssue}
-                issues={issues}
-                loading={loading}
-                onIssueChange={handleIssueChange}
-              />
-            )}
           </Link>
+          {currentIssue && (
+            <IssueSelector 
+              currentIssue={currentIssue}
+              issues={issues}
+              loading={loading}
+              onIssueChange={handleIssueChange}
+            />
+          )}
           
           {/* Removed the user condition to show archives to all users */}
             <ArchivesMenu 

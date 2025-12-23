@@ -6,12 +6,13 @@ import { parseIssueString } from "./issueHelper";
 import { getCurrentIssue } from "../issue/currentIssue";
 
 // Function to fetch all articles from Supabase
-export const getAllArticles = async (): Promise<Article[]> => {
+export const getAllArticles = async (issueText?: string): Promise<Article[]> => {
   try {
-    // Get current issue to filter articles
-    const currentIssueData = await getCurrentIssue();
-    const currentIssue = currentIssueData?.text || "April 2025";
-    
+    // Prefer locally selected issue (viewer preference)
+    const storedIssue = typeof window !== 'undefined' ? localStorage.getItem('selected_issue') : null;
+
+    const currentIssue = issueText || storedIssue || (await getCurrentIssue()).text || "April 2025";
+
     console.log("Current issue for filtering articles:", currentIssue);
     
     // Parse the issue to get month and year

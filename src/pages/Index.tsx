@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import { getCurrentIssue, getAllArticles, checkAndFixDisplayIssue } from "@/lib/data";
+import { getCurrentIssue, getAllArticles } from "@/lib/data";
 import ArticleList from "@/components/ArticleList";
-import SearchBar from "@/components/SearchBar";
 import { Article } from "@/lib/types";
 import { getMaintenanceMode } from "@/lib/data/maintenanceService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,13 +13,12 @@ import { useReadArticles } from "@/hooks/useReadArticles";
 import { useArticleFavorites } from "@/hooks/useArticleFavorites";
 import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
-import { mapArticleFromDb } from "@/lib/data/utils";
-import { LogoUploader } from "@/components/LogoUploader";
-import TableOfContents from "@/components/TableOfContents"; //Import TableOfContents Component
 import PasswordReset from "@/components/auth/PasswordReset";
 
 const Index = () => {
-  const [currentIssue, setCurrentIssue] = useState<string>("April 2025");
+  const [currentIssue, setCurrentIssue] = useState<string>(() => {
+    return localStorage.getItem('selected_issue') || "April 2025";
+  });
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,18 +41,25 @@ const Index = () => {
     return <PasswordReset />;
   }
 
-  useEffect(() => {
-    // Set the home page title
-    console.log("Index: Setting title to 'The Klatsch'");
-    document.title = "The Klatsch";
-    
-    const loadCurrentIssue = async () => {
-      const issueData = await getCurrentIssue();
-      setCurrentIssue(issueData.text);
-    };
+useEffect(() => {
+  // Set the home page title
+  console.log("Index: Setting title to 'The Klatsch'");
+  document.title = "The Klatsch";
 
-    loadCurrentIssue();
-  }, []);
+  const loadCurrentIssue = async () => {
+    // Prefer locally selected issue (works for signed-in and signed-out users)
+    const stored = localStorage.getItem('selected_issue');
+    if (stored) {
+      setCurrentIssue(stored);
+      return;
+    }
+
+    const issueData = await getCurrentIssue();
+    setCurrentIssue(issueData.text);
+  };
+
+  loadCurrentIssue();
+}, []);
 
   // Additional effect to ensure title is always correct on this page
   useEffect(() => {
@@ -77,21 +82,21 @@ const Index = () => {
     loadMaintenanceMode();
   }, []);
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      setLoading(true);
-      try {
-        const articlesData = await getAllArticles();
-        setArticles(articlesData);
-      } catch (error) {
-        console.error("Error fetching articles:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchArticles = async () => {
+    setLoading(true);
+    try {
+      const articlesData = await getAllArticles(currentIssue);
+      setArticles(articlesData);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchArticles();
-  }, []);
+  fetchArticles();
+}, [currentIssue]);
 
   // Effect to restore scroll position after article view
   useEffect(() => {
@@ -246,15 +251,6 @@ const Index = () => {
 
   console.log("Index - All articles:", articles.map(a => a.id));
   console.log("Index - Filtered articles:", filteredArticles.map(a => a.id));
-
-  const [hideRead, setHideRead] = useState(false);
-  const [commentCounts, setCommentCounts] = useState({});
-  const [displayIssue, setDisplayIssue] = useState("April 2025");
-
-    // Example handler (replace with your actual implementation)
-    const handleArticleClick = (articleId: string) => {
-      console.log(`Article clicked: ${articleId}`);
-    };
 
 
   return (

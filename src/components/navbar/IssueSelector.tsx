@@ -35,7 +35,11 @@ const IssueSelector = ({ currentIssue, issues, loading, onIssueChange }: IssueSe
             <DropdownMenuItem
               key={`${issue.month}-${issue.year}`}
               className="cursor-pointer"
-              onClick={() => onIssueChange(issue.text)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onIssueChange(issue.text);
+              }}
             >
               {issue.text}
             </DropdownMenuItem>
