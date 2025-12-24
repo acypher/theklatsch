@@ -17,7 +17,6 @@ const CommentForm = ({ articleId, onSubmitSuccess, onCancel }: CommentFormProps)
   const { user, profile } = useAuth();
   const [newComment, setNewComment] = useState("");
   const [authorName, setAuthorName] = useState(profile?.display_name || "Anonymous");
-  const [authorEmail, setAuthorEmail] = useState(user?.email || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,8 +38,7 @@ const CommentForm = ({ articleId, onSubmitSuccess, onCancel }: CommentFormProps)
         article_id: articleId,
         content: newComment.trim(),
         author_name: authorName.trim() || "Anonymous",
-        author_email: authorEmail.trim() || null,
-        user_id: user.id, // Add the user_id to satisfy RLS policies
+        user_id: user.id,
       });
       
       // Race between insert and timeout
@@ -79,27 +77,15 @@ const CommentForm = ({ articleId, onSubmitSuccess, onCancel }: CommentFormProps)
         />
       </div>
       
-      <div className="flex gap-2">
-        <div className="w-1/4">
-          <input
-            type="text"
-            placeholder="Your name"
-            value={authorName}
-            onChange={(e) => setAuthorName(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isSubmitting}
-          />
-        </div>
-        <div className="w-3/4">
-          <input
-            type="email"
-            placeholder="Email address"
-            value={authorEmail}
-            onChange={(e) => setAuthorEmail(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={isSubmitting}
-          />
-        </div>
+      <div>
+        <input
+          type="text"
+          placeholder="Your name"
+          value={authorName}
+          onChange={(e) => setAuthorName(e.target.value)}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isSubmitting}
+        />
       </div>
       
       <div className="flex gap-2">
