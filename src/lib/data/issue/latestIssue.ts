@@ -13,25 +13,28 @@ export const getLatestMonth = async (): Promise<number> => {
     
     if (error) {
       console.error("Error fetching latest month:", error);
-      return 4; // Default fallback to April
+      return 1; // Default fallback to January
     }
     
-    // Parse the month value
-    try {
-      if (typeof data.value === 'string') {
-        return parseInt(data.value.replace(/^"|"$/g, ''));
-      } else if (typeof data.value === 'object') {
-        const stringValue = JSON.stringify(data.value);
-        return parseInt(stringValue.replace(/^"|"$/g, '').replace(/\\"/g, ''));
-      }
-    } catch (e) {
-      console.error("Error parsing latest month value:", e);
+    if (!data) {
+      console.error("No latest_month found in issue table");
+      return 1; // Default fallback
     }
     
-    return 4; // Default fallback
+    // Parse the month value - handle number, string, or JSON
+    const value = data.value;
+    if (typeof value === 'number') {
+      return value;
+    } else if (typeof value === 'string') {
+      const parsed = parseInt(value.replace(/^"|"$/g, ''));
+      if (!isNaN(parsed)) return parsed;
+    }
+    
+    console.error("Could not parse latest month value:", value);
+    return 1; // Default fallback
   } catch (error) {
     console.error("Error in getLatestMonth:", error);
-    return 4; // Default fallback
+    return 1; // Default fallback
   }
 };
 
@@ -46,25 +49,28 @@ export const getLatestYear = async (): Promise<number> => {
     
     if (error) {
       console.error("Error fetching latest year:", error);
-      return 2025; // Default fallback
+      return 2026; // Default fallback
     }
     
-    // Parse the year value
-    try {
-      if (typeof data.value === 'string') {
-        return parseInt(data.value.replace(/^"|"$/g, ''));
-      } else if (typeof data.value === 'object') {
-        const stringValue = JSON.stringify(data.value);
-        return parseInt(stringValue.replace(/^"|"$/g, '').replace(/\\"/g, ''));
-      }
-    } catch (e) {
-      console.error("Error parsing latest year value:", e);
+    if (!data) {
+      console.error("No latest_year found in issue table");
+      return 2026; // Default fallback
     }
     
-    return 2025; // Default fallback
+    // Parse the year value - handle number, string, or JSON
+    const value = data.value;
+    if (typeof value === 'number') {
+      return value;
+    } else if (typeof value === 'string') {
+      const parsed = parseInt(value.replace(/^"|"$/g, ''));
+      if (!isNaN(parsed)) return parsed;
+    }
+    
+    console.error("Could not parse latest year value:", value);
+    return 2026; // Default fallback
   } catch (error) {
     console.error("Error in getLatestYear:", error);
-    return 2025; // Default fallback
+    return 2026; // Default fallback
   }
 };
 
@@ -79,25 +85,25 @@ export const getLatestIssue = async (): Promise<string> => {
     
     if (error) {
       console.error("Error fetching latest issue:", error);
-      return "April 2025"; // Default fallback
+      return "January 2026"; // Default fallback
     }
     
-    // Parse the issue value
-    try {
-      if (typeof data.value === 'string') {
-        return data.value.replace(/^"|"$/g, '');
-      } else if (typeof data.value === 'object') {
-        const stringValue = JSON.stringify(data.value);
-        return stringValue.replace(/^"|"$/g, '').replace(/\\"/g, '');
-      }
-    } catch (e) {
-      console.error("Error parsing latest issue value:", e);
+    if (!data) {
+      console.error("No latest_issue found in issue table");
+      return "January 2026"; // Default fallback
     }
     
-    return "April 2025"; // Default fallback
+    // Parse the issue value - handle string or JSON
+    const value = data.value;
+    if (typeof value === 'string') {
+      return value.replace(/^"|"$/g, '');
+    }
+    
+    console.error("Could not parse latest issue value:", value);
+    return "January 2026"; // Default fallback
   } catch (error) {
     console.error("Error in getLatestIssue:", error);
-    return "April 2025"; // Default fallback
+    return "January 2026"; // Default fallback
   }
 };
 
