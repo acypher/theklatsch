@@ -45,21 +45,33 @@ useEffect(() => {
   document.title = "The Klatsch";
 
   const loadCurrentIssue = async () => {
-    // Always fetch the current issue from database first to get the authoritative value
+    // DB is the source of truth for “latest/current issue” across browsers.
     const issueData = await getCurrentIssue();
     const dbIssue = issueData.text;
-    
-    // Check if user has explicitly selected a different issue
-    const stored = localStorage.getItem('selected_issue');
-    
-    // Use stored value only if it exists AND was explicitly selected (not just a stale cache)
-    // If stored matches db, clear it (no need to store default)
-    if (stored && stored === dbIssue) {
-      localStorage.removeItem('selected_issue');
+
+    // v2 persisted selection: only trust it if it was explicitly set by the user
+    // (older builds wrote `selected_issue` without provenance; that value can be stale).
+    const rawV2 = localStorage.getItem('selected_issue_v2');
+    let userSelectedIssue: string | null = null;
+
+    if (rawV2) {
+      try {
+        const parsed = JSON.parse(rawV2) as { issue?: unknown; source?: unknown };
+        if (parsed?.source === 'user' && typeof parsed.issue === 'string' && parsed.issue.trim()) {
+          userSelectedIssue = parsed.issue.trim();
+        }
+      } catch {
+        // ignore malformed v2
+      }
     }
-    
-    // Use stored if user explicitly selected a different issue, otherwise use db value
-    setCurrentIssue(stored && stored !== dbIssue ? stored : dbIssue);
+
+    // Clean up legacy/stale keys so other browsers stop “sticking” to January.
+    if (!userSelectedIssue) {
+      localStorage.removeItem('selected_issue');
+      localStorage.removeItem('selected_issue_v2');
+    }
+
+    setCurrentIssue(userSelectedIssue ?? dbIssue);
   };
 
   loadCurrentIssue();
