@@ -8,10 +8,32 @@ import { getCurrentIssue } from "../issue/currentIssue";
 // Function to fetch all articles from Supabase
 export const getAllArticles = async (issueText?: string): Promise<Article[]> => {
   try {
-    // Prefer locally selected issue (viewer preference)
-    const storedIssue = typeof window !== 'undefined' ? localStorage.getItem('selected_issue') : null;
+    // Issue selection is a *viewer preference*.
+    // Only trust localStorage if it was explicitly set by the user (v2).
+    const rawV2 = typeof window !== "undefined" ? localStorage.getItem("selected_issue_v2") : null;
+    let userSelectedIssue: string | null = null;
 
-    const currentIssue = issueText || storedIssue || (await getCurrentIssue()).text || "April 2025";
+    if (rawV2) {
+      try {
+        const parsed = JSON.parse(rawV2) as { issue?: unknown; source?: unknown };
+        if (
+          parsed?.source === "user" &&
+          typeof parsed.issue === "string" &&
+          parsed.issue.trim()
+        ) {
+          userSelectedIssue = parsed.issue.trim();
+        }
+      } catch {
+        // ignore malformed v2
+      }
+    }
+
+    // If there is no explicit v2 selection, clear legacy key to prevent stale cross-browser behavior.
+    if (typeof window !== "undefined" && !userSelectedIssue) {
+      localStorage.removeItem("selected_issue");
+    }
+
+    const currentIssue = issueText || userSelectedIssue || (await getCurrentIssue()).text || "April 2025";
 
     console.log("Current issue for filtering articles:", currentIssue);
     
