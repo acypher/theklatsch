@@ -16,12 +16,10 @@ import { supabase } from "@/integrations/supabase/client";
 import PasswordReset from "@/components/auth/PasswordReset";
 
 const Index = () => {
-  const [currentIssue, setCurrentIssue] = useState<string>(() => {
-    return localStorage.getItem('selected_issue') || "April 2025";
-  });
+  const [currentIssue, setCurrentIssue] = useState<string>("");
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [wholeWords, setWholeWords] = useState(false);
   const articleListRef = useRef<HTMLDivElement>(null);
@@ -47,19 +45,25 @@ useEffect(() => {
   document.title = "The Klatsch";
 
   const loadCurrentIssue = async () => {
-    // Prefer locally selected issue (works for signed-in and signed-out users)
-    const stored = localStorage.getItem('selected_issue');
-    if (stored) {
-      setCurrentIssue(stored);
-      return;
-    }
-
+    // Always fetch the current issue from database first to get the authoritative value
     const issueData = await getCurrentIssue();
-    setCurrentIssue(issueData.text);
+    const dbIssue = issueData.text;
+    
+    // Check if user has explicitly selected a different issue
+    const stored = localStorage.getItem('selected_issue');
+    
+    // Use stored value only if it exists AND was explicitly selected (not just a stale cache)
+    // If stored matches db, clear it (no need to store default)
+    if (stored && stored === dbIssue) {
+      localStorage.removeItem('selected_issue');
+    }
+    
+    // Use stored if user explicitly selected a different issue, otherwise use db value
+    setCurrentIssue(stored && stored !== dbIssue ? stored : dbIssue);
   };
 
   loadCurrentIssue();
-}, []);
+}, [isAuthenticated]);
 
   // Additional effect to ensure title is always correct on this page
   useEffect(() => {
