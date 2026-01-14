@@ -93,7 +93,13 @@ const handleIssueChange = async (issueText: string) => {
   setLoading(true);
   try {
     // Issue selection is a *viewer preference*, not a global setting.
-    // Store locally so it works for both signed-in and signed-out users.
+    // v2: write a structured record so we can distinguish explicit user choice from stale legacy values.
+    localStorage.setItem(
+      'selected_issue_v2',
+      JSON.stringify({ issue: issueText, source: 'user', setAt: Date.now() })
+    );
+
+    // Keep legacy key for backward compatibility with older builds (will be ignored unless v2 exists).
     localStorage.setItem('selected_issue', issueText);
 
     toast.success(`Switched to ${issueText}`);
