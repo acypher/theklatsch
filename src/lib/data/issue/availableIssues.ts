@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format, addMonths } from "date-fns";
+import { getLatestMonth, getLatestYear } from "./latestIssue";
 
 export interface Issue {
   month: number;
@@ -8,15 +8,27 @@ export interface Issue {
   text: string;
 }
 
+const monthNames = [
+  'January', 'February', 'March', 'April', 
+  'May', 'June', 'July', 'August',
+  'September', 'October', 'November', 'December'
+];
+
 export const getAvailableIssues = async (): Promise<Issue[]> => {
   try {
-    // Get distinct month/year combinations from non-deleted articles
-    const { data: articlesData, error: articlesError } = await supabase
-      .from('articles')
-      .select('month, year')
-      .eq('deleted', false)
-      .not('month', 'is', null)
-      .not('year', 'is', null);
+    // Fetch latest issue from the issue table AND articles in parallel
+    const [latestMonth, latestYear, articlesResult] = await Promise.all([
+      getLatestMonth(),
+      getLatestYear(),
+      supabase
+        .from('articles')
+        .select('month, year')
+        .eq('deleted', false)
+        .not('month', 'is', null)
+        .not('year', 'is', null)
+    ]);
+
+    const { data: articlesData, error: articlesError } = articlesResult;
 
     if (articlesError) {
       throw new Error(articlesError.message);
@@ -24,15 +36,17 @@ export const getAvailableIssues = async (): Promise<Issue[]> => {
 
     // Create a map to avoid duplicates
     const issueMap = new Map<string, Issue>();
-    
-    // Convert month numbers to names
-    const monthNames = [
-      'January', 'February', 'March', 'April', 
-      'May', 'June', 'July', 'August',
-      'September', 'October', 'November', 'December'
-    ];
 
-    // Process articles data only (current format issues from April 2025+)
+    // Always add the latest issue first (from the issue table)
+    const latestKey = `${latestMonth}-${latestYear}`;
+    const latestMonthName = monthNames[latestMonth - 1] || 'Unknown';
+    issueMap.set(latestKey, {
+      month: latestMonth,
+      year: latestYear,
+      text: `${latestMonthName} ${latestYear}`
+    });
+
+    // Process articles data (current format issues from April 2025+)
     articlesData?.forEach(article => {
       if (article.month && article.year) {
         // Only include issues from April 2025 onwards (current format)
