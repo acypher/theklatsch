@@ -1,6 +1,28 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getLatestIssue } from "./latestIssue";
+import { parseIssueString } from "../article/issueHelper";
+
+const issueToIndex = (issueText: string): number | null => {
+  const { month, year } = parseIssueString(issueText);
+  if (!month || !year) return null;
+  return year * 12 + month;
+};
+
+const updateDisplayIssue = async (issueText: string) => {
+  const { month, year } = parseIssueString(issueText);
+  if (!month || !year) return;
+
+  const updates = [
+    { key: "display_issue", value: issueText },
+    { key: "display_month", value: month },
+    { key: "display_year", value: year },
+  ];
+
+  for (const update of updates) {
+    await supabase.from("issue").update({ value: update.value }).eq("key", update.key);
+  }
+};
 
 export const getDefaultIssue = async (): Promise<string> => {
   try {
@@ -35,18 +57,16 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
       .eq('key', 'display_issue')
       .maybeSingle();
     
+    const latestIssue = await getLatestIssue();
+
     if (error) {
       console.error("Error fetching display issue:", error);
-      return { text: await getLatestIssue() };
+      return { text: latestIssue };
     }
-    
+
     // If no data exists, set it to latest issue
     if (!data?.value) {
-      const latestIssue = await getLatestIssue();
-      await supabase
-        .from('issue')
-        .update({ value: latestIssue })
-        .eq('key', 'display_issue');
+      await updateDisplayIssue(latestIssue);
       return { text: latestIssue };
     }
     
@@ -78,18 +98,22 @@ export const getCurrentIssue = async (): Promise<{ text: string }> => {
 
       // Only fallback if clearly invalid after normalization
       if (!currentText || currentText === 'null' || currentText === 'undefined' || currentText.includes('Unknown')) {
-        const latestIssue = await getLatestIssue();
-        await supabase
-          .from('issue')
-          .update({ value: latestIssue })
-          .eq('key', 'display_issue');
+        await updateDisplayIssue(latestIssue);
+        return { text: latestIssue };
+      }
+
+      // Never allow display_issue to lag behind latest_issue (prevents cross-browser/login mismatch)
+      const currentIdx = issueToIndex(currentText);
+      const latestIdx = issueToIndex(latestIssue);
+      if (currentIdx != null && latestIdx != null && currentIdx < latestIdx) {
+        await updateDisplayIssue(latestIssue);
         return { text: latestIssue };
       }
 
       return { text: currentText };
     } catch (e) {
       console.error("Error parsing issue value:", e);
-      const latestIssue = await getLatestIssue();
+      await updateDisplayIssue(latestIssue);
       return { text: latestIssue };
     }
   } catch (error) {
