@@ -253,3 +253,28 @@ export const PrivateField = () => {
     />
   );
 };
+
+export const DraftField = () => {
+  const { control } = useFormContext<ArticleFormValues>();
+  
+  return (
+    <Controller
+      control={control}
+      name="draft"
+      render={({ field }) => (
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="draft"
+            checked={field.value || false}
+            onChange={(e) => field.onChange(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300"
+          />
+          <label htmlFor="draft" className="text-sm font-medium">
+            Draft (only visible to you until published)
+          </label>
+        </div>
+      )}
+    />
+  );
+};

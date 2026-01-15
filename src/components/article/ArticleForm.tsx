@@ -13,7 +13,8 @@ import {
   SourceUrlField,
   SummaryField,
   ContentField,
-  PrivateField
+  PrivateField,
+  DraftField
 } from "@/components/article/ArticleFormFields";
 
 interface ArticleFormProps {
@@ -23,6 +24,7 @@ interface ArticleFormProps {
   submitButtonText: string;
   onChange?: () => void;
   children?: ReactNode;
+  isDraft?: boolean;
 }
 
 const ArticleForm = ({ 
@@ -31,14 +33,18 @@ const ArticleForm = ({
   isSubmitting, 
   submitButtonText, 
   onChange,
-  children 
+  children,
+  isDraft = false
 }: ArticleFormProps) => {
+  const currentDraftValue = form.watch("draft");
+  const showDraftBorder = isDraft || currentDraftValue;
+
   return (
     <FormProvider {...form}>
       <form 
         onSubmit={form.handleSubmit(onSubmit)} 
         onChange={onChange} 
-        className="space-y-6"
+        className={`space-y-6 ${showDraftBorder ? 'draft-border p-6 rounded-lg' : ''}`}
       >
         {children}
         
@@ -52,6 +58,7 @@ const ArticleForm = ({
         <SummaryField />
         
         <PrivateField />
+        <DraftField />
         
         <div className="pt-4 flex gap-2">
           <Button 

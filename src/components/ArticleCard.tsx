@@ -151,8 +151,10 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
     h6: ({ node, ...props }: any) => <h6 className="m-0 p-0 text-xl font-semibold" {...props} />,
   };
 
+  const isDraft = currentArticle.draft;
+
   return (
-    <Card className="h-full flex flex-col hover:shadow-md transition-shadow article-card relative" data-article-id={currentArticle.id}>
+    <Card className={`h-full flex flex-col hover:shadow-md transition-shadow article-card relative ${isDraft ? 'draft-border' : ''}`} data-article-id={currentArticle.id}>
       <ReadCheckbox articleId={currentArticle.id} />
       <FavoriteButton articleId={currentArticle.id} />
 

@@ -74,12 +74,13 @@ const CreateArticleForm = () => {
         sourceUrl: data.sourceUrl,
         summary: data.summary,
         more_content: data.more_content,
-        private: data.private || false
+        private: data.private || false,
+        draft: data.draft || false
       });
 
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       
-      toast.success("Article published successfully!");
+      toast.success(data.draft ? "Draft saved successfully!" : "Article published successfully!");
       
       navigate(`/article/${newArticle.id}`);
     } catch (error) {
