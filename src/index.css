@@ -72,3 +72,31 @@
 .markdown-editor .wmde-markdown {
   @apply bg-background text-foreground;
 }
+
+/* Draft article styling - squiggly/dashed border */
+.draft-border {
+  position: relative;
+  border: 3px dashed hsl(var(--muted-foreground) / 0.4);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    hsl(var(--muted) / 0.3) 10px,
+    hsl(var(--muted) / 0.3) 20px
+  );
+}
+
+.draft-border::before {
+  content: "DRAFT";
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  background: hsl(var(--background));
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: hsl(var(--muted-foreground));
+  border: 2px dashed hsl(var(--muted-foreground) / 0.4);
+  border-radius: 4px;
+}

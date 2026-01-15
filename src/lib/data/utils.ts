@@ -22,5 +22,7 @@ export const mapArticleFromDb = (article: any): Article => ({
   deleted: article.deleted,
   deletedAt: article.deleted_at,
   displayPosition: article.display_position,
-  private: article.private
+  private: article.private,
+  draft: article.draft,
+  user_id: article.user_id
 });

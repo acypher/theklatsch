@@ -15,4 +15,6 @@ export interface Article {
   displayPosition?: number | null;
   updatedAt?: string;
   private?: boolean;
+  draft?: boolean;
+  user_id?: string | null;
 }

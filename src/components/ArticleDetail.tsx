@@ -148,8 +148,10 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
     );
   }
 
+  const isDraft = article?.draft;
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className={`container mx-auto px-4 py-8 ${isDraft ? 'draft-border rounded-lg' : ''}`}>
       <div className="mb-8">
         <Button 
           variant="ghost" 

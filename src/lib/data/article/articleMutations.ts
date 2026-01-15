@@ -34,6 +34,7 @@ export const addArticle = async (article: Omit<Article, 'id' | 'createdAt'>): Pr
       summary: article.summary,
       more_content: article.more_content,
       private: article.private || false,
+      draft: article.draft || false,
       user_id: (await supabase.auth.getUser()).data.user?.id,
       month: latestMonth,
       year: latestYear,
@@ -102,6 +103,7 @@ export const updateArticle = async (
       summary: article.summary,
       more_content: article.more_content,
       private: article.private || false,
+      draft: article.draft || false,
       display_position: position
     };
     

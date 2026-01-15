@@ -24,6 +24,7 @@ const EditArticleForm = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [originalPosition, setOriginalPosition] = useState<number | null>(null);
   const [originalKeywords, setOriginalKeywords] = useState<string[]>([]);
+  const [isDraft, setIsDraft] = useState(false);
   const { recordArticleUpdate } = useArticleUpdates();
   
   const form = useForm<ArticleFormValues>({
@@ -57,6 +58,9 @@ const EditArticleForm = () => {
         // Store original keywords
         setOriginalKeywords([...article.keywords]);
         
+        // Store draft status
+        setIsDraft(article.draft || false);
+        
         const keywordsString = article.keywords.join(' ');
         
         form.reset({
@@ -68,7 +72,8 @@ const EditArticleForm = () => {
           sourceUrl: article.sourceUrl || "",
           summary: article.summary || "",
           more_content: article.more_content || "",
-          private: article.private || false
+          private: article.private || false,
+          draft: article.draft || false
         });
       } catch (error) {
         toast.error("Failed to load article");
@@ -117,7 +122,8 @@ const EditArticleForm = () => {
         summary: data.summary,
         more_content: data.more_content,
         updatedAt: new Date().toISOString(),
-        private: data.private || false
+        private: data.private || false,
+        draft: data.draft || false
       }, {
         preservePosition: !venueChanged && !ottChanged,
         originalPosition: originalPosition
@@ -149,6 +155,7 @@ const EditArticleForm = () => {
       onSubmit={onSubmit}
       isSubmitting={isSubmitting}
       submitButtonText="Update Article"
+      isDraft={isDraft}
     >
       {/* Top buttons */}
       <div className="mb-6 flex gap-2">

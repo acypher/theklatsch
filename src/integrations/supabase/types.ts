@@ -168,6 +168,7 @@ export type Database = {
           deleted_at: string | null
           description: string
           display_position: number | null
+          draft: boolean
           id: string
           imageurl: string | null
           keywords: string[]
@@ -187,6 +188,7 @@ export type Database = {
           deleted_at?: string | null
           description: string
           display_position?: number | null
+          draft?: boolean
           id?: string
           imageurl?: string | null
           keywords?: string[]
@@ -206,6 +208,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string
           display_position?: number | null
+          draft?: boolean
           id?: string
           imageurl?: string | null
           keywords?: string[]
