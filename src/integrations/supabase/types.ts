@@ -371,6 +371,7 @@ export type Database = {
           auto_mark_read: boolean
           hide_read_articles: boolean
           id: string
+          show_list_articles: boolean
           updated_at: string
           user_id: string
         }
@@ -378,6 +379,7 @@ export type Database = {
           auto_mark_read?: boolean
           hide_read_articles?: boolean
           id?: string
+          show_list_articles?: boolean
           updated_at?: string
           user_id: string
         }
@@ -385,6 +387,7 @@ export type Database = {
           auto_mark_read?: boolean
           hide_read_articles?: boolean
           id?: string
+          show_list_articles?: boolean
           updated_at?: string
           user_id?: string
         }
