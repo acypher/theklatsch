@@ -222,24 +222,46 @@ const Profile = () => {
             <CardDescription>Manage how articles are marked as read</CardDescription>
           </CardHeader>
           
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="auto-mark-read"
-                checked={preferences.auto_mark_read}
-                onCheckedChange={(checked) => {
-                  if (typeof checked === 'boolean') {
-                    updatePreferences({ auto_mark_read: checked });
-                  }
-                }}
-              />
-              <Label htmlFor="auto-mark-read" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Automatically mark opened articles as read
-              </Label>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="auto-mark-read"
+                  checked={preferences.auto_mark_read}
+                  onCheckedChange={(checked) => {
+                    if (typeof checked === 'boolean') {
+                      updatePreferences({ auto_mark_read: checked });
+                    }
+                  }}
+                />
+                <Label htmlFor="auto-mark-read" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Automatically mark opened articles as read
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                When enabled, articles will be automatically marked as read when you open them. You can still manually mark articles using the checkbox on each article card.
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              When enabled, articles will be automatically marked as read when you open them. You can still manually mark articles using the checkbox on each article card.
-            </p>
+
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="show-list-articles"
+                  checked={preferences.show_list_articles}
+                  onCheckedChange={(checked) => {
+                    if (typeof checked === 'boolean') {
+                      updatePreferences({ show_list_articles: checked });
+                    }
+                  }}
+                />
+                <Label htmlFor="show-list-articles" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Show 'list' articles
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                When enabled, articles with the 'list' keyword will be shown with every issue. These are recurring reference articles that appear across all monthly issues.
+              </p>
+            </div>
           </CardContent>
         </Card>
 

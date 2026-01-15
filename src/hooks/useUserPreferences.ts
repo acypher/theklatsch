@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 export interface UserPreferences {
   hide_read_articles: boolean;
   auto_mark_read: boolean;
+  show_list_articles: boolean;
 }
 
 export const useUserPreferences = () => {
@@ -13,6 +14,7 @@ export const useUserPreferences = () => {
   const [preferences, setPreferences] = useState<UserPreferences>({
     hide_read_articles: false,
     auto_mark_read: false,
+    show_list_articles: false,
   });
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +28,7 @@ export const useUserPreferences = () => {
       try {
         const { data, error } = await supabase
           .from('user_preferences')
-          .select('hide_read_articles, auto_mark_read')
+          .select('hide_read_articles, auto_mark_read, show_list_articles')
           .eq('user_id', user.id)
           .maybeSingle();
 

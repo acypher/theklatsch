@@ -11,6 +11,7 @@ import { MaintenancePage } from "@/components/home/MaintenancePage";
 import { StorefrontImage } from "@/components/home/StorefrontImage";
 import { useReadArticles } from "@/hooks/useReadArticles";
 import { useArticleFavorites } from "@/hooks/useArticleFavorites";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
 import PasswordReset from "@/components/auth/PasswordReset";
@@ -29,6 +30,7 @@ const Index = () => {
 
   const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated);
   const { allFavorites } = useArticleFavorites();
+  const { preferences } = useUserPreferences();
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   // Check if this is a password reset request
@@ -229,13 +231,18 @@ useEffect(() => {
       result = articles;
     }
 
+    // Filter out "list" articles for authenticated users who have show_list_articles disabled
+    if (isAuthenticated && !preferences.show_list_articles) {
+      result = result.filter(article => !article.keywords.includes('list'));
+    }
+
     // Then apply read filter if enabled (but not when showing favorites)
     if (filterEnabled && isAuthenticated && !showFavoritesOnly) {
       result = result.filter(article => !readArticles.has(article.id));
     }
 
     return result;
-  }, [articles, allArticlesForSearch, searchQuery, wholeWords, filterEnabled, readArticles, isAuthenticated, showFavoritesOnly, allFavorites]);
+  }, [articles, allArticlesForSearch, searchQuery, wholeWords, filterEnabled, readArticles, isAuthenticated, showFavoritesOnly, allFavorites, preferences.show_list_articles]);
 
   // Search handlers
   const handleSearch = (query: string, wholeWordsEnabled: boolean) => {
