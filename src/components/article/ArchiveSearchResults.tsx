@@ -13,8 +13,16 @@ const ArchiveSearchResults = ({ results, searchQuery }: ArchiveSearchResultsProp
     return null;
   }
 
-  const handleClick = (url: string) => {
-    window.open(url, '_blank');
+  const handleClick = (url: string, query: string) => {
+    // Use Text Fragments API to highlight and scroll to matching text
+    // Find the first search term to use for the fragment
+    const terms = query.trim().split(/\s+/).filter(t => t.length > 0);
+    const firstTerm = terms[0] || '';
+    
+    // Encode the search term for the URL fragment
+    const textFragment = firstTerm ? `#:~:text=${encodeURIComponent(firstTerm)}` : '';
+    
+    window.open(url + textFragment, '_blank');
   };
 
   // Highlight search terms in the snippet
@@ -45,7 +53,7 @@ const ArchiveSearchResults = ({ results, searchQuery }: ArchiveSearchResultsProp
           <Card 
             key={result.id}
             className="cursor-pointer hover:bg-accent/50 transition-colors border-dashed"
-            onClick={() => handleClick(result.url)}
+            onClick={() => handleClick(result.url, searchQuery)}
           >
             <CardContent className="p-3">
               <div className="flex items-start justify-between gap-2">
