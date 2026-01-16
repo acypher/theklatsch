@@ -15,6 +15,8 @@ import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { searchArticles } from "@/lib/search";
 import { supabase } from "@/integrations/supabase/client";
 import PasswordReset from "@/components/auth/PasswordReset";
+import { searchArchives, ArchiveSearchResult } from "@/lib/data/archiveSearch";
+import ArchiveSearchResults from "@/components/article/ArchiveSearchResults";
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("");
@@ -32,6 +34,7 @@ const Index = () => {
   const { allFavorites } = useArticleFavorites();
   const { preferences } = useUserPreferences();
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [archiveResults, setArchiveResults] = useState<ArchiveSearchResult[]>([]);
 
   // Check if this is a password reset request
   const isPasswordReset = searchParams.has('access_token') && searchParams.has('refresh_token');
@@ -245,18 +248,24 @@ useEffect(() => {
   }, [articles, allArticlesForSearch, searchQuery, wholeWords, filterEnabled, readArticles, isAuthenticated, showFavoritesOnly, allFavorites, preferences.show_list_articles]);
 
   // Search handlers
-  const handleSearch = (query: string, wholeWordsEnabled: boolean) => {
+  const handleSearch = async (query: string, wholeWordsEnabled: boolean) => {
     setSearchQuery(query);
     setWholeWords(wholeWordsEnabled);
     // When starting a search, show all articles (not just unread)
     if (query.trim()) {
       setFilterEnabled(false);
+      // Search archives too
+      const archiveHits = await searchArchives(query);
+      setArchiveResults(archiveHits);
+    } else {
+      setArchiveResults([]);
     }
   };
 
   const handleClearSearch = () => {
     setSearchQuery("");
     setWholeWords(false);
+    setArchiveResults([]);
   };
 
   const handleKeywordClick = (keyword: string) => {
@@ -295,6 +304,13 @@ useEffect(() => {
           <MaintenancePage />
         ) : (
           <>
+            {/* Archive search results */}
+            {searchQuery && archiveResults.length > 0 && (
+              <ArchiveSearchResults 
+                results={archiveResults} 
+                searchQuery={searchQuery} 
+              />
+            )}
             <div ref={articleListRef}>
               <ArticleList 
                 articles={filteredArticles}

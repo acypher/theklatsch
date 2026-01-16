@@ -41,6 +41,41 @@ export type Database = {
         }
         Relationships: []
       }
+      archive_search_index: {
+        Row: {
+          back_issue_id: number
+          display_issue: string
+          id: string
+          indexed_at: string
+          text_content: string
+          url: string
+        }
+        Insert: {
+          back_issue_id: number
+          display_issue: string
+          id?: string
+          indexed_at?: string
+          text_content: string
+          url: string
+        }
+        Update: {
+          back_issue_id?: number
+          display_issue?: string
+          id?: string
+          indexed_at?: string
+          text_content?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archive_search_index_back_issue_id_fkey"
+            columns: ["back_issue_id"]
+            isOneToOne: true
+            referencedRelation: "back_issues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       article_favorites: {
         Row: {
           article_id: string
