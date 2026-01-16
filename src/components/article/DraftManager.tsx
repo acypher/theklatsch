@@ -23,7 +23,7 @@ const DraftManager = ({ storageKey, clearDraft }: DraftManagerProps) => {
         onClick={handleClearDraft}
         className="text-sm"
       >
-        Clear Draft
+        Clear
       </Button>
     </div>
   );
