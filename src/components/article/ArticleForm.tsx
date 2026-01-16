@@ -69,9 +69,9 @@ const ArticleForm = ({
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                {submitButtonText === "Publish Article" ? "Publishing..." : "Updating..."}
+                {currentDraftValue ? "Saving..." : (submitButtonText === "Publish Article" ? "Publishing..." : "Updating...")}
               </>
-            ) : submitButtonText}
+            ) : (currentDraftValue ? "Save" : submitButtonText)}
           </Button>
           <Button 
             type="button" 
