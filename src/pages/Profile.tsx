@@ -21,7 +21,6 @@ const Profile = () => {
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,53 +74,48 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSaveAll = async () => {
     setIsSubmitting(true);
     
     try {
+      // Save profile info
       await updateProfile({ 
         display_name: displayName,
         username: username 
       });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-    
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters long");
-      return;
-    }
-    
-    setIsChangingPassword(true);
-    
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-      
-      if (error) {
-        toast.error("Failed to update password: " + error.message);
-      } else {
-        toast.success("Password updated successfully");
+      // Update password if changed
+      if (newPassword || confirmPassword) {
+        if (newPassword !== confirmPassword) {
+          toast.error("Passwords do not match");
+          setIsSubmitting(false);
+          return;
+        }
+        
+        if (newPassword.length < 6) {
+          toast.error("Password must be at least 6 characters long");
+          setIsSubmitting(false);
+          return;
+        }
+        
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword
+        });
+        
+        if (error) {
+          toast.error("Failed to update password: " + error.message);
+          setIsSubmitting(false);
+          return;
+        }
+        
         setNewPassword("");
         setConfirmPassword("");
       }
     } catch (error) {
-      console.error("Error updating password:", error);
-      toast.error("Failed to update password");
+      console.error("Error saving changes:", error);
+      toast.error("Failed to save changes");
     } finally {
-      setIsChangingPassword(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -149,71 +143,46 @@ const Profile = () => {
             <CardDescription>Update your profile information</CardDescription>
           </CardHeader>
           
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  value={user?.email || ""} 
-                  disabled 
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input 
-                  id="username" 
-                  value={username} 
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your username"
-                />
-                <p className="text-xs text-muted-foreground">
-                  This is your unique username
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name (or Initials)</Label>
-                <Input 
-                  id="displayName" 
-                  value={displayName} 
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Enter your preferred display name or initials"
-                />
-                <p className="text-xs text-muted-foreground">
-                  This is the name or initials that will be displayed to other users
-                </p>
-              </div>
-            </CardContent>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                value={user?.email || ""} 
+                disabled 
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">
+                Email cannot be changed
+              </p>
+            </div>
             
-            <CardFooter className="flex justify-between">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => navigate("/")}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting || (!displayName.trim() && !username.trim())}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
-            </CardFooter>
-          </form>
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input 
+                id="username" 
+                value={username} 
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
+              />
+              <p className="text-xs text-muted-foreground">
+                This is your unique username
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="displayName">Display Name (or Initials)</Label>
+              <Input 
+                id="displayName" 
+                value={displayName} 
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Enter your preferred display name or initials"
+              />
+              <p className="text-xs text-muted-foreground">
+                This is the name or initials that will be displayed to other users
+              </p>
+            </div>
+          </CardContent>
         </Card>
 
         <Card className="mt-6">
@@ -271,51 +240,56 @@ const Profile = () => {
             <CardDescription>Update your account password</CardDescription>
           </CardHeader>
           
-          <form onSubmit={handlePasswordChange}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input 
-                  id="newPassword" 
-                  type="password"
-                  value={newPassword} 
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  minLength={6}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input 
-                  id="confirmPassword" 
-                  type="password"
-                  value={confirmPassword} 
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                  minLength={6}
-                />
-              </div>
-            </CardContent>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input 
+                id="newPassword" 
+                type="password"
+                value={newPassword} 
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                minLength={6}
+              />
+            </div>
             
-            <CardFooter>
-              <Button 
-                type="submit" 
-                disabled={isChangingPassword || !newPassword || !confirmPassword}
-                className="w-full"
-              >
-                {isChangingPassword ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating Password...
-                  </>
-                ) : (
-                  "Update Password"
-                )}
-              </Button>
-            </CardFooter>
-          </form>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input 
+                id="confirmPassword" 
+                type="password"
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                minLength={6}
+              />
+            </div>
+          </CardContent>
         </Card>
+
+        {/* Bottom action buttons */}
+        <div className="mt-6 flex justify-between">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => navigate("/")}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSaveAll}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
+          </Button>
+        </div>
       </div>
     </>
   );
