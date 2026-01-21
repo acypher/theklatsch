@@ -69,12 +69,10 @@ export const useUserPreferences = () => {
 
       if (error) {
         console.error('Error updating preferences:', error);
-        toast.error('Failed to update preferences');
-        return false;
+        throw new Error('Failed to update preferences');
       }
 
       setPreferences(updatedPreferences);
-      toast.success('Preferences updated successfully');
       return true;
     } catch (error) {
       console.error('Unexpected error updating preferences:', error);
