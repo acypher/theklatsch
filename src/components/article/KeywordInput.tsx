@@ -113,10 +113,13 @@ const KeywordInput = ({ value, onChange, placeholder }: KeywordInputProps) => {
       )}
 
       {/* Command input with suggestions */}
-      <Command className="rounded-lg border" shouldFilter={false}>
+      <Command
+        className="rounded-lg border"
+        shouldFilter={false}
+        value={inputValue}
+        onValueChange={handleInputChange}
+      >
         <CommandInput
-          value={inputValue}
-          onValueChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue.trim() && setShowSuggestions(true)}
           placeholder={currentKeywords.length === 0 ? placeholder : "Add more keywords..."}
