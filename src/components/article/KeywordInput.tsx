@@ -143,6 +143,10 @@ const KeywordInput = ({ value, onChange, placeholder }: KeywordInputProps) => {
                     key={suggestion}
                     value={suggestion}
                     onSelect={() => addKeyword(suggestion)}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      addKeyword(suggestion);
+                    }}
                     className="cursor-pointer"
                   >
                     {suggestion}
