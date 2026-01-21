@@ -28,11 +28,29 @@ const Profile = () => {
   
   const navigate = useNavigate();
 
-  // Sync local preference state when preferences load
+  // Sync local state when data loads
   useEffect(() => {
     setLocalAutoMarkRead(preferences.auto_mark_read);
     setLocalShowListArticles(preferences.show_list_articles);
   }, [preferences]);
+
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name || "");
+      setUsername(profile.username || "");
+    }
+  }, [profile]);
+
+  const handleCancel = () => {
+    // Reset all local state to original values
+    setDisplayName(profile?.display_name || "");
+    setUsername(profile?.username || "");
+    setLocalAutoMarkRead(preferences.auto_mark_read);
+    setLocalShowListArticles(preferences.show_list_articles);
+    setNewPassword("");
+    setConfirmPassword("");
+    navigate("/");
+  };
 
   useEffect(() => {
     if (user && !profile && !profileLoading) {
@@ -289,7 +307,7 @@ const Profile = () => {
           <Button 
             type="button" 
             variant="outline" 
-            onClick={() => navigate("/")}
+            onClick={handleCancel}
           >
             Cancel
           </Button>
