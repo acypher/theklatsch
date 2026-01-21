@@ -1,13 +1,12 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { useKeywordSuggestions } from "@/hooks/useKeywordSuggestions";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -21,7 +20,6 @@ interface KeywordInputProps {
 const KeywordInput = ({ value, onChange, placeholder }: KeywordInputProps) => {
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { getSuggestions } = useKeywordSuggestions();
 
@@ -59,7 +57,6 @@ const KeywordInput = ({ value, onChange, placeholder }: KeywordInputProps) => {
     onChange(newKeywords);
     setInputValue("");
     setShowSuggestions(false);
-    inputRef.current?.focus();
   };
 
   const removeKeyword = (keywordToRemove: string) => {
@@ -69,9 +66,7 @@ const KeywordInput = ({ value, onChange, placeholder }: KeywordInputProps) => {
     onChange(newKeywords);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    
+  const handleInputChange = (newValue: string) => {
     // Check if user typed a space - add the current word as a keyword
     if (newValue.endsWith(" ")) {
       const word = newValue.trim();
@@ -85,12 +80,7 @@ const KeywordInput = ({ value, onChange, placeholder }: KeywordInputProps) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (inputValue.trim()) {
-        addKeyword(inputValue);
-      }
-    } else if (e.key === "Backspace" && !inputValue && currentKeywords.length > 0) {
+    if (e.key === "Backspace" && !inputValue && currentKeywords.length > 0) {
       // Remove last keyword when backspacing on empty input
       removeKeyword(currentKeywords[currentKeywords.length - 1]);
     } else if (e.key === "Escape") {
@@ -122,41 +112,32 @@ const KeywordInput = ({ value, onChange, placeholder }: KeywordInputProps) => {
         </div>
       )}
 
-      {/* Input field */}
-      <Input
-        ref={inputRef}
-        value={inputValue}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        onFocus={() => inputValue.trim() && setShowSuggestions(true)}
-        placeholder={currentKeywords.length === 0 ? placeholder : "Add more keywords..."}
-      />
-
-      {/* Suggestions dropdown */}
-      {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md">
-          <Command>
-            <CommandList>
-              <CommandGroup heading="Existing keywords">
-                {suggestions.map((suggestion) => (
-                  <CommandItem
-                    key={suggestion}
-                    value={suggestion}
-                    onSelect={() => addKeyword(suggestion)}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      addKeyword(suggestion);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    {suggestion}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </div>
-      )}
+      {/* Command input with suggestions */}
+      <Command className="rounded-lg border" shouldFilter={false}>
+        <CommandInput
+          value={inputValue}
+          onValueChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onFocus={() => inputValue.trim() && setShowSuggestions(true)}
+          placeholder={currentKeywords.length === 0 ? placeholder : "Add more keywords..."}
+        />
+        {showSuggestions && suggestions.length > 0 && (
+          <CommandList>
+            <CommandGroup heading="Existing keywords">
+              {suggestions.map((suggestion) => (
+                <CommandItem
+                  key={suggestion}
+                  value={suggestion}
+                  onSelect={() => addKeyword(suggestion)}
+                  className="cursor-pointer"
+                >
+                  {suggestion}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        )}
+      </Command>
     </div>
   );
 };
