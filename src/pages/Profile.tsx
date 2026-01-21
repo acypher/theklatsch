@@ -113,11 +113,17 @@ const Profile = () => {
         username: username 
       });
 
-      // Save reading preferences
-      await updatePreferences({
-        auto_mark_read: localAutoMarkRead,
-        show_list_articles: localShowListArticles,
-      });
+      // Save reading preferences only if changed
+      const preferencesChanged = 
+        localAutoMarkRead !== preferences.auto_mark_read ||
+        localShowListArticles !== preferences.show_list_articles;
+      
+      if (preferencesChanged) {
+        await updatePreferences({
+          auto_mark_read: localAutoMarkRead,
+          show_list_articles: localShowListArticles,
+        });
+      }
 
       // Update password if changed
       if (newPassword || confirmPassword) {
