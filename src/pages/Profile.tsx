@@ -21,7 +21,18 @@ const Profile = () => {
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // Local state for preferences (only saved on "Save Changes")
+  const [localAutoMarkRead, setLocalAutoMarkRead] = useState(preferences.auto_mark_read);
+  const [localShowListArticles, setLocalShowListArticles] = useState(preferences.show_list_articles);
+  
   const navigate = useNavigate();
+
+  // Sync local preference state when preferences load
+  useEffect(() => {
+    setLocalAutoMarkRead(preferences.auto_mark_read);
+    setLocalShowListArticles(preferences.show_list_articles);
+  }, [preferences]);
 
   useEffect(() => {
     if (user && !profile && !profileLoading) {
@@ -82,6 +93,12 @@ const Profile = () => {
       await updateProfile({ 
         display_name: displayName,
         username: username 
+      });
+
+      // Save reading preferences
+      await updatePreferences({
+        auto_mark_read: localAutoMarkRead,
+        show_list_articles: localShowListArticles,
       });
 
       // Update password if changed
@@ -196,10 +213,10 @@ const Profile = () => {
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="auto-mark-read"
-                  checked={preferences.auto_mark_read}
+                  checked={localAutoMarkRead}
                   onCheckedChange={(checked) => {
                     if (typeof checked === 'boolean') {
-                      updatePreferences({ auto_mark_read: checked });
+                      setLocalAutoMarkRead(checked);
                     }
                   }}
                 />
@@ -216,10 +233,10 @@ const Profile = () => {
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id="show-list-articles"
-                  checked={preferences.show_list_articles}
+                  checked={localShowListArticles}
                   onCheckedChange={(checked) => {
                     if (typeof checked === 'boolean') {
-                      updatePreferences({ show_list_articles: checked });
+                      setLocalShowListArticles(checked);
                     }
                   }}
                 />
