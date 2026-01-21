@@ -107,11 +107,21 @@ const Profile = () => {
     setIsSubmitting(true);
     
     try {
-      // Save profile info
-      await updateProfile({ 
-        display_name: displayName,
-        username: username 
-      });
+      // Track what was changed for appropriate feedback
+      let changesMade = false;
+
+      // Save profile info only if changed
+      const profileChanged = 
+        displayName !== (profile?.display_name || "") ||
+        username !== (profile?.username || "");
+      
+      if (profileChanged) {
+        await updateProfile({ 
+          display_name: displayName,
+          username: username 
+        });
+        changesMade = true;
+      }
 
       // Save reading preferences only if changed
       const preferencesChanged = 
@@ -123,6 +133,7 @@ const Profile = () => {
           auto_mark_read: localAutoMarkRead,
           show_list_articles: localShowListArticles,
         });
+        changesMade = true;
       }
 
       // Update password if changed
@@ -151,6 +162,14 @@ const Profile = () => {
         
         setNewPassword("");
         setConfirmPassword("");
+        changesMade = true;
+      }
+
+      // Show appropriate feedback
+      if (changesMade) {
+        toast.success("Changes saved successfully");
+      } else {
+        toast.info("No changes to save");
       }
     } catch (error) {
       console.error("Error saving changes:", error);
