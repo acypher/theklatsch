@@ -165,12 +165,13 @@ const Profile = () => {
         changesMade = true;
       }
 
-      // Show appropriate feedback
+      // Show appropriate feedback and navigate away
       if (changesMade) {
         toast.success("Changes saved successfully");
       } else {
         toast.info("No changes to save");
       }
+      navigate("/");
     } catch (error) {
       console.error("Error saving changes:", error);
       toast.error("Failed to save changes");
