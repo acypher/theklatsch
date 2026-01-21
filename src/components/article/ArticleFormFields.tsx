@@ -6,6 +6,7 @@ import { FormControl, FormField as HookFormField, FormItem } from "@/components/
 import FormField from "@/components/article/FormField";
 import MarkdownEditor from "@/components/article/MarkdownEditor";
 import ImageUploader from "@/components/article/ImageUploader";
+import KeywordInput from "@/components/article/KeywordInput";
 import { ArticleFormValues } from "@/components/article/ArticleFormSchema";
 
 interface FieldWrapperProps {
@@ -113,12 +114,12 @@ export const KeywordsField = () => {
         <FieldWrapper 
           name="keywords" 
           label="Keywords"
-          description="Separate keywords with spaces"
+          description="Type to see suggestions from existing keywords"
         >
-          <Input
-            id="keywords"
-            placeholder="Web Development JavaScript Design"
-            {...field} 
+          <KeywordInput
+            value={field.value || ""}
+            onChange={field.onChange}
+            placeholder="Start typing to see suggestions..."
           />
         </FieldWrapper>
       )}
