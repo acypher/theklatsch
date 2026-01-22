@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ArticleFormValues } from "@/components/article/ArticleFormSchema";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   TitleField,
   DescriptionField,
   AuthorField,
@@ -37,7 +43,27 @@ const ArticleForm = ({
   isDraft = false
 }: ArticleFormProps) => {
   const currentDraftValue = form.watch("draft");
+  const titleValue = form.watch("title");
+  const descriptionValue = form.watch("description");
   const showDraftBorder = isDraft || currentDraftValue;
+  
+  const isMissingRequired = !titleValue?.trim() || !descriptionValue?.trim();
+  const isButtonDisabled = isSubmitting || isMissingRequired;
+
+  const SubmitButton = (
+    <Button 
+      type="submit" 
+      disabled={isButtonDisabled} 
+      className="flex-1"
+    >
+      {isSubmitting ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+          {currentDraftValue ? "Saving..." : (submitButtonText === "Publish Article" ? "Publishing..." : "Updating...")}
+        </>
+      ) : (currentDraftValue ? "Save" : submitButtonText)}
+    </Button>
+  );
 
   return (
     <FormProvider {...form}>
@@ -61,18 +87,20 @@ const ArticleForm = ({
         <DraftField />
         
         <div className="pt-4 flex gap-2">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting} 
-            className="flex-1"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                {currentDraftValue ? "Saving..." : (submitButtonText === "Publish Article" ? "Publishing..." : "Updating...")}
-              </>
-            ) : (currentDraftValue ? "Save" : submitButtonText)}
-          </Button>
+          {isMissingRequired ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild className="flex-1">
+                  <span className="flex-1">{SubmitButton}</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Articles require a Title and a Description</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            SubmitButton
+          )}
           <Button 
             type="button" 
             variant="outline" 
