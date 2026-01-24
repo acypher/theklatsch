@@ -13,6 +13,12 @@ import {
   defaultFormValues 
 } from "@/components/article/ArticleFormSchema";
 import { useArticleUpdates } from "@/hooks/useArticleUpdates";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Custom event for article updates
 export const ARTICLE_UPDATED_EVENT = 'article-updated';
@@ -149,6 +155,27 @@ const EditArticleForm = () => {
     );
   }
 
+  const titleValue = form.watch("title");
+  const descriptionValue = form.watch("description");
+  const currentDraftValue = form.watch("draft");
+  const isMissingRequired = !titleValue?.trim() || !descriptionValue?.trim();
+  const isButtonDisabled = isSubmitting || isMissingRequired;
+
+  const TopSubmitButton = (
+    <Button 
+      type="submit" 
+      disabled={isButtonDisabled} 
+      className="flex-1"
+    >
+      {isSubmitting ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+          {currentDraftValue ? "Saving..." : "Updating..."}
+        </>
+      ) : (currentDraftValue ? "Save" : "Update Article")}
+    </Button>
+  );
+
   return (
     <ArticleForm
       form={form}
@@ -159,18 +186,20 @@ const EditArticleForm = () => {
     >
       {/* Top buttons */}
       <div className="mb-6 flex gap-2">
-        <Button 
-          type="submit" 
-          disabled={isSubmitting} 
-          className="flex-1"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-              Updating...
-            </>
-          ) : "Update Article"}
-        </Button>
+        {isMissingRequired ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild className="flex-1">
+                <span className="flex-1">{TopSubmitButton}</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Articles require a Title and a Description</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          TopSubmitButton
+        )}
         <Button 
           type="button" 
           variant="outline" 
