@@ -1,6 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { Article } from "@/lib/types";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ArticlesListProps {
   articles: Article[];
@@ -111,8 +112,26 @@ const ArticlesList = ({
                     </span>
                   )}
                 </span>
-                <span className={`${isArticleRead ? "text-muted-foreground/50" : ""} ${article.private ? 'border-b-2 border-b-red-600 pb-1' : ''}`}>
-                  {article.title}
+                <span className={`${isArticleRead ? "text-muted-foreground/50" : ""} ${article.private ? 'border-b-2 border-b-red-600 pb-1' : ''} inline`}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => <span>{children}</span>,
+                      a: ({ href, children }) => (
+                        <a 
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {children}
+                        </a>
+                      ),
+                    }}
+                  >
+                    {article.title}
+                  </ReactMarkdown>
                 </span>
               </button>
             </li>
