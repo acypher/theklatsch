@@ -104,8 +104,10 @@ useEffect(() => {
   }, []);
 
 useEffect(() => {
+  // Only fetch when we have a valid issue string
+  if (!currentIssue) return;
+
   const fetchArticles = async () => {
-    setLoading(true);
     try {
       const articlesData = await getAllArticles(currentIssue);
       setArticles(articlesData);
