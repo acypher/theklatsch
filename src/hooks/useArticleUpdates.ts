@@ -120,7 +120,7 @@ export const useArticleUpdates = () => {
           article_id: articleId,
           updated_at: new Date().toISOString(),
           updated_by: (await supabase.auth.getUser()).data.user?.id
-        });
+        }, { onConflict: 'article_id' });
     } catch (error) {
       console.error('Error recording article update:', error);
     }
@@ -136,7 +136,7 @@ export const useArticleUpdates = () => {
           article_id: articleId,
           user_id: (await supabase.auth.getUser()).data.user?.id,
           viewed_at: new Date().toISOString()
-        });
+        }, { onConflict: 'article_id,user_id' });
       
       setUserViews(prev => new Map([...prev, [articleId, new Date().toISOString()]]));
     } catch (error) {
