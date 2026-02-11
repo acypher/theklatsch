@@ -11,7 +11,7 @@ interface ArticleUpdate {
 
 export const useArticleUpdates = () => {
   const [articleUpdates, setArticleUpdates] = useState<ArticleUpdate[]>([]);
-  const [userViews, setUserViews] = useState<Set<string>>(new Set());
+  const [userViews, setUserViews] = useState<Map<string, string>>(new Map());
   const { isAuthenticated } = useAuth();
 
   // Fetch initial article updates
@@ -36,10 +36,12 @@ export const useArticleUpdates = () => {
       
       const { data: views } = await supabase
         .from('article_update_views')
-        .select('article_id');
+        .select('article_id, viewed_at');
       
       if (views) {
-        setUserViews(new Set(views.map(v => v.article_id)));
+        const viewMap = new Map<string, string>();
+        views.forEach(v => viewMap.set(v.article_id, v.viewed_at));
+        setUserViews(viewMap);
       }
     };
 
@@ -89,13 +91,12 @@ export const useArticleUpdates = () => {
           table: 'article_update_views'
         },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
-            const newView = payload.new as { article_id: string; user_id: string };
-            // Only update if it's the current user's view
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const newView = payload.new as { article_id: string; user_id: string; viewed_at: string };
             const currentUser = supabase.auth.getUser();
             currentUser.then(({ data }) => {
               if (data.user && data.user.id === newView.user_id) {
-                setUserViews(prev => new Set([...prev, newView.article_id]));
+                setUserViews(prev => new Map([...prev, [newView.article_id, newView.viewed_at]]));
               }
             });
           }
@@ -137,7 +138,7 @@ export const useArticleUpdates = () => {
           viewed_at: new Date().toISOString()
         });
       
-      setUserViews(prev => new Set([...prev, articleId]));
+      setUserViews(prev => new Map([...prev, [articleId, new Date().toISOString()]]));
     } catch (error) {
       console.error('Error marking article as viewed:', error);
     }
@@ -149,7 +150,9 @@ export const useArticleUpdates = () => {
     const updatedArticles: {[key: string]: string} = {};
     
     articleUpdates.forEach(update => {
-      if (!userViews.has(update.article_id)) {
+      const viewedAt = userViews.get(update.article_id);
+      // Show as updated if never viewed, or if updated after last view
+      if (!viewedAt || new Date(update.updated_at) > new Date(viewedAt)) {
         updatedArticles[update.article_id] = update.updated_at;
       }
     });
