@@ -109,6 +109,11 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
+          onBlur={() => {
+            if (inputValue.trim()) {
+              addKeyword(inputValue);
+            }
+          }}
           onKeyDown={handleKeyDown}
           placeholder={
             selectedKeywords.length === 0 ? "Type to search or add keywords..." : ""
