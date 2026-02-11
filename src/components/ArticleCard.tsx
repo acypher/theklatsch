@@ -47,7 +47,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
 
       const fetchPromise = supabase
         .from("comments")
-        .select("*", { count: 'exact', head: true })
+        .select("id", { count: 'exact' })
         .eq("article_id", article.id);
 
       const { count, error } = await Promise.race([
