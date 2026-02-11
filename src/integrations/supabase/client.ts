@@ -17,7 +17,7 @@ export const supabase = createClient<Database>(
       storage: localStorage,
       persistSession: true,
       autoRefreshToken: true,
-      flowType: 'pkce' // Adding PKCE flow for more secure authentication
+      flowType: 'implicit'
     }
   }
 );
