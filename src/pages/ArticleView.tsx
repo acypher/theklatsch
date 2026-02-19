@@ -19,7 +19,6 @@ const ArticleView = () => {
   const { isRead, toggleReadState } = useArticleReads(id || "");
   const { preferences, loading: preferencesLoading } = useUserPreferences();
 
-  console.log(`ArticleView RENDER - id: ${id}, loading: ${loading}, article: ${!!article}, isAuthenticated: ${isAuthenticated}`);
   
   useEffect(() => {
     const loadCurrentIssue = async () => {
@@ -41,7 +40,6 @@ const ArticleView = () => {
             setArticle(articleData);
             
             // Update page title using the article title
-            console.log(`ArticleView: Setting title to '${articleData.title} | The Klatsch'`);
             document.title = `${articleData.title} | The Klatsch`;
             
             // Update or create Open Graph meta tags
@@ -68,19 +66,10 @@ const ArticleView = () => {
 
   // Separate effect for auto-marking as read
   useEffect(() => {
-    console.log(`ArticleView: Auto-mark effect triggered - id: ${id}, isAuthenticated: ${isAuthenticated}, isRead: ${isRead}, auto_mark_read: ${preferences.auto_mark_read}, preferencesLoading: ${preferencesLoading}`);
-    
-    // Only proceed if preferences are loaded and article exists
     if (!preferencesLoading && id && article) {
-      console.log(`ArticleView: Checking auto-mark conditions - isAuthenticated: ${isAuthenticated}, isRead: ${isRead}, auto_mark_read: ${preferences.auto_mark_read}`);
       if (isAuthenticated && !isRead && preferences.auto_mark_read) {
-        console.log(`Auto-marking article as read - articleId: ${id}`);
         toggleReadState();
-      } else {
-        console.log(`Not auto-marking - either not authenticated, already read, or preference disabled`);
       }
-    } else {
-      console.log(`Skipping auto-mark check - preferencesLoading: ${preferencesLoading}, id: ${id}, article: ${!!article}`);
     }
   }, [id, isAuthenticated, isRead, toggleReadState, preferences.auto_mark_read, preferencesLoading, article]);
 
