@@ -6,7 +6,7 @@ import { READ_STATE_CHANGED_EVENT } from '@/hooks/useArticleReads';
 // Local storage key for read filter preference
 const FILTER_READ_STORAGE_KEY = 'klatsch-filter-read-articles';
 
-export const useReadArticles = (isAuthenticated: boolean) => {
+export const useReadArticles = (isAuthenticated: boolean, authLoading: boolean = false) => {
   const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
   const [filterEnabled, setFilterEnabled] = useState<boolean>(() => {
     // Initialize from localStorage on component mount
@@ -21,6 +21,9 @@ export const useReadArticles = (isAuthenticated: boolean) => {
   
   useEffect(() => {
     const fetchReadArticles = async () => {
+      // Don't clear read articles while auth is still loading
+      if (authLoading) return;
+      
       if (!isAuthenticated) {
         setReadArticles(new Set());
         return;
@@ -69,7 +72,7 @@ export const useReadArticles = (isAuthenticated: boolean) => {
         handleReadStateChange as EventListener
       );
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authLoading]);
 
   return { readArticles, filterEnabled, setFilterEnabled };
 };

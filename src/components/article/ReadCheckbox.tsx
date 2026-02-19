@@ -8,12 +8,11 @@ interface ReadCheckboxProps {
 }
 
 const ReadCheckbox = ({ articleId }: ReadCheckboxProps) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { isRead, loading, toggleReadState } = useArticleReads(articleId);
 
-  
-
-  if (!isAuthenticated) return null;
+  // Don't hide while auth is still loading - prevents flash on back navigation
+  if (!authLoading && !isAuthenticated) return null;
 
   return (
     <div className="absolute top-2 right-2 z-10 w-4 h-4 flex items-center justify-center">

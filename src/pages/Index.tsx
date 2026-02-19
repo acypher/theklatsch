@@ -28,11 +28,11 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [wholeWords, setWholeWords] = useState(false);
   const articleListRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated);
+  const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated, authLoading);
   const { allFavorites } = useArticleFavorites();
   const { preferences } = useUserPreferences();
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
