@@ -162,9 +162,8 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
         to={`/article/${currentArticle.id}`}
         className="block group"
         onClick={() => {
-          console.log(`Article clicked - articleId: ${currentArticle.id}, isAuthenticated: ${isAuthenticated}, isRead: ${isRead}`);
-          // Note: Auto-marking is now handled by ArticleView component based on user preferences
-          // No auto-marking here - let users control this via their preference setting
+          // Save scroll position so Index can restore it instantly when the user navigates back
+          sessionStorage.setItem('indexScrollY', window.scrollY.toString());
         }}
       >
         <div className="hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg">

@@ -18,6 +18,8 @@ import PasswordReset from "@/components/auth/PasswordReset";
 import { searchArchives, ArchiveSearchResult } from "@/lib/data/archiveSearch";
 import ArchiveSearchResults from "@/components/article/ArchiveSearchResults";
 
+const INDEX_STATE_KEY = 'indexPageState';
+
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("");
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
@@ -38,6 +40,37 @@ const Index = () => {
 
   // Check if this is a password reset request
   const isPasswordReset = searchParams.has('access_token') && searchParams.has('refresh_token');
+
+  // Restore saved state when navigating back from an article
+  const restoredStateRef = useRef(false);
+  useEffect(() => {
+    if (restoredStateRef.current) return;
+    const saved = sessionStorage.getItem(INDEX_STATE_KEY);
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        sessionStorage.removeItem(INDEX_STATE_KEY);
+        restoredStateRef.current = true;
+        if (state.articles?.length) setArticles(state.articles);
+        if (state.currentIssue) setCurrentIssue(state.currentIssue);
+        if (state.searchQuery !== undefined) setSearchQuery(state.searchQuery);
+        if (state.wholeWords !== undefined) setWholeWords(state.wholeWords);
+        if (state.archiveResults) setArchiveResults(state.archiveResults);
+        setLoading(false);
+        // Restore scroll position after DOM settles
+        const scrollY = parseInt(sessionStorage.getItem('indexScrollY') || '0', 10);
+        sessionStorage.removeItem('indexScrollY');
+        if (scrollY > 0) {
+          requestAnimationFrame(() => {
+            setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior }), 50);
+          });
+        }
+        return;
+      } catch {
+        sessionStorage.removeItem(INDEX_STATE_KEY);
+      }
+    }
+  }, []);
 
   // If it's a password reset, show the password reset component
   if (isPasswordReset) {
@@ -104,8 +137,9 @@ useEffect(() => {
   }, []);
 
 useEffect(() => {
-  // Only fetch when we have a valid issue string
+  // Only fetch when we have a valid issue string AND we didn't restore from cache
   if (!currentIssue) return;
+  if (restoredStateRef.current) return; // skip re-fetch when restoring from cache
 
   const fetchArticles = async () => {
     try {
@@ -121,38 +155,12 @@ useEffect(() => {
   fetchArticles();
 }, [currentIssue]);
 
-  // Effect to restore scroll position after article view
+  // Continuously save Index state to sessionStorage so it's ready if the user clicks an article
   useEffect(() => {
-    const restoreScrollPosition = () => {
-      const lastViewedArticleId = sessionStorage.getItem('lastViewedArticleId');
-
-      if (lastViewedArticleId) {
-        // Wait for articles to load and DOM to be ready
-        setTimeout(() => {
-          const articleElement = document.querySelector(`[data-article-id="${lastViewedArticleId}"]`);
-
-          if (articleElement) {
-            const navbar = document.querySelector('nav');
-            const navbarHeight = navbar ? navbar.offsetHeight : 0;
-            const extraPadding = 20;
-            const yOffset = -(navbarHeight + extraPadding);
-
-            const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
-            window.scrollTo({
-              top: y,
-              behavior: 'smooth'
-            });
-
-            // Clear the saved article ID after scrolling
-            sessionStorage.removeItem('lastViewedArticleId');
-          }
-        }, 100);
-      }
-    };
-
-    restoreScrollPosition();
-  }, [articles, location]);
+    if (loading || !currentIssue || !articles.length) return;
+    const state = { articles, currentIssue, searchQuery, wholeWords, archiveResults };
+    sessionStorage.setItem(INDEX_STATE_KEY, JSON.stringify(state));
+  }, [articles, currentIssue, searchQuery, wholeWords, archiveResults, loading]);
 
   // Store all articles without issue filtering for search
   const [allArticlesForSearch, setAllArticlesForSearch] = useState<Article[]>([]);
