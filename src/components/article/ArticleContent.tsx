@@ -37,7 +37,7 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
     if (onBackClick) {
       onBackClick();
     } else {
-      navigate(-1);
+      navigate("/");
     }
   };
   
