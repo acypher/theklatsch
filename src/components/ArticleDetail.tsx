@@ -113,11 +113,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   };
 
   const handleNavigateBack = () => {
-    // Save the current article ID to session storage before navigating
-    if (article) {
-      sessionStorage.setItem('lastViewedArticleId', article.id);
-    }
-    navigate("/");
+    navigate(-1);
   };
 
   if (loading) {
