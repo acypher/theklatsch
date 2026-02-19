@@ -18,6 +18,8 @@ const ArticleView = () => {
   const { isAuthenticated } = useAuth();
   const { isRead, toggleReadState } = useArticleReads(id || "");
   const { preferences, loading: preferencesLoading } = useUserPreferences();
+
+  console.log(`ArticleView RENDER - id: ${id}, loading: ${loading}, article: ${!!article}, isAuthenticated: ${isAuthenticated}`);
   
   useEffect(() => {
     const loadCurrentIssue = async () => {
