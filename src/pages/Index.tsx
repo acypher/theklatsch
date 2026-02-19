@@ -56,6 +56,12 @@ const Index = () => {
         if (state.searchQuery !== undefined) setSearchQuery(state.searchQuery);
         if (state.wholeWords !== undefined) setWholeWords(state.wholeWords);
         if (state.archiveResults) setArchiveResults(state.archiveResults);
+        // Restore read articles from cache to avoid flash while auth loads
+        if (state.readArticleIds?.length) {
+          setFilterEnabled(state.filterEnabled ?? filterEnabled);
+          // We'll restore readArticles via a ref that useReadArticles can pick up
+          sessionStorage.setItem('cachedReadArticles', JSON.stringify(state.readArticleIds));
+        }
         setLoading(false);
         // Restore scroll position after DOM settles
         const scrollY = parseInt(sessionStorage.getItem('indexScrollY') || '0', 10);
@@ -158,9 +164,13 @@ useEffect(() => {
   // Continuously save Index state to sessionStorage so it's ready if the user clicks an article
   useEffect(() => {
     if (loading || !currentIssue || !articles.length) return;
-    const state = { articles, currentIssue, searchQuery, wholeWords, archiveResults };
+    const state = {
+      articles, currentIssue, searchQuery, wholeWords, archiveResults,
+      readArticleIds: Array.from(readArticles),
+      filterEnabled
+    };
     sessionStorage.setItem(INDEX_STATE_KEY, JSON.stringify(state));
-  }, [articles, currentIssue, searchQuery, wholeWords, archiveResults, loading]);
+  }, [articles, currentIssue, searchQuery, wholeWords, archiveResults, loading, readArticles, filterEnabled]);
 
   // Store all articles without issue filtering for search
   const [allArticlesForSearch, setAllArticlesForSearch] = useState<Article[]>([]);
