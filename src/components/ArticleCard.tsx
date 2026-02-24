@@ -162,6 +162,8 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
         to={`/article/${currentArticle.id}`}
         className="block group"
         onClick={() => {
+          // Mark that Index state restoration is intentional (back navigation from article view)
+          sessionStorage.setItem('restoreIndexState', '1');
           // Save scroll position so Index can restore it instantly when the user navigates back
           sessionStorage.setItem('indexScrollY', window.scrollY.toString());
         }}

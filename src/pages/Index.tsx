@@ -19,6 +19,7 @@ import { searchArchives, ArchiveSearchResult } from "@/lib/data/archiveSearch";
 import ArchiveSearchResults from "@/components/article/ArchiveSearchResults";
 
 const INDEX_STATE_KEY = 'indexPageState';
+const RESTORE_INDEX_STATE_KEY = 'restoreIndexState';
 
 const Index = () => {
   const [currentIssue, setCurrentIssue] = useState<string>("");
@@ -46,6 +47,16 @@ const Index = () => {
   const restoredIssueRef = useRef<string | null>(null);
   useEffect(() => {
     if (restoredStateRef.current) return;
+
+    const shouldRestore = sessionStorage.getItem(RESTORE_INDEX_STATE_KEY) === '1';
+    if (!shouldRestore) {
+      // Prevent stale article cache from previous sessions from overriding current issue data.
+      sessionStorage.removeItem(INDEX_STATE_KEY);
+      return;
+    }
+
+    sessionStorage.removeItem(RESTORE_INDEX_STATE_KEY);
+
     const saved = sessionStorage.getItem(INDEX_STATE_KEY);
     if (saved) {
       try {
