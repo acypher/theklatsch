@@ -50,9 +50,10 @@ export const getAllArticles = async (issueText?: string): Promise<Article[]> => 
       .order('display_position', { ascending: true })
       .order('created_at', { ascending: false });
     
-    // Apply month/year filter - all articles (including "list" ones) must belong to the selected issue
+    // Apply month/year filter if available, and always include articles with "list" keyword
     if (month !== null && year !== null) {
-      query = query.eq('month', month).eq('year', year);
+      // Show articles from the specific month/year OR articles with "list" keyword (which should always appear)
+      query = query.or(`and(month.eq.${month},year.eq.${year}),keywords.cs.{"list"}`);
     }
     
     const { data: articles, error } = await query;

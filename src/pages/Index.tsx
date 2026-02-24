@@ -43,6 +43,7 @@ const Index = () => {
 
   // Restore saved state when navigating back from an article
   const restoredStateRef = useRef(false);
+  const restoredIssueRef = useRef<string | null>(null);
   useEffect(() => {
     if (restoredStateRef.current) return;
     const saved = sessionStorage.getItem(INDEX_STATE_KEY);
@@ -51,6 +52,7 @@ const Index = () => {
         const state = JSON.parse(saved);
         sessionStorage.removeItem(INDEX_STATE_KEY);
         restoredStateRef.current = true;
+        restoredIssueRef.current = state.currentIssue || null;
         if (state.articles?.length) setArticles(state.articles);
         if (state.currentIssue) setCurrentIssue(state.currentIssue);
         if (state.searchQuery !== undefined) setSearchQuery(state.searchQuery);
@@ -115,7 +117,15 @@ useEffect(() => {
       localStorage.removeItem('selected_issue_v2');
     }
 
-    setCurrentIssue(userSelectedIssue ?? dbIssue);
+    const effectiveIssue = userSelectedIssue ?? dbIssue;
+
+    // If restored state belongs to a different issue, fetch fresh data for the effective issue.
+    if (restoredIssueRef.current && restoredIssueRef.current !== effectiveIssue) {
+      restoredStateRef.current = false;
+      setLoading(true);
+    }
+
+    setCurrentIssue(effectiveIssue);
   };
 
   loadCurrentIssue();
