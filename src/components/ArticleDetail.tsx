@@ -113,7 +113,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   };
 
   const handleNavigateBack = () => {
-    navigate(-1);
+    navigate("/");
   };
 
   if (loading) {
