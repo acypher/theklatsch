@@ -110,9 +110,12 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
           }}
           onFocus={() => setIsOpen(true)}
           onBlur={() => {
-            if (inputValue.trim()) {
-              addKeyword(inputValue);
-            }
+            // Delay to allow dropdown click to register before committing
+            setTimeout(() => {
+              if (inputValue.trim()) {
+                addKeyword(inputValue);
+              }
+            }, 150);
           }}
           onKeyDown={handleKeyDown}
           placeholder={
