@@ -7,17 +7,7 @@ import { READ_STATE_CHANGED_EVENT } from '@/hooks/useArticleReads';
 const FILTER_READ_STORAGE_KEY = 'klatsch-filter-read-articles';
 
 export const useReadArticles = (isAuthenticated: boolean, authLoading: boolean = false) => {
-  const [readArticles, setReadArticles] = useState<Set<string>>(() => {
-    // Restore from cache if available (set by Index page on back navigation)
-    const cached = sessionStorage.getItem('cachedReadArticles');
-    if (cached) {
-      sessionStorage.removeItem('cachedReadArticles');
-      try {
-        return new Set(JSON.parse(cached));
-      } catch { /* ignore */ }
-    }
-    return new Set();
-  });
+  const [readArticles, setReadArticles] = useState<Set<string>>(new Set());
   const [filterEnabled, setFilterEnabled] = useState<boolean>(() => {
     // Initialize from localStorage on component mount
     const stored = localStorage.getItem(FILTER_READ_STORAGE_KEY);
