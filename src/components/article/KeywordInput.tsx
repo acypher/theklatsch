@@ -111,8 +111,11 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
           }}
           onFocus={() => setIsOpen(true)}
           onBlur={() => {
-            // Delay to allow dropdown click to register before committing
             setTimeout(() => {
+              if (skipBlurCommitRef.current) {
+                skipBlurCommitRef.current = false;
+                return;
+              }
               if (inputValue.trim()) {
                 addKeyword(inputValue);
               }
