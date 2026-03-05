@@ -51,26 +51,13 @@ export const getDefaultIssue = async (): Promise<string> => {
 
 export const getCurrentIssue = async (): Promise<{ text: string }> => {
   try {
-    // Fetch both display_issue and latest_issue in a single query
-    const { data: allRows, error } = await supabase
+    const { data, error } = await supabase
       .from('issue')
-      .select('key, value')
-      .in('key', ['display_issue', 'latest_issue']);
-
-    const displayRow = allRows?.find(r => r.key === 'display_issue');
-    const latestRow = allRows?.find(r => r.key === 'latest_issue');
+      .select('value')
+      .eq('key', 'display_issue')
+      .maybeSingle();
     
-    const parseIssueValue = (raw: any): string | null => {
-      if (!raw) return null;
-      if (typeof raw === 'string') {
-        try { const p = JSON.parse(raw); if (typeof p === 'string') return p; } catch {}
-        return raw.replace(/^"+|"+$/g, '').replace(/\\"/g, '"').trim();
-      }
-      return String(raw).replace(/^"+|"+$/g, '').trim();
-    };
-
-    const latestIssue = parseIssueValue(latestRow?.value) || "March 2026";
-    const data = displayRow ? { value: displayRow.value } : null;
+    const latestIssue = await getLatestIssue();
 
     if (error) {
       console.error("Error fetching display issue:", error);
