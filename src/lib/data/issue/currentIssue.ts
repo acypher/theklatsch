@@ -51,13 +51,12 @@ export const getDefaultIssue = async (): Promise<string> => {
 
 export const getCurrentIssue = async (): Promise<{ text: string }> => {
   try {
-    const { data, error } = await supabase
-      .from('issue')
-      .select('value')
-      .eq('key', 'display_issue')
-      .maybeSingle();
-    
-    const latestIssue = await getLatestIssue();
+    const [issueResult, latestIssue] = await Promise.all([
+      supabase.from('issue').select('value').eq('key', 'display_issue').maybeSingle(),
+      getLatestIssue(),
+    ]);
+
+    const { data, error } = issueResult;
 
     if (error) {
       console.error("Error fetching display issue:", error);
