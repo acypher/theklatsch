@@ -49,11 +49,13 @@ export const HomeLogo = () => {
     <header className="text-center mb-12">
       {logoUrl ? (
         <div className="flex justify-center mb-4">
-          <img 
-            src={logoUrl} 
-            alt="The Klatsch" 
-            className="h-20 md:h-24" 
-          />
+          <div className="bg-black rounded-lg px-8 py-4 inline-block">
+            <img 
+              src={logoUrl} 
+              alt="The Klatsch" 
+              className="h-20 md:h-24" 
+            />
+          </div>
         </div>
       ) : (
         <h1 className="text-4xl font-bold mb-4">The Klatsch</h1>
