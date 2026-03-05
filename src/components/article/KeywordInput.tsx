@@ -21,6 +21,7 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const skipBlurCommitRef = useRef(false);
 
   // Parse space-separated string into array
   const selectedKeywords = value
