@@ -21,6 +21,7 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const skipBlurCommitRef = useRef(false);
 
   // Parse space-separated string into array
   const selectedKeywords = value
@@ -110,8 +111,11 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
           }}
           onFocus={() => setIsOpen(true)}
           onBlur={() => {
-            // Delay to allow dropdown click to register before committing
             setTimeout(() => {
+              if (skipBlurCommitRef.current) {
+                skipBlurCommitRef.current = false;
+                return;
+              }
               if (inputValue.trim()) {
                 addKeyword(inputValue);
               }
@@ -134,6 +138,7 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
                   <CommandItem
                     key={keyword}
                     value={keyword}
+                    onMouseDown={() => { skipBlurCommitRef.current = true; }}
                     onSelect={() => addKeyword(keyword)}
                     className="cursor-pointer"
                   >
