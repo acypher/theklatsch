@@ -129,12 +129,18 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
           }}
           onFocus={() => setIsOpen(true)}
           onBlur={() => {
-            // Delay to allow dropdown click to register before committing
-            setTimeout(() => {
-              if (inputValue.trim()) {
-                addKeyword(inputValue);
+            // Delay to allow dropdown click selection before blur commit
+            window.setTimeout(() => {
+              if (skipBlurCommitRef.current) {
+                skipBlurCommitRef.current = false;
+                return;
               }
-            }, 150);
+
+              const pendingValue = inputValueRef.current.trim();
+              if (pendingValue) {
+                addKeyword(pendingValue);
+              }
+            }, 0);
           }}
           onKeyDown={handleKeyDown}
           placeholder={
