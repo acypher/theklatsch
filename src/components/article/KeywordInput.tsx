@@ -21,12 +21,26 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const valueRef = useRef(value);
+  const inputValueRef = useRef(inputValue);
+  const skipBlurCommitRef = useRef(false);
+
+  const parseKeywords = (rawValue: string) =>
+    rawValue
+      .split(" ")
+      .map((k) => k.trim())
+      .filter(Boolean);
 
   // Parse space-separated string into array
-  const selectedKeywords = value
-    .split(" ")
-    .map((k) => k.trim())
-    .filter(Boolean);
+  const selectedKeywords = parseKeywords(value);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    inputValueRef.current = inputValue;
+  }, [inputValue]);
 
   // Filter suggestions based on input
   const filteredKeywords = existingKeywords.filter(
@@ -37,16 +51,21 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
 
   const addKeyword = (keyword: string) => {
     const trimmed = keyword.trim();
-    if (trimmed && !selectedKeywords.includes(trimmed)) {
-      const newKeywords = [...selectedKeywords, trimmed];
+    if (!trimmed) return;
+
+    const currentKeywords = parseKeywords(valueRef.current);
+    if (!currentKeywords.includes(trimmed)) {
+      const newKeywords = [...currentKeywords, trimmed];
       onChange(newKeywords.join(" "));
     }
+
     setInputValue("");
     setIsOpen(false);
   };
 
   const removeKeyword = (keyword: string) => {
-    const newKeywords = selectedKeywords.filter((k) => k !== keyword);
+    const currentKeywords = parseKeywords(valueRef.current);
+    const newKeywords = currentKeywords.filter((k) => k !== keyword);
     onChange(newKeywords.join(" "));
   };
 
@@ -110,12 +129,18 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
           }}
           onFocus={() => setIsOpen(true)}
           onBlur={() => {
-            // Delay to allow dropdown click to register before committing
-            setTimeout(() => {
-              if (inputValue.trim()) {
-                addKeyword(inputValue);
+            // Delay to allow dropdown click selection before blur commit
+            window.setTimeout(() => {
+              if (skipBlurCommitRef.current) {
+                skipBlurCommitRef.current = false;
+                return;
               }
-            }, 150);
+
+              const pendingValue = inputValueRef.current.trim();
+              if (pendingValue) {
+                addKeyword(pendingValue);
+              }
+            }, 0);
           }}
           onKeyDown={handleKeyDown}
           placeholder={
@@ -134,6 +159,9 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
                   <CommandItem
                     key={keyword}
                     value={keyword}
+                    onMouseDown={() => {
+                      skipBlurCommitRef.current = true;
+                    }}
                     onSelect={() => addKeyword(keyword)}
                     className="cursor-pointer"
                   >
