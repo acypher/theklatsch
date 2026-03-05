@@ -159,6 +159,9 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
                   <CommandItem
                     key={keyword}
                     value={keyword}
+                    onMouseDown={() => {
+                      skipBlurCommitRef.current = true;
+                    }}
                     onSelect={() => addKeyword(keyword)}
                     className="cursor-pointer"
                   >
