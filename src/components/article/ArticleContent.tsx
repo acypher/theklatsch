@@ -67,7 +67,7 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
             <h2 className="text-2xl font-bold mb-4">More Information</h2>
             <div className="prose prose-lg max-w-none markdown-wrapper">
               <ReactMarkdown 
-                remarkPlugins={[remarkGfm]} 
+                remarkPlugins={remarkPlugins}
                 components={customRenderers}
               >
                 {moreContent}
