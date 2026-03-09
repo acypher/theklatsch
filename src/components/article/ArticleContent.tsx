@@ -53,7 +53,7 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
       <div className="prose prose-lg max-w-none mb-8">
         <div className="markdown-wrapper text-xl leading-relaxed mb-8">
           <ReactMarkdown 
-            remarkPlugins={[remarkGfm]} 
+            remarkPlugins={remarkPlugins} 
             components={customRenderers}
           >
             {description}
