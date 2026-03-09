@@ -38,7 +38,7 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
       </a>
     ),
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
-  }), []);
+  const remarkPlugins = useMemo(() => [remarkGfm], []);
 
   const handleBackClick = () => {
     if (onBackClick) {
