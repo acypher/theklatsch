@@ -18,32 +18,27 @@ interface ArticleContentProps {
 const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackClick }: ArticleContentProps) => {
   const navigate = useNavigate();
   
-  // Markdown component renderer customization
-  const customRenderers = {
-    // Customize link rendering to use proper attributes and prevent dropdown issues
+  // Memoize renderers to prevent infinite re-render loop
+  const customRenderers = useMemo(() => ({
     a: ({ node, href, children, ...props }: any) => (
-      <span 
+      <a 
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         className="text-primary hover:underline cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
           if (href) {
-            const a = document.createElement('a');
-            a.href = href;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            window.open(href, '_blank', 'noopener,noreferrer');
           }
         }}
       >
         {children}
-      </span>
+      </a>
     ),
-    // Ensure paragraphs don't interfere with other UI components
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
-  };
+  }), []);
 
   const handleBackClick = () => {
     if (onBackClick) {
