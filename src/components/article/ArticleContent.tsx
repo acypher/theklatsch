@@ -26,7 +26,13 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
         target="_blank" 
         rel="noopener noreferrer"
         className="text-primary hover:underline"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (props.href) {
+            window.open(props.href, '_blank', 'noopener,noreferrer');
+          }
+        }}
       />
     ),
     // Ensure paragraphs don't interfere with other UI components
