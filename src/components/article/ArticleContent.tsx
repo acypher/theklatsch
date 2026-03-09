@@ -20,20 +20,25 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
   // Markdown component renderer customization
   const customRenderers = {
     // Customize link rendering to use proper attributes and prevent dropdown issues
-    a: ({ node, ...props }: any) => (
-      <a 
-        {...props} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="text-primary hover:underline"
+    a: ({ node, href, children, ...props }: any) => (
+      <span 
+        className="text-primary hover:underline cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
-          if (props.href) {
-            window.open(props.href, '_blank', 'noopener,noreferrer');
+          if (href) {
+            const a = document.createElement('a');
+            a.href = href;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
           }
         }}
-      />
+      >
+        {children}
+      </span>
     ),
     // Ensure paragraphs don't interfere with other UI components
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
