@@ -1,4 +1,5 @@
 
+import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ExternalLink } from "lucide-react";
@@ -17,32 +18,29 @@ interface ArticleContentProps {
 const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackClick }: ArticleContentProps) => {
   const navigate = useNavigate();
   
-  // Markdown component renderer customization
-  const customRenderers = {
-    // Customize link rendering to use proper attributes and prevent dropdown issues
+  // Memoize renderers to prevent infinite re-render loop
+  const customRenderers = useMemo(() => ({
     a: ({ node, href, children, ...props }: any) => (
-      <span 
+      <a 
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         className="text-primary hover:underline cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
           if (href) {
-            const a = document.createElement('a');
-            a.href = href;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            window.open(href, '_blank', 'noopener,noreferrer');
           }
         }}
       >
         {children}
-      </span>
+      </a>
     ),
-    // Ensure paragraphs don't interfere with other UI components
     p: ({ node, ...props }: any) => <p className="markdown-paragraph" {...props} />,
-  };
+  }), []);
+
+  const remarkPlugins = useMemo(() => [remarkGfm], []);
 
   const handleBackClick = () => {
     if (onBackClick) {
@@ -57,7 +55,7 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
       <div className="prose prose-lg max-w-none mb-8">
         <div className="markdown-wrapper text-xl leading-relaxed mb-8">
           <ReactMarkdown 
-            remarkPlugins={[remarkGfm]} 
+            remarkPlugins={remarkPlugins} 
             components={customRenderers}
           >
             {description}
@@ -69,7 +67,7 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
             <h2 className="text-2xl font-bold mb-4">More Information</h2>
             <div className="prose prose-lg max-w-none markdown-wrapper">
               <ReactMarkdown 
-                remarkPlugins={[remarkGfm]} 
+                remarkPlugins={remarkPlugins}
                 components={customRenderers}
               >
                 {moreContent}
@@ -83,7 +81,7 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
             <h2 className="text-2xl font-bold mb-4">Summary</h2>
             <div className="prose prose-lg max-w-none markdown-wrapper">
               <ReactMarkdown 
-                remarkPlugins={[remarkGfm]} 
+                remarkPlugins={remarkPlugins} 
                 components={customRenderers}
               >
                 {summary}
