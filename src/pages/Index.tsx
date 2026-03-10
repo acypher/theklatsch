@@ -63,7 +63,7 @@ const Index = () => {
     if (currentIssue) sessionStorage.setItem('currentIssue', currentIssue);
   }, [currentIssue]);
 
-
+  useEffect(() => {
     document.title = "The Klatsch";
 
     const loadCurrentIssue = async () => {
