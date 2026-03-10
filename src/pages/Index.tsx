@@ -60,6 +60,10 @@ const Index = () => {
   }, [loading, articles.length]);
 
   useEffect(() => {
+    if (currentIssue) sessionStorage.setItem('currentIssue', currentIssue);
+  }, [currentIssue]);
+
+
     document.title = "The Klatsch";
 
     const loadCurrentIssue = async () => {
