@@ -37,7 +37,7 @@ const KeywordInput = ({ value, onChange }: KeywordInputProps) => {
   );
 
   const addKeyword = (keyword: string) => {
-    const trimmed = keyword.trim();
+    const trimmed = keyword.trim().toLowerCase();
     if (trimmed && !selectedKeywords.includes(trimmed)) {
       const newKeywords = [...selectedKeywords, trimmed];
       onChange(newKeywords.join(" "));

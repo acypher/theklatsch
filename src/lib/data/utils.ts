@@ -13,7 +13,7 @@ export const mapArticleFromDb = (article: any): Article => ({
   title: article.title,
   description: article.description,
   author: article.author,
-  keywords: article.keywords || [],
+  keywords: (article.keywords || []).map((k: string) => k.toLowerCase()),
   imageUrl: article.imageurl,
   sourceUrl: article.sourceurl,
   createdAt: article.created_at,
