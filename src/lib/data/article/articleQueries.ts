@@ -5,6 +5,22 @@ import { mapArticleFromDb } from "../utils";
 import { parseIssueString } from "./issueHelper";
 import { getCurrentIssue } from "../issue/currentIssue";
 
+/**
+ * Stable re-sort: venue → ott → normal → list.
+ * Within each group the original display_position order is preserved,
+ * so manual drag-and-drop still works inside each group but violations
+ * across groups are corrected with minimal displacement.
+ */
+const keywordPriority = (article: Article): number => {
+  if (article.keywords.includes('venue')) return 0;
+  if (article.keywords.includes('ott')) return 1;
+  if (article.keywords.includes('list')) return 3;
+  return 2;
+};
+
+const enforceKeywordOrder = (articles: Article[]): Article[] =>
+  [...articles].sort((a, b) => keywordPriority(a) - keywordPriority(b));
+
 // Function to fetch all articles from Supabase
 export const getAllArticles = async (issueText?: string): Promise<Article[]> => {
   try {
