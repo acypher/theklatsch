@@ -1,54 +1,33 @@
 
 
-## Robust Front Page Loading and Instant Back-Navigation
+## Diagnosis: Why Back-Navigation Is Slow
 
-### Problem
+The root cause is **not** the article data — React Query already caches that. The bottleneck is the **`currentIssue` state**, which initializes as `""` on every remount of `Index`. Because `useArticles` has `enabled: !!currentIssue`, it won't return cached data until after the async `getCurrentIssue()` Supabase call completes. This means every back-navigation waits for a network round-trip before showing anything.
 
-1. **"List" articles disappear** after returning from an article -- The `sessionStorage` caching/restoration system has race conditions between multiple effects (state restoration, issue loading, and article fetching). When conditions don't align perfectly, the restored articles can be cleared or the fetch can be skipped, causing "list" keyword articles to vanish.
+## Plan: Synchronous Issue Initialization
 
-2. **Back-navigation performance** -- `navigate("/")` does NOT cause a full browser reload (it's client-side React Router navigation). However, the `Index` component does unmount/remount, losing all React state. The current `sessionStorage`-based restoration is fragile and the root cause of bug #1.
+**The fix is simple**: cache `currentIssue` in `sessionStorage` so it's available synchronously on remount, allowing React Query to serve cached articles instantly.
 
-### Solution: Replace sessionStorage caching with React Query
+### Changes to `src/pages/Index.tsx`
 
-The project already has `@tanstack/react-query` installed with a `QueryClient` configured. React Query's cache persists across component unmount/remount cycles, making it the ideal replacement for the manual `sessionStorage` approach.
+1. **Initialize `currentIssue` from sessionStorage** instead of `""`:
+   ```ts
+   const [currentIssue, setCurrentIssue] = useState<string>(
+     () => sessionStorage.getItem('currentIssue') || ""
+   );
+   ```
 
-### What Changes
+2. **Persist `currentIssue` when it changes** — add a small effect:
+   ```ts
+   useEffect(() => {
+     if (currentIssue) sessionStorage.setItem('currentIssue', currentIssue);
+   }, [currentIssue]);
+   ```
 
-**Create two new hooks:**
+That's it. With this change:
+- First visit: `currentIssue` starts empty, async fetch runs, articles load normally
+- Back-navigation: `currentIssue` is instantly available from sessionStorage → `useArticles` immediately returns cached React Query data → page renders with zero delay
+- The async `getCurrentIssue()` still runs in the background and updates the issue if it changed
 
-- `src/hooks/useArticles.ts` -- Wraps `getAllArticles(issueText)` in `useQuery` with key `['articles', currentIssue]` and a generous `staleTime` (5 minutes). Returns cached data instantly on remount.
-
-- `src/hooks/useAllArticlesForSearch.ts` -- Wraps the "fetch all articles" Supabase query in `useQuery` with key `['articles', 'all']`. Uses the shared `mapArticleFromDb` utility instead of the inline mapping currently in Index.tsx.
-
-**Simplify `src/pages/Index.tsx`:**
-
-- Replace manual `useState`/`useEffect` article fetching with the two new hooks
-- Remove all `sessionStorage` state caching: the `INDEX_STATE_KEY`, `RESTORE_INDEX_STATE_KEY` constants, the restoration effect (lines 45-92), the continuous-save effect (lines 186-194), and both refs (`restoredStateRef`, `restoredIssueRef`)
-- Remove `cachedReadArticles` sessionStorage usage
-- Keep only lightweight scroll position save/restore via `sessionStorage` (`indexScrollY`): on mount, check for saved scroll position and restore it after articles render
-
-**Simplify `src/components/ArticleCard.tsx`:**
-
-- Remove the `restoreIndexState` flag setting on click (line 166)
-- Keep only the `indexScrollY` scroll position save on click (line 168)
-
-**Clean up `src/hooks/useReadArticles.ts`:**
-
-- Remove the `cachedReadArticles` sessionStorage initialization (lines 12-18), replace with a plain `new Set()`
-
-### Why This Works
-
-- When a user clicks "Back to articles" and `navigate("/")` runs, `Index` remounts but `useQuery` returns the cached article data instantly -- no loading spinner, no flicker, no race conditions
-- The "list" articles are always present because they come from the actual query result cached by React Query, not from a manually-serialized snapshot
-- Fresh page loads work correctly because `useQuery` simply fetches from the database
-- Search state (query text, whole words, archive results) resets on back-navigation, which is acceptable behavior; the article list itself is preserved
-
-### Files to Create
-- `src/hooks/useArticles.ts`
-- `src/hooks/useAllArticlesForSearch.ts`
-
-### Files to Modify
-- `src/pages/Index.tsx`
-- `src/components/ArticleCard.tsx`
-- `src/hooks/useReadArticles.ts`
+No other files need to change. No HTML caching needed — the actual bottleneck was just a missing synchronous seed value for the issue string.
 
