@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import GifPlayer from "@/components/GifPlayer";
 
 interface ArticleCardHeaderProps {
   articleId: string;
@@ -10,15 +10,24 @@ interface ArticleCardHeaderProps {
 }
 
 const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: ArticleCardHeaderProps) => {
+  const resolvedUrl = getImageUrl(imageUrl);
+
   return (
     <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
-      <img 
-        src={getImageUrl(imageUrl)} 
-        alt={title} 
-        className="w-full h-full object-contain"
-        loading="lazy"
-        id={isGif ? "animated-gif" : undefined}
-      />
+      {isGif ? (
+        <GifPlayer
+          src={resolvedUrl}
+          alt={title}
+          className="w-full h-full object-contain"
+        />
+      ) : (
+        <img 
+          src={resolvedUrl} 
+          alt={title} 
+          className="w-full h-full object-contain"
+          loading="lazy"
+        />
+      )}
     </AspectRatio>
   );
 };

@@ -37,18 +37,46 @@
             padding: 1rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             transition: transform 0.2s;
+            position: relative;
         }
         .gif-item:hover {
             transform: scale(1.05);
         }
-        .gif-item img {
+        .gif-item img, .gif-item canvas {
             display: block;
             width: 200px;
             height: auto;
         }
+        .gif-item canvas {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+        }
+        .gif-item canvas.hidden { display: none; }
+        .gif-item img.invisible { visibility: hidden; }
         .gif-label {
             display: none;
         }
+        .gif-toggle {
+            position: absolute;
+            top: 1.4rem;
+            right: 1.4rem;
+            z-index: 10;
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+            padding: 0;
+        }
+        .gif-toggle:hover { background: rgba(0,0,0,0.8); }
     </style>
 </head>
 <body>
@@ -57,34 +85,42 @@
     <div class="gif-grid">
         <div class="gif-item">
             <img src="gifs/taunting-01.gif" alt="taunting 01">
+            <button class="gif-toggle" aria-label="Toggle animation"></button>
             <div class="gif-label">taunting-01</div>
         </div>
         <div class="gif-item">
             <img src="gifs/animated-smileys-taunting-03.gif" alt="animated smileys taunting 03">
+            <button class="gif-toggle" aria-label="Toggle animation"></button>
             <div class="gif-label">animated-smileys-taunting-03</div>
         </div>
         <div class="gif-item">
             <img src="gifs/taunting-06.gif" alt="taunting 06">
+            <button class="gif-toggle" aria-label="Toggle animation"></button>
             <div class="gif-label">taunting-06</div>
         </div>
         <div class="gif-item">
             <img src="gifs/taunting-07.gif" alt="taunting 07">
+            <button class="gif-toggle" aria-label="Toggle animation"></button>
             <div class="gif-label">taunting-07</div>
         </div>
         <div class="gif-item">
             <img src="gifs/animated-smileys-taunting-10.gif" alt="animated smileys taunting 10">
+            <button class="gif-toggle" aria-label="Toggle animation"></button>
             <div class="gif-label">animated-smileys-taunting-10</div>
         </div>
         <div class="gif-item">
             <img src="gifs/taunting-11.gif" alt="taunting 11">
+            <button class="gif-toggle" aria-label="Toggle animation"></button>
             <div class="gif-label">taunting-11</div>
         </div>
         <div class="gif-item">
             <img src="gifs/taunting-12.gif" alt="taunting 12">
+            <button class="gif-toggle" aria-label="Toggle animation"></button>
             <div class="gif-label">taunting-12</div>
         </div>
         <div class="gif-item">
             <img src="gifs/taunting-13.gif" alt="taunting 13">
+            <button class="gif-toggle" aria-label="Toggle animation"></button>
             <div class="gif-label">taunting-13</div>
         </div>
     </div>
@@ -98,7 +134,86 @@
         <br>
         (where they are called "na na nas")
     </p> 
+
+    <script>
+    (function() {
+        const PLAY_DURATION = 20000;
+        const PLAY_ICON = "▶";
+        const PAUSE_ICON = "⏸";
+
+        document.querySelectorAll('.gif-item').forEach(function(item) {
+            const img = item.querySelector('img');
+            const btn = item.querySelector('.gif-toggle');
+            if (!img || !btn) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.className = 'hidden';
+            item.appendChild(canvas);
+
+            let state = 'idle'; // idle | playing | paused | forever
+            let timer = null;
+
+            function freezeFrame() {
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.naturalWidth || img.width;
+                canvas.height = img.naturalHeight || img.height;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            }
+
+            function showPaused() {
+                freezeFrame();
+                canvas.classList.remove('hidden');
+                img.classList.add('invisible');
+                btn.textContent = PLAY_ICON;
+                btn.style.display = 'flex';
+                state = 'paused';
+            }
+
+            function showPlaying() {
+                canvas.classList.add('hidden');
+                img.classList.remove('invisible');
+            }
+
+            function resetToIdle() {
+                clearTimeout(timer);
+                timer = null;
+                showPlaying();
+                btn.style.display = 'none';
+                state = 'idle';
+            }
+
+            function startTimer() {
+                showPlaying();
+                btn.style.display = 'none';
+                state = 'playing';
+                clearTimeout(timer);
+                timer = setTimeout(showPaused, PLAY_DURATION);
+            }
+
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (state === 'paused') {
+                    showPlaying();
+                    btn.textContent = PAUSE_ICON;
+                    state = 'forever';
+                } else if (state === 'forever') {
+                    showPaused();
+                }
+            });
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        if (state === 'idle') startTimer();
+                    } else {
+                        resetToIdle();
+                    }
+                });
+            }, { threshold: 0.25 });
+
+            observer.observe(item);
+        });
+    })();
+    </script>
 </body>
 </html>
-
-
