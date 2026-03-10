@@ -20,7 +20,9 @@ import { useArticles } from "@/hooks/useArticles";
 import { useAllArticlesForSearch } from "@/hooks/useAllArticlesForSearch";
 
 const Index = () => {
-  const [currentIssue, setCurrentIssue] = useState<string>("");
+  const [currentIssue, setCurrentIssue] = useState<string>(
+    () => sessionStorage.getItem('currentIssue') || ""
+  );
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [wholeWords, setWholeWords] = useState(false);
@@ -56,6 +58,10 @@ const Index = () => {
       }
     }
   }, [loading, articles.length]);
+
+  useEffect(() => {
+    if (currentIssue) sessionStorage.setItem('currentIssue', currentIssue);
+  }, [currentIssue]);
 
   useEffect(() => {
     document.title = "The Klatsch";
