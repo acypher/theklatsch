@@ -12,7 +12,6 @@ import ArticleImage from "./article/ArticleImage";
 import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
-import { initGifController } from '@/utils/gifController';
 import { useArticleUpdates } from "@/hooks/useArticleUpdates";
 
 interface ArticleDetailProps {
