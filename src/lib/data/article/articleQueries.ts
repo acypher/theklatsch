@@ -63,7 +63,8 @@ export const getAllArticles = async (issueText?: string): Promise<Article[]> => 
     }
 
     if (articles && articles.length > 0) {
-      return articles.map(mapArticleFromDb);
+      const mapped = articles.map(mapArticleFromDb);
+      return enforceKeywordOrder(mapped);
     } else {
       console.log("No articles found for the current issue");
       return [];
