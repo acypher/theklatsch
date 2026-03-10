@@ -12,7 +12,6 @@ import ArticleImage from "./article/ArticleImage";
 import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
-import { initGifController } from '@/utils/gifController';
 import { useArticleUpdates } from "@/hooks/useArticleUpdates";
 
 interface ArticleDetailProps {
@@ -71,20 +70,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
     }
   }, [article, isAuthenticated, markAsViewed]);
 
-  useEffect(() => {
-    if (article?.imageUrl?.toLowerCase().endsWith('.gif')) {
-      // Initialize the GIF controller when the article loads
-      const initGif = async () => {
-        try {
-          await initGifController();
-        } catch (error) {
-          console.error("Error initializing GIF controller:", error);
-        }
-      };
-      
-      initGif();
-    }
-  }, [article]);
+  // GIF control is now handled by the GifPlayer component inside ArticleImage
 
   const handleDelete = async () => {
     if (!id) return;
