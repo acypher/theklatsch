@@ -3,11 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 // Function to determine the appropriate display position based on keywords/tags
 export const determineDisplayPosition = async (keywords: string[], month: number, year: number): Promise<number> => {
   try {
-    // RULE 1: If it has a "venue" tag, place it at position 1
-    if (keywords.includes('venue')) {
-      return 1;
-    }
-    
     // Get current articles for this issue sorted by position
     const { data: articles, error } = await supabase
       .from('articles')
@@ -19,53 +14,39 @@ export const determineDisplayPosition = async (keywords: string[], month: number
     
     if (error) {
       console.error("Error fetching articles for position determination:", error);
-      return 999; // Default to a high position if there's an error
+      return 999;
     }
     
-    // If no articles exist yet
     if (!articles || articles.length === 0) {
       return 1;
     }
-    
-    // RULE 2: If it has a "lists" tag, place it at the very end (after all other articles)
+
+    // Count existing venue and ott articles to determine proper positioning
+    const venueCount = articles.filter(a => (a.keywords || []).includes('venue')).length;
+    const ottCount = articles.filter(a => (a.keywords || []).includes('ott')).length;
+
+    // RULE 1: venue articles go first (position 1..venueCount)
+    if (keywords.includes('venue')) {
+      // Place at the end of the venue block
+      return venueCount; // This will be re-sorted, but ensures it's in the venue zone
+    }
+
+    // RULE 2: lists articles go at the very end
     if (keywords.includes('lists')) {
-      const maxPosition = articles.length > 0 
-        ? Math.max(...articles.map(a => a.display_position || 0)) + 1 
-        : 1;
+      const maxPosition = Math.max(...articles.map(a => a.display_position || 0)) + 1;
       return maxPosition;
     }
-    
-    // RULE 3: If it has an "ott" tag
+
+    // RULE 3: ott articles go right after venue articles
     if (keywords.includes('ott')) {
-      // Find the position after the last article with 'venue' or 'ott' tags
-      let position = 1;
-      let allPreviousHaveRequiredTags = true;
-      
-      for (let i = 0; i < articles.length; i++) {
-        const articleKeywords = articles[i].keywords || [];
-        if (articleKeywords.includes('venue') || articleKeywords.includes('ott')) {
-          // This article has a required tag
-          position = (articles[i].display_position || 0) + 1;
-        } else {
-          // Found an article without required tags, stop here
-          allPreviousHaveRequiredTags = false;
-          break;
-        }
+      // Position after all venue articles
+      // Find the display_position of the last venue article, or start at 1
+      const venueArticles = articles.filter(a => (a.keywords || []).includes('venue'));
+      if (venueArticles.length > 0) {
+        const lastVenuePos = Math.max(...venueArticles.map(a => a.display_position || 0));
+        return lastVenuePos + 1;
       }
-      
-      // If all articles had required tags, position should be after the last one
-      if (allPreviousHaveRequiredTags) {
-        return position;
-      } else {
-        // Otherwise, find the first position where an article doesn't have required tags
-        for (let i = 0; i < articles.length; i++) {
-          const articleKeywords = articles[i].keywords || [];
-          if (!(articleKeywords.includes('venue') || articleKeywords.includes('ott'))) {
-            return articles[i].display_position || i + 1;
-          }
-        }
-        return position;
-      }
+      return 1;
     }
     
     // RULE 4: If it has a "tmm" tag
