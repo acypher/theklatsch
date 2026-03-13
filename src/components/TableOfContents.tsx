@@ -80,7 +80,7 @@ const TableOfContents = ({
 
   // Check for unread updates - in ALL articles that are read AND updated
   useEffect(() => {
-    const hasAnyUnreadUpdates = articles.some(article => 
+    const hasAnyUnreadUpdates = allArticles.some(article => 
       readArticles.has(article.id) && updatedArticles[article.id] !== undefined
     );
     setHasUnreadUpdates(hasAnyUnreadUpdates);
