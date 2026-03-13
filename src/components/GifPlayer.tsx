@@ -106,7 +106,7 @@ const GifPlayer = ({ src, alt, className = "", playDuration = 20000 }: GifPlayer
       {showIcon && (
         <button
           onClick={handleToggle}
-          className="absolute top-2 right-2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-colors cursor-pointer"
+          className="absolute bottom-2 right-2 z-10 bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 transition-colors cursor-pointer"
           aria-label={state === "paused" ? "Play animation" : "Pause animation"}
         >
           {state === "paused" ? <Play size={14} /> : <Pause size={14} />}
