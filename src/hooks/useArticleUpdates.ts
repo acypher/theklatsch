@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,6 +12,7 @@ interface ArticleUpdate {
 export const useArticleUpdates = () => {
   const [articleUpdates, setArticleUpdates] = useState<ArticleUpdate[]>([]);
   const [userViews, setUserViews] = useState<Map<string, string>>(new Map());
+  const [viewsLoaded, setViewsLoaded] = useState(false);
   const { isAuthenticated } = useAuth();
 
   // Fetch initial article updates
@@ -32,7 +33,10 @@ export const useArticleUpdates = () => {
   // Fetch user's viewed updates
   useEffect(() => {
     const fetchUserViews = async () => {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated) {
+        setViewsLoaded(false);
+        return;
+      }
       
       const { data: views } = await supabase
         .from('article_update_views')
@@ -43,6 +47,7 @@ export const useArticleUpdates = () => {
         views.forEach(v => viewMap.set(v.article_id, v.viewed_at));
         setUserViews(viewMap);
       }
+      setViewsLoaded(true);
     };
 
     fetchUserViews();
@@ -144,24 +149,27 @@ export const useArticleUpdates = () => {
     }
   };
 
-  const getUpdatedArticles = () => {
-    if (!isAuthenticated) return {};
+  // Memoize to avoid creating a new object reference every render
+  const updatedArticles = useMemo(() => {
+    // Don't show any updates until both auth is confirmed and views have loaded
+    // This prevents the race condition where articleUpdates loads before userViews
+    if (!isAuthenticated || !viewsLoaded) return {};
     
-    const updatedArticles: {[key: string]: string} = {};
+    const result: {[key: string]: string} = {};
     
     articleUpdates.forEach(update => {
       const viewedAt = userViews.get(update.article_id);
       // Show as updated if never viewed, or if updated after last view
       if (!viewedAt || new Date(update.updated_at) > new Date(viewedAt)) {
-        updatedArticles[update.article_id] = update.updated_at;
+        result[update.article_id] = update.updated_at;
       }
     });
     
-    return updatedArticles;
-  };
+    return result;
+  }, [isAuthenticated, viewsLoaded, articleUpdates, userViews]);
 
   return {
-    updatedArticles: getUpdatedArticles(),
+    updatedArticles,
     recordArticleUpdate,
     markAsViewed
   };
