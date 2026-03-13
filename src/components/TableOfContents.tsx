@@ -44,7 +44,6 @@ const TableOfContents = ({
   const maxHeight = useContentsHeight();
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   const [hasUnreadComments, setHasUnreadComments] = useState(false);
-  const [hasUnreadUpdates, setHasUnreadUpdates] = useState(false);
   const { updatedArticles } = useArticleUpdates();
   
   // Filter articles if hideRead is true
@@ -78,13 +77,10 @@ const TableOfContents = ({
     setHasUnreadComments(hasAnyUnreadComments);
   }, [commentCounts, allArticles]);
 
-  // Check for unread updates - in ALL articles that are read AND updated
-  useEffect(() => {
-    const hasAnyUnreadUpdates = allArticles.some(article => 
-      readArticles.has(article.id) && updatedArticles[article.id] !== undefined
-    );
-    setHasUnreadUpdates(hasAnyUnreadUpdates);
-  }, [updatedArticles, articles, readArticles]);
+  // Derive hasUnreadUpdates directly (no stale useEffect state)
+  const hasUnreadUpdates = allArticles.some(article => 
+    readArticles.has(article.id) && updatedArticles[article.id] !== undefined
+  );
 
   // Only call useRecommendations once we have an issue key
   const { recommendations, loading, isSaving, handleSaveRecommendations } = 
