@@ -11,7 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import UserMenu from "./navbar/UserMenu";
 import IssueSelector from "./navbar/IssueSelector";
 import ArchivesMenu from "./navbar/ArchivesMenu";
+import AdvanceIssueDialog from "./navbar/AdvanceIssueDialog";
 import SearchBar from "./SearchBar";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 interface NavbarProps {
   onLogoClick?: () => void;
@@ -43,6 +45,7 @@ const Navbar = ({
   onFavoritesToggle
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
+  const isAdmin = useIsAdmin();
   const location = useLocation();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
@@ -162,12 +165,17 @@ const handleIssueChange = async (issueText: string) => {
             The Klatsch
           </Link>
           {currentIssue && (
-            <IssueSelector 
-              currentIssue={currentIssue}
-              issues={issues}
-              loading={loading}
-              onIssueChange={handleIssueChange}
-            />
+            <>
+              <IssueSelector 
+                currentIssue={currentIssue}
+                issues={issues}
+                loading={loading}
+                onIssueChange={handleIssueChange}
+              />
+              {isAdmin && (
+                <AdvanceIssueDialog currentIssue={currentIssue} />
+              )}
+            </>
           )}
           
           {/* Removed the user condition to show archives to all users */}
