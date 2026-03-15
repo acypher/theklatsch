@@ -11,6 +11,9 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import AdvanceIssueDialog from "@/components/navbar/AdvanceIssueDialog";
+import { getCurrentIssue } from "@/lib/data/issue/currentIssue";
 
 const Profile = () => {
   const { user, profile, updateProfile, profileLoading } = useAuth();
