@@ -44,7 +44,6 @@ const Navbar = ({
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
-  const location = useLocation();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
   const [backIssues, setBackIssues] = useState<any[]>([]);
