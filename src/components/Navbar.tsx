@@ -43,7 +43,7 @@ const Navbar = ({
   onFavoritesToggle
 }: NavbarProps) => {
   const { user, profile, signOut } = useAuth();
-  const isAdmin = useIsAdmin();
+  const location = useLocation();
   const location = useLocation();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
