@@ -33,6 +33,11 @@ const Profile = () => {
   
   const navigate = useNavigate();
 
+  // Load current issue for admin dialog
+  useEffect(() => {
+    getCurrentIssue().then(({ text }) => setCurrentIssue(text));
+  }, []);
+
   // Sync local state when data loads
   useEffect(() => {
     setLocalAutoMarkRead(preferences.auto_mark_read);
