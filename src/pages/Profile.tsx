@@ -18,6 +18,8 @@ import { getCurrentIssue } from "@/lib/data/issue/currentIssue";
 const Profile = () => {
   const { user, profile, updateProfile, profileLoading } = useAuth();
   const { preferences, loading: preferencesLoading, updatePreferences } = useUserPreferences();
+  const isAdmin = useIsAdmin();
+  const [currentIssue, setCurrentIssue] = useState("");
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState(profile?.username || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
