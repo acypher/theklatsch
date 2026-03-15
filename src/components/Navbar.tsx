@@ -170,9 +170,6 @@ const handleIssueChange = async (issueText: string) => {
                 loading={loading}
                 onIssueChange={handleIssueChange}
               />
-              {isAdmin && (
-                <AdvanceIssueDialog currentIssue={currentIssue} />
-              )}
             </>
           )}
           
