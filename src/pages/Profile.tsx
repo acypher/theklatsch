@@ -11,10 +11,15 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import AdvanceIssueDialog from "@/components/navbar/AdvanceIssueDialog";
+import { getCurrentIssue } from "@/lib/data/issue/currentIssue";
 
 const Profile = () => {
   const { user, profile, updateProfile, profileLoading } = useAuth();
   const { preferences, loading: preferencesLoading, updatePreferences } = useUserPreferences();
+  const isAdmin = useIsAdmin();
+  const [currentIssue, setCurrentIssue] = useState("");
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState(profile?.username || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,6 +32,11 @@ const Profile = () => {
   const [localShowListArticles, setLocalShowListArticles] = useState(preferences.show_list_articles);
   
   const navigate = useNavigate();
+
+  // Load current issue for admin dialog
+  useEffect(() => {
+    getCurrentIssue().then(({ text }) => setCurrentIssue(text));
+  }, []);
 
   // Sync local state when data loads
   useEffect(() => {
@@ -327,6 +337,24 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
+
+        {isAdmin && currentIssue && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Admin Settings</CardTitle>
+              <CardDescription>Manage site-wide settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Current Issue: <strong>{currentIssue}</strong></p>
+                  <p className="text-xs text-muted-foreground mt-1">Advance to the next monthly issue when you're ready</p>
+                </div>
+                <AdvanceIssueDialog currentIssue={currentIssue} />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Bottom action buttons */}
         <div className="mt-6 flex justify-between">
