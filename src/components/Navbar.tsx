@@ -165,12 +165,17 @@ const handleIssueChange = async (issueText: string) => {
             The Klatsch
           </Link>
           {currentIssue && (
-            <IssueSelector 
-              currentIssue={currentIssue}
-              issues={issues}
-              loading={loading}
-              onIssueChange={handleIssueChange}
-            />
+            <>
+              <IssueSelector 
+                currentIssue={currentIssue}
+                issues={issues}
+                loading={loading}
+                onIssueChange={handleIssueChange}
+              />
+              {isAdmin && (
+                <AdvanceIssueDialog currentIssue={currentIssue} />
+              )}
+            </>
           )}
           
           {/* Removed the user condition to show archives to all users */}
