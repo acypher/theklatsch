@@ -338,6 +338,24 @@ const Profile = () => {
           </CardContent>
         </Card>
 
+        {isAdmin && currentIssue && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Admin Settings</CardTitle>
+              <CardDescription>Manage site-wide settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Current Issue: <strong>{currentIssue}</strong></p>
+                  <p className="text-xs text-muted-foreground mt-1">Advance to the next monthly issue when you're ready</p>
+                </div>
+                <AdvanceIssueDialog currentIssue={currentIssue} />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Bottom action buttons */}
         <div className="mt-6 flex justify-between">
           <Button 
