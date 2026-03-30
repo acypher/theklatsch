@@ -27,6 +27,7 @@ export const ARTICLE_UPDATED_EVENT = 'article-updated';
 const EditArticleForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [originalPosition, setOriginalPosition] = useState<number | null>(null);
