@@ -7,6 +7,7 @@ import { updateArticlesOrder } from "@/lib/data/article/specialOperations";
 import { toast } from "sonner";
 
 export const useDragAndDrop = (articles: Article[], onOrderChange: (articles: Article[]) => void) => {
+  const queryClient = useQueryClient();
   const [draggedItem, setDraggedItem] = useState<Article | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
