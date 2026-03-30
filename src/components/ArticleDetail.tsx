@@ -24,6 +24,7 @@ interface ArticleDetailProps {
 const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssue }: ArticleDetailProps = {}) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [article, setArticle] = useState<Article | null>(propArticle || null);
   const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
