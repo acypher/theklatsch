@@ -49,10 +49,6 @@ const GifPlayer = ({ src, alt, className = "", playDuration = 20000 }: GifPlayer
             if (prev === "idle") return "playing";
             return prev;
           });
-        } else {
-          // Scrolled out of view → reset
-          clearTimer();
-          setState("idle");
         }
       },
       { threshold: 0.25 }
