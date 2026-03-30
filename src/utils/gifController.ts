@@ -13,7 +13,7 @@ const isAnimatedGif = async (url: string): Promise<boolean> => {
   }
 };
 
-export const initGifController = async (playDuration: number = 10000) => {
+export const initGifController = async (playDuration: number = 5000) => {
   const gif = document.getElementById('animated-gif');
   if (!gif) return null;
 
