@@ -18,6 +18,7 @@ const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: A
         <GifPlayer
           src={resolvedUrl}
           alt={title}
+          playDuration={5000}
           className="w-full h-full object-contain"
         />
       ) : (
