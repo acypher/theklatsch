@@ -79,6 +79,7 @@ export const useDragAndDrop = (articles: Article[], onOrderChange: (articles: Ar
     try {
       const success = await updateArticlesOrder(orderData);
       if (success) {
+        await queryClient.invalidateQueries({ queryKey: ['articles'] });
         toast.success("Article order updated successfully");
       } else {
         toast.error("Failed to update article order");

@@ -53,6 +53,7 @@ const ArrangeArticles = () => {
       const success = await updateArticlesOrder(articlesOrder);
       
       if (success) {
+        await queryClient.invalidateQueries({ queryKey: ['articles'] });
         toast.success("Article order updated successfully");
         // Update local state to reflect new positions
         const updatedArticles = articles.map((article, index) => ({
