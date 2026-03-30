@@ -11,7 +11,7 @@ interface GifPlayerProps {
 
 type GifState = "idle" | "playing" | "paused" | "forever";
 
-const GifPlayer = ({ src, alt, className = "", playDuration = 20000 }: GifPlayerProps) => {
+const GifPlayer = ({ src, alt, className = "", playDuration = 5000 }: GifPlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
