@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Article } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { updateArticlesOrder } from "@/lib/data/article/specialOperations";
