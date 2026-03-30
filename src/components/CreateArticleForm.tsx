@@ -17,6 +17,7 @@ import {
 
 const CreateArticleForm = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ArticleFormValues>({
