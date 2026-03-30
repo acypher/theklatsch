@@ -1,11 +1,13 @@
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Article } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 import { updateArticlesOrder } from "@/lib/data/article/specialOperations";
 import { toast } from "sonner";
 
 export const useDragAndDrop = (articles: Article[], onOrderChange: (articles: Article[]) => void) => {
+  const queryClient = useQueryClient();
   const [draggedItem, setDraggedItem] = useState<Article | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -77,6 +79,7 @@ export const useDragAndDrop = (articles: Article[], onOrderChange: (articles: Ar
     try {
       const success = await updateArticlesOrder(orderData);
       if (success) {
+        await queryClient.invalidateQueries({ queryKey: ['articles'] });
         toast.success("Article order updated successfully");
       } else {
         toast.error("Failed to update article order");

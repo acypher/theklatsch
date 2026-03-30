@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { getArticleById, deleteArticle } from "@/lib/data";
@@ -23,6 +24,7 @@ interface ArticleDetailProps {
 const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssue }: ArticleDetailProps = {}) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [article, setArticle] = useState<Article | null>(propArticle || null);
   const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -78,6 +80,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
     try {
       setIsDeleting(true);
       await deleteArticle(id);
+      await queryClient.invalidateQueries({ queryKey: ['articles'] });
       toast.success("Article deleted successfully");
       navigate("/");
     } catch (error) {

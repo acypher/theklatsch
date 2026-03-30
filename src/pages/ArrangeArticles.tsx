@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { getAllArticles } from "@/lib/data";
@@ -12,6 +13,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Loader2, Save } from "lucide-react";
 
 const ArrangeArticles = () => {
+  const queryClient = useQueryClient();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -51,6 +53,7 @@ const ArrangeArticles = () => {
       const success = await updateArticlesOrder(articlesOrder);
       
       if (success) {
+        await queryClient.invalidateQueries({ queryKey: ['articles'] });
         toast.success("Article order updated successfully");
         // Update local state to reflect new positions
         const updatedArticles = articles.map((article, index) => ({
