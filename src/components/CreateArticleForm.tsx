@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addArticle } from "@/lib/data";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ import {
 
 const CreateArticleForm = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ArticleFormValues>({
@@ -79,6 +81,9 @@ const CreateArticleForm = () => {
       });
 
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+      
+      // Invalidate article caches so back-navigation shows the new article
+      await queryClient.invalidateQueries({ queryKey: ['articles'] });
       
       toast.success(data.draft ? "Draft saved successfully!" : "Article published successfully!");
       
