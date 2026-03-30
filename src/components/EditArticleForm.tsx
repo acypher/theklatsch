@@ -140,6 +140,9 @@ const EditArticleForm = () => {
       // Record the article update in the database
       await recordArticleUpdate(id);
       
+      // Invalidate article caches so back-navigation shows updated data
+      await queryClient.invalidateQueries({ queryKey: ['articles'] });
+      
       toast.success("Article updated successfully!");
       navigate(`/article/${id}`);
     } catch (error) {
