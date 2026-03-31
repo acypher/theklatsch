@@ -15,8 +15,12 @@ export const useArticleReads = (articleId: string) => {
   const initialFetchDone = useRef(false);
 
   useEffect(() => {
-    const fetchReadState = async () => {
-      if (!user || !isMounted.current || initialFetchDone.current) return;
+  const fetchReadState = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      if (!isMounted.current || initialFetchDone.current) return;
 
       try {
         setLoading(true);
