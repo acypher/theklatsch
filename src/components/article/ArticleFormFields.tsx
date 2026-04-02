@@ -1,5 +1,5 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FormControl, FormField as HookFormField, FormItem } from "@/components/ui/form";
@@ -8,6 +8,9 @@ import MarkdownEditor from "@/components/article/MarkdownEditor";
 import ImageUploader from "@/components/article/ImageUploader";
 import KeywordInput from "@/components/article/KeywordInput";
 import { ArticleFormValues } from "@/components/article/ArticleFormSchema";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface FieldWrapperProps {
   name: keyof ArticleFormValues;
