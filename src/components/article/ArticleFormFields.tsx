@@ -1,5 +1,5 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { FormControl, FormField as HookFormField, FormItem } from "@/components/ui/form";
@@ -8,6 +8,9 @@ import MarkdownEditor from "@/components/article/MarkdownEditor";
 import ImageUploader from "@/components/article/ImageUploader";
 import KeywordInput from "@/components/article/KeywordInput";
 import { ArticleFormValues } from "@/components/article/ArticleFormSchema";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface FieldWrapperProps {
   name: keyof ArticleFormValues;
@@ -158,8 +161,33 @@ export const ImageField = () => {
 };
 
 export const SourceUrlField = () => {
-  const { control } = useFormContext<ArticleFormValues>();
-  
+  const { control, setValue, getValues } = useFormContext<ArticleFormValues>();
+  const [isFetchingOg, setIsFetchingOg] = useState(false);
+
+  const fetchOgImage = async (url: string) => {
+    if (!url || !url.startsWith('http')) return;
+    
+    // Only auto-fill if image field is empty or has the default unsplash placeholder
+    const currentImage = getValues('imageUrl');
+    if (currentImage && !currentImage.includes('images.unsplash.com') && currentImage.trim() !== '') return;
+
+    setIsFetchingOg(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('og-image', {
+        body: { url },
+      });
+
+      if (!error && data?.success && data?.imageUrl) {
+        setValue('imageUrl', data.imageUrl);
+        toast.success("Image auto-detected from article URL");
+      }
+    } catch (err) {
+      console.error('OG image fetch failed:', err);
+    } finally {
+      setIsFetchingOg(false);
+    }
+  };
+
   return (
     <Controller
       control={control}
@@ -168,12 +196,28 @@ export const SourceUrlField = () => {
         <FieldWrapper 
           name="sourceUrl" 
           label="Source URL"
+          description="Paste an article URL to auto-detect its image"
         >
-          <Input
-            id="sourceUrl"
-            placeholder="https://example.com/your-article"
-            {...field} 
-          />
+          <div className="relative">
+            <Input
+              id="sourceUrl"
+              placeholder="https://example.com/your-article"
+              {...field}
+              onBlur={(e) => {
+                field.onBlur();
+                fetchOgImage(e.target.value);
+              }}
+              onPaste={(e) => {
+                setTimeout(() => {
+                  const pastedValue = (e.target as HTMLInputElement).value;
+                  fetchOgImage(pastedValue);
+                }, 0);
+              }}
+            />
+            {isFetchingOg && (
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+            )}
+          </div>
         </FieldWrapper>
       )}
     />
