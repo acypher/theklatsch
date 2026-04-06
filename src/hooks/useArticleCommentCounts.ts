@@ -18,24 +18,30 @@ export function useArticleCommentCounts(articleIds: string[]) {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchCounts = async () => {
-    if (!isAuthenticated || articleIds.length === 0) {
+    if (articleIds.length === 0) {
       setCounts({});
       return;
     }
     setIsLoading(true);
 
-    // Only fetch comments for the articles we're displaying
+    // Fetch comment counts for displayed articles (visible to all authenticated users per RLS)
     const { data: rawCommentCounts, error: ccError } = await supabase
       .from("comments")
       .select("article_id, id")
       .in("article_id", articleIds);
 
-    // Only fetch viewed comments for articles we're displaying
-    const { data: viewed, error: vError } = await supabase
-      .from("comment_views")
-      .select("article_id, comment_id")
-      .eq("user_id", user.id)
-      .in("article_id", articleIds);
+    // Only fetch viewed comments if user is logged in
+    let viewed: { article_id: string; comment_id: string }[] | null = null;
+    let vError = null;
+    if (isAuthenticated && user) {
+      const result = await supabase
+        .from("comment_views")
+        .select("article_id, comment_id")
+        .eq("user_id", user.id)
+        .in("article_id", articleIds);
+      viewed = result.data;
+      vError = result.error;
+    }
 
     if (ccError || vError || !rawCommentCounts) {
       setCounts({});
