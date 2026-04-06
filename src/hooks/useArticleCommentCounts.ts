@@ -24,16 +24,18 @@ export function useArticleCommentCounts(articleIds: string[]) {
     }
     setIsLoading(true);
 
-    // Get the total comment count per article
+    // Only fetch comments for the articles we're displaying
     const { data: rawCommentCounts, error: ccError } = await supabase
       .from("comments")
-      .select("article_id, id");
+      .select("article_id, id")
+      .in("article_id", articleIds);
 
-    // Get the viewed comment count per article for this user
+    // Only fetch viewed comments for articles we're displaying
     const { data: viewed, error: vError } = await supabase
       .from("comment_views")
       .select("article_id, comment_id")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .in("article_id", articleIds);
 
     if (ccError || vError || !rawCommentCounts) {
       setCounts({});
