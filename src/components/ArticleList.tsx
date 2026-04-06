@@ -70,7 +70,7 @@ const ArticleList = ({
       <ArticlesGrid 
         articles={localArticles}
         allArticles={allArticles || initialArticles} // Pass the complete list
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={isAuthenticated}
         isDragging={isDragging}
         draggedItemId={draggedItem?.id || null}
         readArticles={readArticles}
