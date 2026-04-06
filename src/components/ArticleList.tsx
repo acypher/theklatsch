@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Article } from "@/lib/types";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import LoadingState from "./article/LoadingState";
 import NoArticlesFound from "./article/NoArticlesFound";
 import UnsavedChangesPrompt from "./article/UnsavedChangesPrompt";
@@ -17,8 +17,8 @@ interface ArticleListProps {
   hideRead?: boolean;
   filterEnabled?: boolean;
   onFilterToggle?: (checked: boolean) => void;
-  allArticles?: Article[]; // The complete list of articles
-  currentIssue?: string; // Current issue prop
+  allArticles?: Article[];
+  currentIssue?: string;
   searchQuery?: string;
   onKeywordClick?: (keyword: string) => void;
 }
@@ -32,31 +32,16 @@ const ArticleList = ({
   hideRead = false,
   filterEnabled = false,
   onFilterToggle,
-  allArticles, // Original complete list of articles
+  allArticles,
   currentIssue,
   searchQuery = "",
   onKeywordClick
 }: ArticleListProps) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated } = useAuth();
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     setLocalArticles(initialArticles);
-
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsLoggedIn(!!data.session);
-    };
-
-    checkAuth();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsLoggedIn(!!session);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
   }, [initialArticles]);
 
   const {
@@ -85,7 +70,7 @@ const ArticleList = ({
       <ArticlesGrid 
         articles={localArticles}
         allArticles={allArticles || initialArticles} // Pass the complete list
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={isAuthenticated}
         isDragging={isDragging}
         draggedItemId={draggedItem?.id || null}
         readArticles={readArticles}
