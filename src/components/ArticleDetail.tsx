@@ -80,7 +80,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
     try {
       setIsDeleting(true);
       await deleteArticle(id);
-      await queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.removeQueries({ queryKey: ['articles'] });
       toast.success("Article deleted successfully");
       navigate("/");
     } catch (error) {

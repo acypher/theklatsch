@@ -83,7 +83,7 @@ const CreateArticleForm = () => {
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       
       // Invalidate article caches so back-navigation shows the new article
-      await queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.removeQueries({ queryKey: ['articles'] });
       
       toast.success(data.draft ? "Draft saved successfully!" : "Article published successfully!");
       
