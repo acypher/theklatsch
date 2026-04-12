@@ -1,32 +1,30 @@
 
 import KeywordBadge from "../KeywordBadge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, FileText, ExternalLink } from "lucide-react";
+import { MessageSquare, ExternalLink } from "lucide-react";
 
 interface ArticleCardFooterProps {
   keywords: string[];
   onCommentsClick: (e: React.MouseEvent) => void;
-  onSummaryClick: (e: React.MouseEvent) => void;
   isLoading: boolean;
   hasError: boolean;
   commentCount: number;
   viewedCommentCount?: number;
-  hasSummary: boolean;
   sourceUrl: string;
   onKeywordClick?: (keyword: string) => void;
+  openerLetters: string[];
 }
 
 const ArticleCardFooter = ({
   keywords,
   onCommentsClick,
-  onSummaryClick,
   isLoading,
   hasError,
   commentCount,
   viewedCommentCount,
-  hasSummary,
   sourceUrl,
-  onKeywordClick
+  onKeywordClick,
+  openerLetters
 }: ArticleCardFooterProps) => (
   <div className="space-y-3">
     <div className="flex flex-wrap gap-2">
@@ -42,7 +40,7 @@ const ArticleCardFooter = ({
     </div>
     
     <div className="flex justify-between items-center">
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <Button 
           variant="ghost" 
           size="sm" 
@@ -59,16 +57,14 @@ const ArticleCardFooter = ({
           <ExternalLink className="h-4 w-4" />
           Source
         </Button>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onSummaryClick}
-          disabled={!hasSummary}
-          className={`flex items-center gap-1 text-xs ${!hasSummary ? 'text-muted-foreground opacity-50 cursor-not-allowed' : ''}`}
-        >
-          <FileText className="h-4 w-4" />
-          Summary
-        </Button>
+        {openerLetters.map((letter) => (
+          <span
+            key={letter}
+            className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-muted text-muted-foreground text-xs font-semibold"
+          >
+            {letter}
+          </span>
+        ))}
       </div>
       
       <Button
