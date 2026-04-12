@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { getArticleById, updateArticle, getAllArticles } from "@/lib/data";
+import { getArticleById, updateArticle } from "@/lib/data";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import ArticleForm from "@/components/article/ArticleForm";
@@ -46,10 +46,7 @@ const EditArticleForm = () => {
       
       try {
         setIsLoading(true);
-        const [article, allArticles] = await Promise.all([
-          getArticleById(id),
-          getAllArticles()
-        ]);
+        const article = await getArticleById(id);
         
         if (!article) {
           toast.error("Article not found");
@@ -57,11 +54,7 @@ const EditArticleForm = () => {
           return;
         }
         
-        // Find the original position in the list
-        const articleIndex = allArticles.findIndex(a => a.id === id);
-        if (articleIndex !== -1) {
-          setOriginalPosition(allArticles[articleIndex].displayPosition || articleIndex + 1);
-        }
+        setOriginalPosition(article.displayPosition || null);
         
         // Store original keywords
         setOriginalKeywords([...article.keywords]);
