@@ -5,7 +5,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useState, useEffect } from "react";
 import CommentDialog from "./comments/CommentDialog";
-import SummaryDialog from "./article/SummaryDialog";
 import { supabase } from "@/integrations/supabase/client";
 import ArticleCardHeader from "./article/ArticleCardHeader";
 import ArticleCardMeta from "./article/ArticleCardMeta";
@@ -13,9 +12,9 @@ import ArticleCardFooter from "./article/ArticleCardFooter";
 import ReadCheckbox from './article/ReadCheckbox';
 import FavoriteButton from './article/FavoriteButton';
 import { useAuth } from "@/contexts/AuthContext";
-import VideoViewer from "./VideoViewer";
 import { isVideoUrl } from "@/lib/search";
 import { useArticleReads } from "@/hooks/useArticleReads";
+import { useArticleOpens } from "@/hooks/useArticleOpens";
 
 interface ArticleCardProps {
   article: Article;
@@ -24,7 +23,6 @@ interface ArticleCardProps {
 
 const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
   const [currentArticle, setCurrentArticle] = useState(article);
   const [commentCount, setCommentCount] = useState(0);
   const [viewedCommentCount, setViewedCommentCount] = useState<number | undefined>(undefined);
@@ -32,9 +30,9 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   const [hasError, setHasError] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const { isRead, toggleReadState } = useArticleReads(article.id);
+  const openerLetters = useArticleOpens(article.id);
 
   const isGif = currentArticle.imageUrl.toLowerCase().endsWith('.gif');
-  const hasVideo = isVideoUrl(currentArticle.sourceUrl);
 
   const fetchCommentData = async () => {
     try {
@@ -61,7 +59,6 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
 
       setCommentCount(count || 0);
 
-      // Only fetch viewed comments if user is authenticated
       if (isAuthenticated && user) {
         try {
           const { data, error: viewError } = await supabase
@@ -89,7 +86,6 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
     fetchCommentData();
   }, [article.id, isAuthenticated, user]);
 
-  // Sync currentArticle with article prop when it changes
   useEffect(() => {
     setCurrentArticle(article);
   }, [article]);
@@ -100,7 +96,6 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   };
 
   const getImageUrl = (url: string) => {
-    // If URL is empty, contains unsplash reference, or is invalid, use default
     if (!url || url.includes('images.unsplash.com') || url.trim() === '') {
       return "https://kjfwyaniengzduyeeufq.supabase.co/storage/v1/object/public/logos/defaultImage.png";
     }
@@ -117,16 +112,24 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
 
   const handleCommentsClose = () => {
     setShowComments(false);
-    // Refresh comment count data when dialog closes
     fetchCommentData();
   };
 
-  const handleSummaryClose = () => {
-    setShowSummary(false);
-  };
-
-  const handleSummaryUpdate = (updatedSummary: string) => {
-    setCurrentArticle(prev => ({ ...prev, summary: updatedSummary }));
+  const handleArticleClick = async () => {
+    sessionStorage.setItem('indexScrollY', window.scrollY.toString());
+    
+    // Track the open for the current user
+    if (isAuthenticated && user) {
+      supabase
+        .from('article_opens')
+        .upsert(
+          { article_id: currentArticle.id, user_id: user.id, opened_at: new Date().toISOString() },
+          { onConflict: 'article_id,user_id' }
+        )
+        .then(({ error }) => {
+          if (error) console.error('Error tracking article open:', error);
+        });
+    }
   };
 
   const customRenderers = {
@@ -161,10 +164,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
       <Link 
         to={`/article/${currentArticle.id}`}
         className="block group"
-        onClick={() => {
-          // Save scroll position so Index can restore it instantly when the user navigates back
-          sessionStorage.setItem('indexScrollY', window.scrollY.toString());
-        }}
+        onClick={handleArticleClick}
       >
         <div className="hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg">
           <CardHeader className="p-0">
@@ -203,7 +203,6 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
       </Link>
       
       <CardContent className="pt-0">
-
         <ArticleCardFooter 
           keywords={currentArticle.keywords}
           onCommentsClick={(e) => {
@@ -211,18 +210,13 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
             e.stopPropagation();
             setShowComments(true);
           }}
-          onSummaryClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setShowSummary(true);
-          }}
           isLoading={isLoading}
           hasError={hasError}
           commentCount={commentCount}
           viewedCommentCount={isAuthenticated ? viewedCommentCount : undefined}
-          hasSummary={!!currentArticle.summary?.trim()}
           sourceUrl={currentArticle.sourceUrl}
           onKeywordClick={onKeywordClick}
+          openerLetters={openerLetters}
         />
         {showComments && (
           <CommentDialog 
@@ -230,14 +224,6 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
             articleTitle={currentArticle.title}
             isOpen={showComments}
             onClose={handleCommentsClose}
-          />
-        )}
-        {showSummary && (
-          <SummaryDialog 
-            article={currentArticle}
-            isOpen={showSummary}
-            onClose={handleSummaryClose}
-            onSummaryUpdate={handleSummaryUpdate}
           />
         )}
       </CardContent>
