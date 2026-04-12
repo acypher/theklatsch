@@ -2,45 +2,21 @@
 
 ## Problem
 
-When navigating back from an article to the home page, the "read" checkboxes show a "disallowed" cursor/tooltip because they remain permanently disabled.
+The Edit page calls `getAllArticles()` on mount (line 51 of `EditArticleForm.tsx`) just to look up the article's `displayPosition`. That function triggers a chain of 3+ Supabase queries (`getCurrentIssue` → `getLatestIssue` → articles table), which is why the page takes ~15 seconds to load.
 
-**Root cause** in `useArticleReads.ts` line 19:
+The `displayPosition` is already available on the single article returned by `getArticleById()`.
 
-```typescript
-if (!user || !isMounted.current || initialFetchDone.current) return;
-```
+## Plan
 
-When the component mounts, `loading` starts as `true`. If `user` is still `null` (auth session restoring), `fetchReadState` returns early **without ever setting `loading = false`**. The checkbox stays `disabled={loading}` forever, showing the browser's native "not-allowed" cursor.
+**File: `src/components/EditArticleForm.tsx`**
 
-Even when `user` later becomes available, the effect doesn't re-run because the `initialFetchDone` ref blocks it (though on a fresh mount it should be `false`). The primary issue is the early return when `!user` skips the `finally` block that sets `loading = false`.
+1. Remove the `getAllArticles` import and call from the `useEffect` fetch.
+2. Instead of searching all articles for the position, read `article.displayPosition` directly from the fetched article:
+   ```
+   const article = await getArticleById(id);
+   setOriginalPosition(article.displayPosition || null);
+   ```
+3. Remove the `getAllArticles` import from the file entirely.
 
-## Fix
-
-**File: `src/hooks/useArticleReads.ts`**
-
-1. When `user` is null, explicitly set `loading = false` so the checkbox isn't stuck disabled.
-2. Remove the `initialFetchDone` guard from the early-return that skips the loading reset, or restructure so loading is always resolved.
-
-```typescript
-useEffect(() => {
-  const fetchReadState = async () => {
-    if (!user) {
-      setLoading(false);  // Don't leave checkbox disabled while auth loads
-      return;
-    }
-    if (!isMounted.current || initialFetchDone.current) return;
-    // ... rest unchanged
-  };
-  fetchReadState();
-  // ...
-}, [user, articleId]);
-```
-
-This ensures that when auth is still loading (user is null), the checkbox renders as enabled (unchecked) rather than disabled with a "disallowed" tooltip. Once user resolves, the effect re-runs and fetches the actual read state.
-
-## Technical Details
-
-- The Radix `CheckboxPrimitive.Root` with `disabled` renders `cursor: not-allowed` and shows a browser tooltip "disallowed" on hover
-- The auth context restores asynchronously after navigation; during that window, `user` is null
-- This is the same class of bug as the auth-loading-state guards already applied elsewhere
+This is a single-file, ~5-line change that eliminates the expensive `getAllArticles` call and its cascading Supabase queries from the edit page load path.
 
