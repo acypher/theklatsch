@@ -105,6 +105,27 @@ export type Database = {
           },
         ]
       }
+      article_opens: {
+        Row: {
+          article_id: string
+          id: string
+          opened_at: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          id?: string
+          opened_at?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          id?: string
+          opened_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       article_reads: {
         Row: {
           article_id: string
