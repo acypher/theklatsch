@@ -30,7 +30,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   const [hasError, setHasError] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const { isRead, toggleReadState } = useArticleReads(article.id);
-  const openerLetters = useArticleOpens(article.id);
+  const openerLetters = useArticleOpens(article.id, article.user_id ?? undefined);
 
   const isGif = currentArticle.imageUrl.toLowerCase().endsWith('.gif');
 

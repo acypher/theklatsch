@@ -4,14 +4,27 @@ import { SPECIAL_USERS, SPECIAL_USER_IDS } from '@/lib/specialUsers';
 import { useAuth } from '@/contexts/AuthContext';
 
 /**
- * Fetches which special users (A/M/D) have opened a given article.
- * Returns letters for special users OTHER than the current user.
+ * Returns letters (A/M/D) for special users who have opened a given article,
+ * but ONLY when the current viewer is the article's author AND the author is
+ * one of the three special users. The author never sees their own letter.
  */
-export function useArticleOpens(articleId: string) {
+export function useArticleOpens(articleId: string, authorId?: string) {
   const [openerLetters, setOpenerLetters] = useState<string[]>([]);
   const { user } = useAuth();
 
   useEffect(() => {
+    // Only show letters when the current viewer is the article's author
+    // AND the author is one of the three special users.
+    if (
+      !user ||
+      !authorId ||
+      user.id !== authorId ||
+      !SPECIAL_USER_IDS.includes(authorId)
+    ) {
+      setOpenerLetters([]);
+      return;
+    }
+
     const fetchOpens = async () => {
       const { data, error } = await supabase
         .from('article_opens')
@@ -31,7 +44,7 @@ export function useArticleOpens(articleId: string) {
     };
 
     fetchOpens();
-  }, [articleId, user?.id]);
+  }, [articleId, user?.id, authorId]);
 
   return openerLetters;
 }
