@@ -14,33 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      address_markers: {
-        Row: {
-          address_number: string | null
-          created_at: string | null
-          id: string
-          name: string | null
-          row_number: number
-          updated_at: string | null
-        }
-        Insert: {
-          address_number?: string | null
-          created_at?: string | null
-          id?: string
-          name?: string | null
-          row_number: number
-          updated_at?: string | null
-        }
-        Update: {
-          address_number?: string | null
-          created_at?: string | null
-          id?: string
-          name?: string | null
-          row_number?: number
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       archive_search_index: {
         Row: {
           back_issue_id: number
