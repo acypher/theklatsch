@@ -22,6 +22,9 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
+# Lovable / AI IDE metadata (not needed for self-hosted workflow)
+.lovable/
+
 .DS_Store
 *.suo
 *.ntvs*

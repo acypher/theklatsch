@@ -1,73 +1,74 @@
-# Welcome to your Lovable project
+# theklatsch
 
-## Project info
+Vite, React, TypeScript, Tailwind, shadcn-style UI, Supabase.
 
-**URL**: https://lovable.dev/projects/c93989d9-9b90-4385-bdcf-7f13cd1d4d28
+## Local development
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/c93989d9-9b90-4385-bdcf-7f13cd1d4d28) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+git clone https://github.com/acypher/theklatsch.git
+cd theklatsch
+npm install
+cp .env.example .env
+# Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY from
+# Supabase → Project Settings → API (or API Keys, depending on your key type).
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+App dev server: `http://127.0.0.1:8080` (see `vite.config.ts`).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Use Cursor: **File → Open Folder** and select this project.
 
-**Use GitHub Codespaces**
+## Environment variables (production and local)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_PUBLISHABLE_KEY`**: from Supabase; required for the app to run.
+- Never commit **`.env`**. The repo includes **`.env.example`** only. Copy to `.env` locally.
 
-## What technologies are used for this project?
+`service_role` and other secrets stay on the server (Edge Functions, backend), never in `VITE_*` or the browser.
 
-This project is built with:
+## If secrets ever lived in Git (historical)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Previously committed `.env` or keys embedded in `client.ts` are still in **git history** until you rewrite it.
 
-## How can I deploy this project?
+1. **Minimum:** After the current `main` is on GitHub, **rotate** keys in the [Supabase dashboard](https://supabase.com/dashboard) (publishable/anon, and any leaked `service_role` / secret keys) so old commits cannot access your project.
+2. **Optional hardening:** Use [`git filter-repo`](https://github.com/newren/git-filter-repo) to remove `.env` from all history, then `git push --force` (rewrites all commit hashes; coordinate with any collaborators).
 
-Simply open [Lovable](https://lovable.dev/projects/c93989d9-9b90-4385-bdcf-7f13cd1d4d28) and click on Share -> Publish.
+In Lovable’s UI, **disconnect** this repo when you are fully on local + CI workflows so the project does not keep syncing from their side.
 
-## Can I connect a custom domain to my Lovable project?
+## Publish to theklatsch.com
 
-Yes it is!
+**Recommended:** connect the GitHub repository to a static host that builds on push, for example [Vercel](https://vercel.com), [Netlify](https://netlify.com), or [Cloudflare Pages](https://pages.cloudflare.com).
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. **Build**
+   - Command: `npm run build`
+   - Output: `dist`
+   - Node: 20 or 22 (match CI if you use it)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+2. **Environment variables (hosting dashboard or CI)**  
+   Set the same as local:
+
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+3. **SPA routing**  
+   This repo includes:
+
+   - `vercel.json` — rewrites for client-side routes on Vercel
+   - `public/_redirects` — for Netlify / Cloudflare Pages (`/*` → `index.html`)
+
+4. **Custom domain**  
+   In the host, add `theklatsch.com` (and `www` if you use it) and follow their DNS steps.
+
+5. **Supabase**  
+   In the Supabase project: **Authentication → URL configuration** (and OAuth providers if you use them), add the production URLs, for example:
+
+   - `https://theklatsch.com`
+   - `https://www.theklatsch.com` (if used)
+   - `http://127.0.0.1:8080` for local dev (if you use email/OAuth callbacks here)
+
+6. **Deploy**  
+   Push to `main` on `https://github.com/acypher/theklatsch` — the host (and optional GitHub Actions in `.github/workflows/ci.yml`) pick up the build.
+
+## Quality checks
+
+- `npm run lint`
+- `npm run build`
