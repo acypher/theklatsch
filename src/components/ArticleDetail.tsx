@@ -3,11 +3,10 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { getArticleById, deleteArticle } from "@/lib/data";
+import { deleteArticle } from "@/lib/data";
 import { Article } from "@/lib/types";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import ArticleHeader from "./article/ArticleHeader";
 import ArticleImage from "./article/ArticleImage";
 import ArticleContent from "./article/ArticleContent";
@@ -25,45 +24,12 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [article, setArticle] = useState<Article | null>(propArticle || null);
-  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { isAuthenticated } = useAuth();
   const { markAsViewed } = useArticleUpdates();
-
-  useEffect(() => {
-    if (propArticle) {
-      setArticle(propArticle);
-      setLoading(false);
-    }
-  }, [propArticle]);
-
-  useEffect(() => {
-    const fetchArticle = async () => {
-      if (propArticle) return;
-      if (id) {
-        try {
-          setLoading(true);
-          const fetchedArticle = await getArticleById(id);
-          if (fetchedArticle) {
-            setArticle(fetchedArticle);
-            // Title is now managed by ArticleView component
-          } else {
-            toast.error("Article not found");
-            navigate("/");
-          }
-        } catch (error) {
-          toast.error("Failed to load article");
-          navigate("/");
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchArticle();
-  }, [id, navigate, propArticle]);
+  const article = propArticle || null;
+  const loading = propLoading ?? true;
 
   // Mark article as viewed when the article page loads
   useEffect(() => {

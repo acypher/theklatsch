@@ -32,10 +32,18 @@ const ArticleView = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchArticle = async () => {
+      setLoading(true);
+      setArticle(null);
+
       if (id) {
         try {
           const articleData = await getArticleById(id);
+
+          if (cancelled) return;
+
           if (articleData) {
             setArticle(articleData);
             
@@ -44,12 +52,20 @@ const ArticleView = () => {
             
             // Update or create Open Graph meta tags
             updateMetaTags(articleData);
+          } else {
+            document.title = "Article not found | The Klatsch";
           }
         } catch (error) {
+          if (cancelled) return;
           console.error("Error fetching article for meta tags:", error);
         } finally {
-          setLoading(false);
+          if (!cancelled) {
+            setLoading(false);
+          }
         }
+      } else {
+        document.title = "Article not found | The Klatsch";
+        setLoading(false);
       }
     };
     
@@ -61,6 +77,7 @@ const ArticleView = () => {
       // Remove Open Graph meta tags
       const metaTags = document.querySelectorAll('meta[property^="og:"]');
       metaTags.forEach(tag => tag.remove());
+      cancelled = true;
     };
   }, [id]);
 
