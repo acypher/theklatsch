@@ -164,6 +164,8 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
       <Link 
         to={`/article/${currentArticle.id}`}
         className="block group"
+        target="_blank"
+        rel="noopener noreferrer"
         onClick={handleArticleClick}
       >
         <div className="hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg">
