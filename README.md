@@ -36,37 +36,34 @@ In Lovable’s UI, **disconnect** this repo when you are fully on local + CI wor
 
 ## Publish to theklatsch.com
 
-**Recommended:** connect the GitHub repository to a static host that builds on push, for example [Vercel](https://vercel.com), [Netlify](https://netlify.com), or [Cloudflare Pages](https://pages.cloudflare.com).
+Production is hosted from InMotion cPanel at `/public_html`, with source code in GitHub.
 
-1. **Build**
-   - Command: `npm run build`
-   - Output: `dist`
-   - Node: 20 or 22 (match CI if you use it)
+1. **Build and deploy**
+   - Push to `main` on `https://github.com/acypher/theklatsch`.
+   - GitHub Actions runs `npm ci`, `npm run build`, and uploads `dist/` to InMotion via FTP.
+   - Manual deploys can also be run from the **Deploy to InMotion** workflow in GitHub Actions.
 
-2. **Environment variables (hosting dashboard or CI)**  
-   Set the same as local:
+2. **GitHub secrets**
+   Configure these repository secrets:
 
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
+   - `INMOTION_FTP_SERVER`
+   - `INMOTION_FTP_USERNAME`
+   - `INMOTION_FTP_PASSWORD`
 
-3. **SPA routing**  
-   This repo includes:
+3. **SPA routing**
+   This repo includes `public/.htaccess` so Apache serves `index.html` for client-side routes like `/article/...`.
 
-   - `vercel.json` — rewrites for client-side routes on Vercel
-   - `public/_redirects` — for Netlify / Cloudflare Pages (`/*` → `index.html`)
+4. **DNS and SSL**
+   InMotion cPanel currently serves `theklatsch.com` from `/public_html`. DNS should point `theklatsch.com` and `www.theklatsch.com` at the InMotion web IP, then AutoSSL / Force HTTPS can be enabled in cPanel.
 
-4. **Custom domain**  
-   In the host, add `theklatsch.com` (and `www` if you use it) and follow their DNS steps.
-
-5. **Supabase**  
+5. **Supabase**
    In the Supabase project: **Authentication → URL configuration** (and OAuth providers if you use them), add the production URLs, for example:
 
    - `https://theklatsch.com`
    - `https://www.theklatsch.com` (if used)
    - `http://127.0.0.1:8080` for local dev (if you use email/OAuth callbacks here)
-
-6. **Deploy**  
-   Push to `main` on `https://github.com/acypher/theklatsch` — the host (and optional GitHub Actions in `.github/workflows/ci.yml`) pick up the build.
 
 ## Quality checks
 
