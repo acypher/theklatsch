@@ -29,7 +29,22 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
+      - name: Check deployment secrets
+        id: deploy-secrets
+        env:
+          INMOTION_FTP_SERVER: ${{ secrets.INMOTION_FTP_SERVER }}
+          INMOTION_FTP_USERNAME: ${{ secrets.INMOTION_FTP_USERNAME }}
+          INMOTION_FTP_PASSWORD: ${{ secrets.INMOTION_FTP_PASSWORD }}
+        run: |
+          if [ -n "$INMOTION_FTP_SERVER" ] && [ -n "$INMOTION_FTP_USERNAME" ] && [ -n "$INMOTION_FTP_PASSWORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping upload because one or more InMotion FTP secrets are missing."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Upload to InMotion public_html
+        if: steps.deploy-secrets.outputs.ready == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.INMOTION_FTP_SERVER }}

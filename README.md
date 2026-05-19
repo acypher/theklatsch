@@ -52,6 +52,8 @@ Production is hosted from InMotion cPanel at `/public_html`, with source code in
    - `INMOTION_FTP_USERNAME`
    - `INMOTION_FTP_PASSWORD`
 
+   If the InMotion FTP secrets are missing, the workflow still builds but skips the upload step.
+
 3. **SPA routing**
    This repo includes `public/.htaccess` so Apache serves `index.html` for client-side routes like `/article/...`.
 
