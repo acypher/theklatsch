@@ -1,0 +1,22 @@
+---
+description: Solo git workflow — main only, auto-commit with version bumps
+alwaysApply: true
+---
+
+# Git workflow (theklatsch)
+
+Solo project: work directly on `main`. Do not create branches or PRs unless explicitly asked.
+
+After completing a change:
+
+1. Bump the patch version in `package.json` (e.g. `0.0.2` → `0.0.3`).
+2. Commit on `main` with a short message: `0.0.X: what changed`
+3. Push to `origin/main` immediately.
+
+Example commit message:
+
+```
+0.0.3: dedupe article card queries
+```
+
+Do not wait for the user to ask for commit/push after routine code changes.
