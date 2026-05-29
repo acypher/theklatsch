@@ -21,6 +21,8 @@ interface ArticleListProps {
   currentIssue?: string;
   searchQuery?: string;
   onKeywordClick?: (keyword: string) => void;
+  favorites?: Set<string>;
+  onToggleFavorite?: (articleId: string) => void;
 }
 
 const ArticleList = ({ 
@@ -35,7 +37,9 @@ const ArticleList = ({
   allArticles,
   currentIssue,
   searchQuery = "",
-  onKeywordClick
+  onKeywordClick,
+  favorites = new Set(),
+  onToggleFavorite = () => {}
 }: ArticleListProps) => {
   const { isAuthenticated } = useAuth();
   const [localArticles, setLocalArticles] = useState<Article[]>([]);
@@ -84,6 +88,8 @@ const ArticleList = ({
         currentIssue={currentIssue}
         searchQuery={searchQuery}
         onKeywordClick={onKeywordClick}
+        favorites={favorites}
+        onToggleFavorite={onToggleFavorite}
       />
 
       {hasChanges && (

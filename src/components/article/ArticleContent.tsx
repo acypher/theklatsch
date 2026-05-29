@@ -4,7 +4,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ArticleContentProps {
@@ -16,8 +15,6 @@ interface ArticleContentProps {
 }
 
 const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackClick }: ArticleContentProps) => {
-  const navigate = useNavigate();
-  
   // Memoize renderers to prevent infinite re-render loop
   const customRenderers = useMemo(() => ({
     a: ({ node, href, children, ...props }: any) => (
@@ -46,7 +43,9 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
     if (onBackClick) {
       onBackClick();
     } else {
-      navigate("/");
+      // Full document load (see ArticleDetail.handleNavigateBack) to avoid the
+      // slow SPA back-navigation caused by a burst of per-card Supabase queries.
+      window.location.assign("/");
     }
   };
   

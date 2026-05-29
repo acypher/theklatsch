@@ -1,6 +1,6 @@
 import { Heart } from "lucide-react";
-import { useArticleFavorites } from "@/hooks/useArticleFavorites";
 import { useAuth } from "@/contexts/AuthContext";
+import { useArticleListData } from "./ArticleListDataContext";
 
 interface FavoriteButtonProps {
   articleId: string;
@@ -8,18 +8,19 @@ interface FavoriteButtonProps {
 
 const FavoriteButton = ({ articleId }: FavoriteButtonProps) => {
   const { isAuthenticated } = useAuth();
-  const { isFavorite, loading, toggleFavorite } = useArticleFavorites(articleId);
+  const { favorites, toggleFavorite } = useArticleListData();
 
   if (!isAuthenticated) return null;
+
+  const isFavorite = favorites.has(articleId);
 
   return (
     <button
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        toggleFavorite();
+        toggleFavorite(articleId);
       }}
-      disabled={loading}
       className="absolute top-10 right-2 z-10 w-6 h-6 flex items-center justify-center transition-colors"
       title={isFavorite ? "Remove from favorites" : "Add to favorites"}
     >

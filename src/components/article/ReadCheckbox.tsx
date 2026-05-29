@@ -1,7 +1,7 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { useArticleReads } from "@/hooks/useArticleReads";
 import { useAuth } from "@/contexts/AuthContext";
+import { useArticleListData } from "./ArticleListDataContext";
 
 interface ReadCheckboxProps {
   articleId: string;
@@ -9,20 +9,20 @@ interface ReadCheckboxProps {
 
 const ReadCheckbox = ({ articleId }: ReadCheckboxProps) => {
   const { isAuthenticated, loading: authLoading } = useAuth();
-  const { isRead, loading, toggleReadState } = useArticleReads(articleId);
+  const { readArticles, toggleRead } = useArticleListData();
 
   // Don't hide while auth is still loading - prevents flash on back navigation
   if (!authLoading && !isAuthenticated) return null;
+
+  const isRead = readArticles.has(articleId);
 
   return (
     <div className="absolute top-2 right-2 z-10 w-4 h-4 flex items-center justify-center">
       <Checkbox 
         checked={isRead}
-        disabled={loading}
         onCheckedChange={(checked) => {
-          console.log(`Checkbox clicked - articleId: ${articleId}, new state: ${checked}`);
           if (typeof checked === 'boolean') {
-            toggleReadState();
+            toggleRead(articleId);
           }
         }}
       />

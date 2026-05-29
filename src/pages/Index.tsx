@@ -32,7 +32,7 @@ const Index = () => {
   const [searchParams] = useSearchParams();
 
   const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated, authLoading);
-  const { allFavorites } = useArticleFavorites();
+  const { allFavorites, toggleFavorite } = useArticleFavorites();
   const { preferences } = useUserPreferences();
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [archiveResults, setArchiveResults] = useState<ArchiveSearchResult[]>([]);
@@ -204,6 +204,8 @@ const Index = () => {
                 currentIssue={currentIssue}
                 searchQuery={searchQuery}
                 onKeywordClick={handleKeywordClick}
+                favorites={allFavorites}
+                onToggleFavorite={toggleFavorite}
               />
             </div>
             <StorefrontImage />

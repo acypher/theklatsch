@@ -13,8 +13,8 @@ import ReadCheckbox from './article/ReadCheckbox';
 import FavoriteButton from './article/FavoriteButton';
 import { useAuth } from "@/contexts/AuthContext";
 import { isVideoUrl } from "@/lib/search";
-import { useArticleReads } from "@/hooks/useArticleReads";
 import { useArticleOpens } from "@/hooks/useArticleOpens";
+import { useArticleListData } from "./article/ArticleListDataContext";
 
 interface ArticleCardProps {
   article: Article;
@@ -24,67 +24,15 @@ interface ArticleCardProps {
 const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [currentArticle, setCurrentArticle] = useState(article);
-  const [commentCount, setCommentCount] = useState(0);
-  const [viewedCommentCount, setViewedCommentCount] = useState<number | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
   const { user, isAuthenticated } = useAuth();
-  const { isRead, toggleReadState } = useArticleReads(article.id);
   const openerLetters = useArticleOpens(article.id, article.user_id ?? undefined);
 
+  // Comment + viewed counts are batch-fetched once for the whole list and
+  // shared via context, so the card issues no per-card comment queries.
+  const { commentCounts } = useArticleListData();
+  const { commentCount = 0, viewedCommentCount } = commentCounts[article.id] ?? {};
+
   const isGif = currentArticle.imageUrl.toLowerCase().endsWith('.gif');
-
-  const fetchCommentData = async () => {
-    try {
-      setIsLoading(true);
-      setHasError(false);
-
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timed out')), 8000)
-      );
-
-      const fetchPromise = supabase
-        .from("comments")
-        .select("id", { count: 'exact' })
-        .eq("article_id", article.id);
-
-      const { count, error } = await Promise.race([
-        fetchPromise,
-        timeoutPromise.then(() => { throw new Error('Request timed out'); })
-      ]) as any;
-
-      if (error) {
-        throw error;
-      }
-
-      setCommentCount(count || 0);
-
-      if (isAuthenticated && user) {
-        try {
-          const { data, error: viewError } = await supabase
-            .from("comment_views")
-            .select("comment_id", { count: 'exact' })
-            .eq("article_id", article.id)
-            .eq("user_id", user.id);
-
-          if (!viewError) {
-            setViewedCommentCount(data?.length || 0);
-          }
-        } catch (viewError) {
-          console.error("Error fetching viewed comments:", viewError);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching comment count:", error);
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCommentData();
-  }, [article.id, isAuthenticated, user]);
 
   useEffect(() => {
     setCurrentArticle(article);
@@ -111,8 +59,9 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   };
 
   const handleCommentsClose = () => {
+    // Closing the dialog dispatches COMMENTS_UPDATED_EVENT, which refreshes the
+    // list-level comment counts (see useArticleCommentCounts / ArticlesGrid).
     setShowComments(false);
-    fetchCommentData();
   };
 
   const handleArticleClick = async () => {
@@ -212,8 +161,8 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
             e.stopPropagation();
             setShowComments(true);
           }}
-          isLoading={isLoading}
-          hasError={hasError}
+          isLoading={false}
+          hasError={false}
           commentCount={commentCount}
           viewedCommentCount={isAuthenticated ? viewedCommentCount : undefined}
           sourceUrl={currentArticle.sourceUrl}

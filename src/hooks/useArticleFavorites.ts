@@ -38,8 +38,13 @@ export const useArticleFavorites = (articleId?: string) => {
     fetchFavoriteStatus();
   }, [isAuthenticated, user, articleId]);
 
-  // Fetch all favorites for the user
+  // Fetch all favorites for the user.
+  // Only the page-level caller (no articleId) needs the full list — per-card
+  // callers must never re-fetch the entire favorites table (one full scan per
+  // card previously dominated the home page's request burst).
   useEffect(() => {
+    if (articleId) return;
+
     const fetchAllFavorites = async () => {
       if (!isAuthenticated || !user) {
         setAllFavorites(new Set());
@@ -63,56 +68,53 @@ export const useArticleFavorites = (articleId?: string) => {
     };
 
     fetchAllFavorites();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, articleId]);
 
-  const toggleFavorite = async () => {
-    if (!isAuthenticated || !user || !articleId) {
+  // Accepts an explicit target so the page-level instance (which holds the
+  // shared `allFavorites` set) can toggle any card without per-card hooks.
+  const toggleFavorite = async (targetId?: string) => {
+    const id = targetId ?? articleId;
+
+    if (!isAuthenticated || !user || !id) {
       toast.error('You must be logged in to favorite articles');
       return;
     }
 
+    const currentlyFavorite = allFavorites.has(id) || (id === articleId && isFavorite);
+
+    // Optimistic update
+    setAllFavorites(prev => {
+      const newSet = new Set(prev);
+      if (currentlyFavorite) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+    if (id === articleId) setIsFavorite(!currentlyFavorite);
     setLoading(true);
 
     try {
-      if (isFavorite) {
-        // Remove from favorites
-        const { error } = await supabase
-          .from('article_favorites')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('article_id', articleId);
+      const { error } = currentlyFavorite
+        ? await supabase
+            .from('article_favorites')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('article_id', id)
+        : await supabase
+            .from('article_favorites')
+            .insert({ user_id: user.id, article_id: id });
 
-        if (error) {
-          console.error('Error removing favorite:', error);
-          toast.error('Failed to remove from favorites');
-        } else {
-          setIsFavorite(false);
-          setAllFavorites(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(articleId);
-            return newSet;
-          });
-        }
-      } else {
-        // Add to favorites
-        const { error } = await supabase
-          .from('article_favorites')
-          .insert({
-            user_id: user.id,
-            article_id: articleId
-          });
-
-        if (error) {
-          console.error('Error adding favorite:', error);
-          toast.error('Failed to add to favorites');
-        } else {
-          setIsFavorite(true);
-          setAllFavorites(prev => new Set([...prev, articleId]));
-        }
-      }
+      if (error) throw error;
     } catch (error) {
-      console.error('Unexpected error toggling favorite:', error);
+      console.error('Error toggling favorite:', error);
       toast.error('Failed to update favorites');
+      // Revert optimistic update
+      setAllFavorites(prev => {
+        const newSet = new Set(prev);
+        if (currentlyFavorite) newSet.add(id);
+        else newSet.delete(id);
+        return newSet;
+      });
+      if (id === articleId) setIsFavorite(currentlyFavorite);
     } finally {
       setLoading(false);
     }
