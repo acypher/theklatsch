@@ -13,6 +13,7 @@ import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
 import { useArticleUpdates } from "@/hooks/useArticleUpdates";
+import { hardNavigate } from "@/lib/hardNavigate";
 
 interface ArticleDetailProps {
   article?: Article | null;
@@ -68,13 +69,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   };
 
   const handleNavigateBack = () => {
-    // Use a full document load instead of client-side navigation.
-    // SPA navigation back to the home page (while already authenticated) fires a
-    // large simultaneous burst of per-card Supabase queries that saturate the
-    // browser connection limit and the auth token lock, causing 10-30s stalls.
-    // A full load resets connections and defers that query burst until after the
-    // initial paint, matching the fast path of visiting the site directly.
-    window.location.assign("/");
+    hardNavigate("/");
   };
 
   if (loading) {
