@@ -38,6 +38,7 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AUTH_BOOTSTRAP_TIMEOUT_MS = 5000;
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -107,13 +108,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     let initialSessionHandled = false;
+    let isMounted = true;
+
+    const handleSession = (currentSession: Session | null, markInitialSessionHandled = true) => {
+      if (!isMounted || (markInitialSessionHandled && initialSessionHandled)) return;
+
+      if (markInitialSessionHandled) {
+        initialSessionHandled = true;
+      }
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+
+      if (currentSession?.user) {
+        fetchProfile(currentSession.user.id);
+      } else {
+        setProfile(null);
+        setCachedProfile(null);
+        setProfileLoading(false);
+      }
+
+      setLoading(false);
+    };
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        // Skip INITIAL_SESSION here — we handle it in getSession() below
-        // to avoid double-firing all user-dependent hooks
-        if (event === 'INITIAL_SESSION') return;
+        if (event === 'INITIAL_SESSION') {
+          handleSession(currentSession);
+          return;
+        }
 
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
@@ -125,26 +148,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           setProfile(null);
           setCachedProfile(null);
+          setProfileLoading(false);
         }
       }
     );
 
-    // THEN check for existing session (handles INITIAL_SESSION once)
+    const bootstrapTimeout = window.setTimeout(() => {
+      handleSession(null, false);
+    }, AUTH_BOOTSTRAP_TIMEOUT_MS);
+
+    // THEN check for existing session (whichever initial source resolves first wins)
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      if (!initialSessionHandled) {
-        initialSessionHandled = true;
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (currentSession?.user) {
-          fetchProfile(currentSession.user.id);
-        }
-      }
-      
-      setLoading(false);
+      window.clearTimeout(bootstrapTimeout);
+      handleSession(currentSession);
+    }).catch((error) => {
+      console.error("Error getting initial auth session:", error);
+      window.clearTimeout(bootstrapTimeout);
+      handleSession(null, false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      window.clearTimeout(bootstrapTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
