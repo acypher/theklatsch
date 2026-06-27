@@ -108,10 +108,12 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
 
   const isDraft = currentArticle.draft;
 
+  const listCardHeight = isListArticle && cardHeight ? getListCardMaxHeight(cardHeight) : undefined;
+
   return (
     <Card
       className={`${isListArticle ? 'h-auto' : 'h-full'} flex flex-col hover:shadow-md transition-shadow article-card relative ${isDraft ? 'draft-border' : ''} ${isListArticle ? 'list-article-card' : ''}`}
-      style={isListArticle && cardHeight ? { maxHeight: getListCardMaxHeight(cardHeight) } : undefined}
+      style={listCardHeight ? { height: listCardHeight, maxHeight: listCardHeight } : undefined}
       data-article-id={currentArticle.id}
     >
       <ReadCheckbox articleId={currentArticle.id} />
@@ -134,7 +136,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
               getImageUrl={getImageUrl}
             />
           </CardHeader>
-          <CardContent className={`pt-6 pb-0 ${isListArticle ? 'flex-1 min-h-0 overflow-hidden' : ''}`}>
+          <CardContent className={`pt-6 pb-0 flex flex-col ${isListArticle ? 'flex-1 min-h-0 overflow-hidden' : ''}`}>
             <div className={`line-clamp-2 mb-2 prose-sm prose ${currentArticle.private ? 'border-b-2 border-b-red-600 pb-1' : ''}`}>
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
@@ -148,7 +150,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
               createdAt={currentArticle.createdAt}
               formatDate={formatDate}
             />
-            <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper overflow-hidden">
+            <div className={`text-muted-foreground mb-4 prose prose-sm max-w-none markdown-wrapper overflow-hidden ${isListArticle ? 'flex-1 min-h-0' : 'line-clamp-3'}`}>
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 components={customRenderers}
@@ -160,7 +162,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
         </div>
       </Link>
       
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 flex-shrink-0">
         <ArticleCardFooter 
           keywords={currentArticle.keywords}
           onCommentsClick={(e) => {

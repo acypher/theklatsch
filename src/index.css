@@ -111,6 +111,7 @@
   margin-bottom: 0;
 }
 
-.list-article-card .markdown-wrapper :is(ul, ol, table) {
-  display: none;
+.list-article-card .markdown-wrapper table {
+  font-size: 0.75rem;
+  line-height: 1.25;
 }
