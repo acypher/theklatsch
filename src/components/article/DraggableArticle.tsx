@@ -27,6 +27,8 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
   onDrop,
   onKeywordClick
 }, ref) => {
+  const isListArticle = article.keywords.includes('list') || article.keywords.includes('lists');
+
   return (
     <div
       id={`article-${article.id}`}
@@ -36,7 +38,7 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
       onDragEnd={onDragEnd}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, article)}
-      className={`transition-all duration-200 ${
+      className={`transition-all duration-200 ${isListArticle ? 'self-start w-full' : ''} ${
         isLoggedIn ? "cursor-grab active:cursor-grabbing" : ""
       } ${isDragging && draggedItemId === article.id ? "opacity-50" : "opacity-100"}`}
     >

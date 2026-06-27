@@ -6,7 +6,6 @@ import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import EditableMarkdown from "./EditableMarkdown";
 import { useRecommendations } from "@/hooks/useRecommendations";
-import { useContentsHeight } from "@/hooks/useContentsHeight";
 import ArticlesList from "./table-of-contents/ArticlesList";
 import ReadFilter from "./article/ReadFilter";
 import { useEffect, useState } from "react";
@@ -25,6 +24,7 @@ interface TableOfContentsProps {
   onFilterToggle?: (checked: boolean) => void;
   currentIssue?: string;
   searchQuery?: string;
+  tocHeight?: number;
 }
 
 const TableOfContents = ({ 
@@ -39,9 +39,10 @@ const TableOfContents = ({
   onFilterToggle,
   currentIssue: propCurrentIssue,
   searchQuery = "",
+  tocHeight = 400,
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
-  const maxHeight = useContentsHeight();
+  const maxHeight = tocHeight;
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   const [hasUnreadComments, setHasUnreadComments] = useState(false);
   const { updatedArticles } = useArticleUpdates();

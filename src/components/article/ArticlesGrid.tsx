@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { READ_STATE_CHANGED_EVENT } from "@/hooks/useArticleReads";
 import { toast } from "sonner";
 import { ArticleListDataProvider, ArticleListData } from "./ArticleListDataContext";
+import { useContentsHeight } from "@/hooks/useContentsHeight";
 
 interface ArticlesGridProps {
   articles: Article[];
@@ -121,14 +122,16 @@ const ArticlesGrid = ({
   // for calculating if there are any unread comments
   const allArticleIds = allArticles.map(a => a.id);
   const { counts: commentCounts, fetchCounts } = useArticleCommentCounts(allArticleIds);
+  const { cardHeight, tocHeight } = useContentsHeight(displayArticles.length);
 
   const listData = useMemo<ArticleListData>(() => ({
     commentCounts,
     readArticles,
     favorites,
+    cardHeight,
     toggleRead,
     toggleFavorite: onToggleFavorite,
-  }), [commentCounts, readArticles, favorites, toggleRead, onToggleFavorite]);
+  }), [commentCounts, readArticles, favorites, cardHeight, toggleRead, onToggleFavorite]);
 
   // Listen for comment updates to refresh the counts
   useEffect(() => {
@@ -161,6 +164,7 @@ const ArticlesGrid = ({
           onFilterToggle={onFilterToggle}
           currentIssue={currentIssue}
           searchQuery={searchQuery}
+          tocHeight={tocHeight}
         />
       </div>
 

@@ -29,8 +29,10 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
 
   // Comment + viewed counts are batch-fetched once for the whole list and
   // shared via context, so the card issues no per-card comment queries.
-  const { commentCounts } = useArticleListData();
+  const { commentCounts, cardHeight } = useArticleListData();
   const { commentCount = 0, viewedCommentCount } = commentCounts[article.id] ?? {};
+
+  const isListArticle = currentArticle.keywords.includes('list') || currentArticle.keywords.includes('lists');
 
   const isGif = currentArticle.imageUrl.toLowerCase().endsWith('.gif');
 
@@ -106,18 +108,22 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   const isDraft = currentArticle.draft;
 
   return (
-    <Card className={`h-full flex flex-col hover:shadow-md transition-shadow article-card relative ${isDraft ? 'draft-border' : ''}`} data-article-id={currentArticle.id}>
+    <Card
+      className={`${isListArticle ? 'h-auto' : 'h-full'} flex flex-col hover:shadow-md transition-shadow article-card relative ${isDraft ? 'draft-border' : ''} ${isListArticle ? 'list-article-card' : ''}`}
+      style={isListArticle && cardHeight ? { maxHeight: cardHeight } : undefined}
+      data-article-id={currentArticle.id}
+    >
       <ReadCheckbox articleId={currentArticle.id} />
       <FavoriteButton articleId={currentArticle.id} />
 
       <Link 
         to={`/article/${currentArticle.id}`}
-        className="block group"
+        className={`block group ${isListArticle ? 'flex-1 min-h-0 overflow-hidden' : ''}`}
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleArticleClick}
       >
-        <div className="hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg">
+        <div className={`hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg ${isListArticle ? 'h-full overflow-hidden flex flex-col' : ''}`}>
           <CardHeader className="p-0">
             <ArticleCardHeader 
               articleId={currentArticle.id}
@@ -127,7 +133,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
               getImageUrl={getImageUrl}
             />
           </CardHeader>
-          <CardContent className="pt-6 pb-0">
+          <CardContent className={`pt-6 pb-0 ${isListArticle ? 'flex-1 min-h-0 overflow-hidden' : ''}`}>
             <div className={`line-clamp-2 mb-2 prose-sm prose ${currentArticle.private ? 'border-b-2 border-b-red-600 pb-1' : ''}`}>
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
@@ -141,7 +147,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
               createdAt={currentArticle.createdAt}
               formatDate={formatDate}
             />
-            <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper">
+            <div className="text-muted-foreground mb-4 line-clamp-3 prose prose-sm max-w-none markdown-wrapper overflow-hidden">
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 components={customRenderers}

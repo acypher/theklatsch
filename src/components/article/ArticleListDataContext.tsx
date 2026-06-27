@@ -12,6 +12,8 @@ export interface ArticleListData {
   readArticles: Set<string>;
   /** Set of the current user's favorite article IDs (bulk-fetched once). */
   favorites: Set<string>;
+  /** Measured height of a standard article card in the first grid row. */
+  cardHeight: number;
   toggleRead: (articleId: string) => void;
   toggleFavorite: (articleId: string) => void;
 }
@@ -20,6 +22,7 @@ const FALLBACK: ArticleListData = {
   commentCounts: {},
   readArticles: new Set(),
   favorites: new Set(),
+  cardHeight: 380,
   toggleRead: () => {},
   toggleFavorite: () => {},
 };

@@ -100,3 +100,17 @@
   border: 2px dashed hsl(var(--muted-foreground) / 0.4);
   border-radius: 4px;
 }
+
+.list-article-card {
+  max-height: 452px;
+  overflow: hidden;
+}
+
+.list-article-card .markdown-wrapper :is(ul, ol, p, table) {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.list-article-card .markdown-wrapper :is(ul, ol, table) {
+  display: none;
+}
