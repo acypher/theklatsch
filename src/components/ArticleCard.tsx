@@ -68,8 +68,6 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   };
 
   const handleArticleClick = async () => {
-    sessionStorage.setItem('indexScrollY', window.scrollY.toString());
-    
     // Track the open for the current user
     if (isAuthenticated && user) {
       supabase

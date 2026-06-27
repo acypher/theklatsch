@@ -6,7 +6,6 @@ import KeywordBadge from "../KeywordBadge";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Article } from "@/lib/types";
-import { hardNavigate } from "@/lib/hardNavigate";
 
 interface ArticleHeaderProps {
   article: Article;
@@ -53,7 +52,7 @@ const ArticleHeader = ({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => hardNavigate(`/article/${article.id}/edit`)}
+              onClick={() => { window.location.href = `/article/${article.id}/edit`; }}
             >
               <Pencil size={16} className="mr-2" />
               Edit

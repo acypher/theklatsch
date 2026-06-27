@@ -13,7 +13,6 @@ import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
 import { useArticleUpdates } from "@/hooks/useArticleUpdates";
-import { hardNavigate } from "@/lib/hardNavigate";
 
 interface ArticleDetailProps {
   article?: Article | null;
@@ -69,7 +68,7 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   };
 
   const handleNavigateBack = () => {
-    hardNavigate("/");
+    window.location.href = "/";
   };
 
   if (loading) {

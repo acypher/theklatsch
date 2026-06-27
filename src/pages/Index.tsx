@@ -20,9 +20,7 @@ import { useArticles } from "@/hooks/useArticles";
 import { useAllArticlesForSearch } from "@/hooks/useAllArticlesForSearch";
 
 const Index = () => {
-  const [currentIssue, setCurrentIssue] = useState<string>(
-    () => sessionStorage.getItem('currentIssue') || ""
-  );
+  const [currentIssue, setCurrentIssue] = useState<string>("");
   const [showMaintenancePage, setShowMaintenancePage] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [wholeWords, setWholeWords] = useState(false);
@@ -44,24 +42,6 @@ const Index = () => {
 
   // Check if this is a password reset request
   const isPasswordReset = searchParams.has('access_token') && searchParams.has('refresh_token');
-
-  // Restore scroll position on mount
-  useEffect(() => {
-    const scrollY = parseInt(sessionStorage.getItem('indexScrollY') || '0', 10);
-    if (scrollY > 0) {
-      sessionStorage.removeItem('indexScrollY');
-      // Wait for articles to render before restoring scroll
-      if (!loading && articles.length > 0) {
-        requestAnimationFrame(() => {
-          setTimeout(() => window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior }), 50);
-        });
-      }
-    }
-  }, [loading, articles.length]);
-
-  useEffect(() => {
-    if (currentIssue) sessionStorage.setItem('currentIssue', currentIssue);
-  }, [currentIssue]);
 
   useEffect(() => {
     document.title = "The Klatsch";

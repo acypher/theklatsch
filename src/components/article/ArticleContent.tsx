@@ -5,7 +5,6 @@ import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { hardNavigate } from "@/lib/hardNavigate";
 
 interface ArticleContentProps {
   description: string;
@@ -44,7 +43,7 @@ const ArticleContent = ({ description, moreContent, summary, sourceUrl, onBackCl
     if (onBackClick) {
       onBackClick();
     } else {
-      hardNavigate("/");
+      window.location.href = "/";
     }
   };
   

@@ -18,7 +18,6 @@ export const useAllArticlesForSearch = () => {
       return (data || []).map(mapArticleFromDb);
     },
     staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000, // 30 minutes - keep cached data to avoid reload on back-navigation
   });
 
   return { allArticlesForSearch };
