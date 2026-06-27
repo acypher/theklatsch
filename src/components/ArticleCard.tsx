@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { isVideoUrl } from "@/lib/search";
 import { useArticleOpens } from "@/hooks/useArticleOpens";
 import { useArticleListData } from "./article/ArticleListDataContext";
+import { getListCardMaxHeight } from "@/hooks/useContentsHeight";
 
 interface ArticleCardProps {
   article: Article;
@@ -110,7 +111,7 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
   return (
     <Card
       className={`${isListArticle ? 'h-auto' : 'h-full'} flex flex-col hover:shadow-md transition-shadow article-card relative ${isDraft ? 'draft-border' : ''} ${isListArticle ? 'list-article-card' : ''}`}
-      style={isListArticle && cardHeight ? { maxHeight: cardHeight } : undefined}
+      style={isListArticle && cardHeight ? { maxHeight: getListCardMaxHeight(cardHeight) } : undefined}
       data-article-id={currentArticle.id}
     >
       <ReadCheckbox articleId={currentArticle.id} />

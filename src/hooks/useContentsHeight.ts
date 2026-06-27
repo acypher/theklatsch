@@ -10,6 +10,13 @@ const DEFAULT_CARD_HEIGHT = 380;
 const MIN_CARD_HEIGHT = 300;
 const TOC_BUFFER = 20;
 
+/** List article cards may grow to 1.5× the height of a standard card. */
+export const LIST_CARD_HEIGHT_MULTIPLIER = 1.5;
+export const LIST_CARD_MAX_HEIGHT_FALLBACK = Math.round(452 * LIST_CARD_HEIGHT_MULTIPLIER);
+
+export const getListCardMaxHeight = (standardCardHeight: number): number =>
+  Math.round(standardCardHeight * LIST_CARD_HEIGHT_MULTIPLIER);
+
 export const useContentsHeight = (articleCount = 0): ContentsHeights => {
   const [heights, setHeights] = useState<ContentsHeights>({
     cardHeight: DEFAULT_CARD_HEIGHT,
