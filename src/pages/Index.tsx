@@ -74,7 +74,11 @@ const Index = () => {
     };
 
     loadCurrentIssue();
-  }, [isAuthenticated]);
+    // Intentionally run once on mount only: this doesn't read isAuthenticated,
+    // and re-running it when auth resolves just duplicates a Supabase round
+    // trip that the article list is waiting on.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     document.title = "The Klatsch";
