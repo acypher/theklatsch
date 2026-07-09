@@ -114,6 +114,26 @@
       outline-offset: 4px;
     }
 
+    .page-note {
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .page-note p {
+      margin: 0;
+    }
+
+    .page-note a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
+
     @media (max-width: 620px) {
       main {
         width: min(100% - 20px, 980px);
@@ -157,6 +177,11 @@
       <button class="dot" type="button" aria-label="Show slide 4" aria-current="false"></button>
       <button class="dot" type="button" aria-label="Show slide 5" aria-current="false"></button>
     </nav>
+
+    <footer class="page-note">
+      <p>Note: This web page was created from a single prompt to Codex.</p>
+      <p><a href="hotGlueChat.html">See the Chat that created this page</a></p>
+    </footer>
   </main>
 
   <script>
