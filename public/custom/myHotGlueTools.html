@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My hot glue tools</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #202124;
+      --muted: #6b7280;
+      --paper: #faf7f2;
+      --panel: #ffffff;
+      --accent: #1f7a72;
+      --accent-soft: #d7efeb;
+      --shadow: 0 18px 45px rgba(38, 34, 30, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    main {
+      width: min(980px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 42px 0 56px;
+    }
+
+    h1 {
+      margin: 0 0 28px;
+      font-size: clamp(2.1rem, 7vw, 4.2rem);
+      font-weight: 500;
+      line-height: 1.05;
+      text-align: center;
+    }
+
+    .slideshow {
+      overflow: hidden;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: var(--panel);
+      border: 1px solid rgba(32, 33, 36, 0.12);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+    }
+
+    .slides {
+      height: 100%;
+      position: relative;
+    }
+
+    .slide {
+      align-items: center;
+      background: #f3f0ea;
+      display: flex;
+      inset: 0;
+      justify-content: center;
+      opacity: 0;
+      position: absolute;
+      transition: opacity 300ms ease;
+      width: 100%;
+    }
+
+    .slide.is-active {
+      opacity: 1;
+      z-index: 1;
+    }
+
+    .slide img {
+      display: block;
+      height: 100%;
+      object-fit: contain;
+      width: 100%;
+    }
+
+    .dots {
+      align-items: center;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 22px;
+    }
+
+    .dot {
+      appearance: none;
+      background: #bbb3a8;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      height: 14px;
+      padding: 0;
+      transition: background 180ms ease, transform 180ms ease;
+      width: 14px;
+    }
+
+    .dot[aria-current="true"] {
+      background: var(--accent);
+      transform: scale(1.18);
+    }
+
+    .dot:focus-visible {
+      outline: 3px solid var(--accent-soft);
+      outline-offset: 4px;
+    }
+
+    @media (max-width: 620px) {
+      main {
+        width: min(100% - 20px, 980px);
+        padding-top: 24px;
+      }
+
+      .slideshow {
+        aspect-ratio: 3 / 4;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>My hot glue tools</h1>
+
+    <section class="slideshow" aria-label="My hot glue tools slideshow">
+      <div class="slides">
+        <figure class="slide is-active">
+          <img src="myHotGlueTools/01.jpeg" alt="Hot glue tool 1">
+        </figure>
+        <figure class="slide">
+          <img src="myHotGlueTools/02.jpeg" alt="Hot glue tool 2">
+        </figure>
+        <figure class="slide">
+          <img src="myHotGlueTools/03.jpeg" alt="Hot glue tool 3">
+        </figure>
+        <figure class="slide">
+          <img src="myHotGlueTools/04.jpeg" alt="Hot glue tool 4">
+        </figure>
+        <figure class="slide">
+          <img src="myHotGlueTools/05.jpeg" alt="Hot glue tool 5">
+        </figure>
+      </div>
+    </section>
+
+    <nav class="dots" aria-label="Choose slide">
+      <button class="dot" type="button" aria-label="Show slide 1" aria-current="true"></button>
+      <button class="dot" type="button" aria-label="Show slide 2" aria-current="false"></button>
+      <button class="dot" type="button" aria-label="Show slide 3" aria-current="false"></button>
+      <button class="dot" type="button" aria-label="Show slide 4" aria-current="false"></button>
+      <button class="dot" type="button" aria-label="Show slide 5" aria-current="false"></button>
+    </nav>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const dots = Array.from(document.querySelectorAll(".dot"));
+    const slideshow = document.querySelector(".slideshow");
+    let currentSlide = 0;
+    let autoAdvanceId = window.setInterval(autoAdvance, 3000);
+
+    function showSlide(index) {
+      currentSlide = Math.max(0, Math.min(index, slides.length - 1));
+
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("is-active", slideIndex === currentSlide);
+      });
+
+      dots.forEach((dot, dotIndex) => {
+        dot.setAttribute("aria-current", dotIndex === currentSlide ? "true" : "false");
+      });
+    }
+
+    function stopAutoAdvance() {
+      if (autoAdvanceId) {
+        window.clearInterval(autoAdvanceId);
+        autoAdvanceId = null;
+      }
+    }
+
+    function autoAdvance() {
+      if (currentSlide >= slides.length - 1) {
+        stopAutoAdvance();
+        return;
+      }
+
+      showSlide(currentSlide + 1);
+    }
+
+    slideshow.addEventListener("click", () => {
+      stopAutoAdvance();
+
+      if (currentSlide < slides.length - 1) {
+        showSlide(currentSlide + 1);
+      }
+    });
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", (event) => {
+        event.stopPropagation();
+        stopAutoAdvance();
+        showSlide(index);
+      });
+    });
+  </script>
+</body>
+</html>
