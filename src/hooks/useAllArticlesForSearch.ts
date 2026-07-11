@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Article } from '@/lib/types';
 import { mapArticleFromDb } from '@/lib/data/utils';
 
-export const useAllArticlesForSearch = () => {
+export const useAllArticlesForSearch = (enabled = false) => {
   const { data: allArticlesForSearch = [] } = useQuery<Article[]>({
     queryKey: ['articles', 'all'],
     queryFn: async () => {
@@ -18,6 +18,7 @@ export const useAllArticlesForSearch = () => {
       return (data || []).map(mapArticleFromDb);
     },
     staleTime: 5 * 60 * 1000,
+    enabled,
   });
 
   return { allArticlesForSearch };

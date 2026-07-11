@@ -42,7 +42,7 @@ const Navbar = ({
   showFavoritesOnly = false,
   onFavoritesToggle
 }: NavbarProps) => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, loading: authLoading } = useAuth();
   const location = useLocation();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
@@ -209,7 +209,9 @@ const handleIssueChange = async (issueText: string) => {
               onToggle={onFilterToggle}
             />
           )}
-          {user ? (
+          {authLoading ? (
+            <div className="h-9 w-24 animate-pulse bg-secondary rounded" aria-hidden="true" />
+          ) : user ? (
             <>
               {!hideWriteButton && (
                 <Button 

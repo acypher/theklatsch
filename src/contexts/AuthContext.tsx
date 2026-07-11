@@ -110,11 +110,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let initialSessionHandled = false;
     let isMounted = true;
 
+    const clearBootstrapTimeout = () => window.clearTimeout(bootstrapTimeout);
+
     const handleSession = (currentSession: Session | null, markInitialSessionHandled = true) => {
-      if (!isMounted || (markInitialSessionHandled && initialSessionHandled)) return;
+      if (!isMounted) return;
+      // Never downgrade auth after bootstrap succeeded (e.g. late timeout firing).
+      if (initialSessionHandled && !currentSession) return;
+      if (markInitialSessionHandled && initialSessionHandled) return;
 
       if (markInitialSessionHandled) {
         initialSessionHandled = true;
+        clearBootstrapTimeout();
       }
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -134,6 +140,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         if (event === 'INITIAL_SESSION') {
+          clearBootstrapTimeout();
           handleSession(currentSession);
           return;
         }
@@ -153,23 +160,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    const bootstrapTimeout = window.setTimeout(() => {
-      handleSession(null, false);
+    let bootstrapTimeout = window.setTimeout(() => {
+      if (!initialSessionHandled) {
+        handleSession(null);
+      }
     }, AUTH_BOOTSTRAP_TIMEOUT_MS);
 
     // THEN check for existing session (whichever initial source resolves first wins)
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      window.clearTimeout(bootstrapTimeout);
+      clearBootstrapTimeout();
       handleSession(currentSession);
     }).catch((error) => {
       console.error("Error getting initial auth session:", error);
-      window.clearTimeout(bootstrapTimeout);
-      handleSession(null, false);
+      clearBootstrapTimeout();
+      if (!initialSessionHandled) {
+        handleSession(null);
+      }
     });
 
     return () => {
       isMounted = false;
-      window.clearTimeout(bootstrapTimeout);
+      clearBootstrapTimeout();
       subscription.unsubscribe();
     };
   }, []);

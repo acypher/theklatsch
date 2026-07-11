@@ -12,7 +12,7 @@ import ArticleImage from "./article/ArticleImage";
 import ArticleContent from "./article/ArticleContent";
 import DeleteConfirmationDialog from "./article/DeleteConfirmationDialog";
 import { getImageUrl } from "./article/ImageUtils";
-import { useArticleUpdates } from "@/hooks/useArticleUpdates";
+import { markArticleAsViewed } from "@/hooks/useArticleUpdates";
 
 interface ArticleDetailProps {
   article?: Article | null;
@@ -27,16 +27,15 @@ const ArticleDetail = ({ article: propArticle, loading: propLoading, currentIssu
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { isAuthenticated } = useAuth();
-  const { markAsViewed } = useArticleUpdates();
   const article = propArticle || null;
   const loading = propLoading ?? true;
 
   // Mark article as viewed when the article page loads
   useEffect(() => {
     if (article && isAuthenticated) {
-      markAsViewed(article.id);
+      markArticleAsViewed(article.id);
     }
-  }, [article, isAuthenticated, markAsViewed]);
+  }, [article, isAuthenticated]);
 
   // GIF control is now handled by the GifPlayer component inside ArticleImage
 

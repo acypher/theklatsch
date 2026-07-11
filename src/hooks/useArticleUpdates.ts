@@ -9,6 +9,23 @@ interface ArticleUpdate {
   updated_by: string | null;
 }
 
+export const markArticleAsViewed = async (articleId: string) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from('article_update_views')
+      .upsert({
+        article_id: articleId,
+        user_id: user.id,
+        viewed_at: new Date().toISOString()
+      }, { onConflict: 'article_id,user_id' });
+  } catch (error) {
+    console.error('Error marking article as viewed:', error);
+  }
+};
+
 export const useArticleUpdates = () => {
   const [articleUpdates, setArticleUpdates] = useState<ArticleUpdate[]>([]);
   const [userViews, setUserViews] = useState<Map<string, string>>(new Map());

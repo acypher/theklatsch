@@ -37,7 +37,9 @@ const Index = () => {
 
   // React Query hooks for articles
   const { articles, isLoading: articlesLoading } = useArticles(currentIssue);
-  const { allArticlesForSearch } = useAllArticlesForSearch();
+  const { allArticlesForSearch } = useAllArticlesForSearch(
+    searchQuery.trim() !== '' || showFavoritesOnly
+  );
   const loading = !currentIssue || articlesLoading;
 
   // Check if this is a password reset request
