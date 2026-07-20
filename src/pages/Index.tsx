@@ -31,7 +31,7 @@ const Index = () => {
 
   const { readArticles, filterEnabled, setFilterEnabled } = useReadArticles(isAuthenticated, authLoading);
   const { allFavorites, toggleFavorite } = useArticleFavorites();
-  const { preferences } = useUserPreferences();
+  const { preferences, loading: preferencesLoading, updatePreferences } = useUserPreferences();
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [archiveResults, setArchiveResults] = useState<ArchiveSearchResult[]>([]);
 
@@ -192,6 +192,16 @@ const Index = () => {
                 onKeywordClick={handleKeywordClick}
                 favorites={allFavorites}
                 onToggleFavorite={toggleFavorite}
+                showListArticles={preferences.show_list_articles}
+                onShowListArticlesChange={
+                  isAuthenticated && !preferencesLoading
+                    ? (checked) => {
+                        if (checked) {
+                          void updatePreferences({ show_list_articles: true });
+                        }
+                      }
+                    : undefined
+                }
               />
             </div>
             <StorefrontImage />

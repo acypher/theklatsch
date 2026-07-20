@@ -31,6 +31,8 @@ interface ArticlesGridProps {
   onKeywordClick?: (keyword: string) => void;
   favorites: Set<string>;
   onToggleFavorite: (articleId: string) => void;
+  showListArticles?: boolean;
+  onShowListArticlesChange?: (checked: boolean) => void;
 }
 
 const ArticlesGrid = ({ 
@@ -51,7 +53,9 @@ const ArticlesGrid = ({
   searchQuery = "",
   onKeywordClick,
   favorites,
-  onToggleFavorite
+  onToggleFavorite,
+  showListArticles,
+  onShowListArticlesChange,
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const { user } = useAuth();
@@ -165,6 +169,8 @@ const ArticlesGrid = ({
           currentIssue={currentIssue}
           searchQuery={searchQuery}
           tocHeight={tocHeight}
+          showListArticles={showListArticles}
+          onShowListArticlesChange={onShowListArticlesChange}
         />
       </div>
 

@@ -1,6 +1,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Article } from "@/lib/types";
 import { BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -25,6 +27,8 @@ interface TableOfContentsProps {
   currentIssue?: string;
   searchQuery?: string;
   tocHeight?: number;
+  showListArticles?: boolean;
+  onShowListArticlesChange?: (checked: boolean) => void;
 }
 
 const TableOfContents = ({ 
@@ -40,12 +44,15 @@ const TableOfContents = ({
   currentIssue: propCurrentIssue,
   searchQuery = "",
   tocHeight = 400,
+  showListArticles = true,
+  onShowListArticlesChange,
 }: TableOfContentsProps) => {
   const isMobile = useIsMobile();
   const maxHeight = tocHeight;
   const [issueKey, setIssueKey] = useState<string | undefined>(undefined);
   const [hasUnreadComments, setHasUnreadComments] = useState(false);
   const { updatedArticles } = useArticleUpdates();
+  const showListArticlesToggle = Boolean(onShowListArticlesChange) && !showListArticles;
   
   // Filter articles if hideRead is true
   const displayArticles = hideRead 
@@ -113,8 +120,11 @@ const TableOfContents = ({
 
   // Calculate heights based on maxHeight
   const headerHeight = 56; // Approximate height of the card header
-  const contentAreaHeight = maxHeight - headerHeight;
-  const articleListHeight = hasRecommendations ? `${Math.floor(contentAreaHeight * 0.7)}px` : '100%';
+  const listArticlesToggleHeight = showListArticlesToggle ? 44 : 0;
+  const contentAreaHeight = maxHeight - headerHeight - listArticlesToggleHeight;
+  const articleListHeight = hasRecommendations
+    ? `${Math.floor(contentAreaHeight * 0.7)}px`
+    : `${contentAreaHeight}px`;
   const recommendationsHeight = hasRecommendations ? `${Math.floor(contentAreaHeight * 0.3)}px` : '0';
 
   return (
@@ -183,6 +193,28 @@ const TableOfContents = ({
                 disabled={isSaving}
               />
             </ScrollArea>
+          </div>
+        )}
+
+        {showListArticlesToggle && (
+          <div className="mt-3 flex-shrink-0 border-t border-border pt-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="toc-show-list-articles"
+                checked={false}
+                onCheckedChange={(checked) => {
+                  if (checked === true && onShowListArticlesChange) {
+                    onShowListArticlesChange(true);
+                  }
+                }}
+              />
+              <Label
+                htmlFor="toc-show-list-articles"
+                className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Show list articles
+              </Label>
+            </div>
           </div>
         )}
       </CardContent>
