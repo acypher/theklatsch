@@ -14,7 +14,7 @@ export const useUserPreferences = () => {
   const [preferences, setPreferences] = useState<UserPreferences>({
     hide_read_articles: false,
     auto_mark_read: false,
-    show_list_articles: false,
+    show_list_articles: true,
   });
   const [loading, setLoading] = useState(true);
 

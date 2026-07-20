@@ -28,8 +28,9 @@ const Profile = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   
   // Local state for preferences (only saved on "Save Changes")
+  // UI uses "Hide 'list' articles"; stored preference remains show_list_articles.
   const [localAutoMarkRead, setLocalAutoMarkRead] = useState(preferences.auto_mark_read);
-  const [localShowListArticles, setLocalShowListArticles] = useState(preferences.show_list_articles);
+  const [localHideListArticles, setLocalHideListArticles] = useState(!preferences.show_list_articles);
   
   const navigate = useNavigate();
 
@@ -41,7 +42,7 @@ const Profile = () => {
   // Sync local state when data loads
   useEffect(() => {
     setLocalAutoMarkRead(preferences.auto_mark_read);
-    setLocalShowListArticles(preferences.show_list_articles);
+    setLocalHideListArticles(!preferences.show_list_articles);
   }, [preferences]);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ const Profile = () => {
     setDisplayName(profile?.display_name || "");
     setUsername(profile?.username || "");
     setLocalAutoMarkRead(preferences.auto_mark_read);
-    setLocalShowListArticles(preferences.show_list_articles);
+    setLocalHideListArticles(!preferences.show_list_articles);
     setNewPassword("");
     setConfirmPassword("");
     navigate("/");
@@ -136,12 +137,12 @@ const Profile = () => {
       // Save reading preferences only if changed
       const preferencesChanged = 
         localAutoMarkRead !== preferences.auto_mark_read ||
-        localShowListArticles !== preferences.show_list_articles;
+        localHideListArticles !== !preferences.show_list_articles;
       
       if (preferencesChanged) {
         await updatePreferences({
           auto_mark_read: localAutoMarkRead,
-          show_list_articles: localShowListArticles,
+          show_list_articles: !localHideListArticles,
         });
         changesMade = true;
       }
@@ -286,20 +287,20 @@ const Profile = () => {
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <Checkbox 
-                  id="show-list-articles"
-                  checked={localShowListArticles}
+                  id="hide-list-articles"
+                  checked={localHideListArticles}
                   onCheckedChange={(checked) => {
                     if (typeof checked === 'boolean') {
-                      setLocalShowListArticles(checked);
+                      setLocalHideListArticles(checked);
                     }
                   }}
                 />
-                <Label htmlFor="show-list-articles" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Show 'list' articles
+                <Label htmlFor="hide-list-articles" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Hide 'list' articles
                 </Label>
               </div>
               <p className="text-xs text-muted-foreground">
-                When enabled, articles with the 'list' keyword will be shown with every issue. These are recurring reference articles that appear across all monthly issues.
+                When enabled, articles with the 'list' keyword are hidden from each issue. These are recurring reference articles that appear across all monthly issues.
               </p>
             </div>
           </CardContent>
