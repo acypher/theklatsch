@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import CreateArticle from "./pages/CreateArticle";
@@ -16,45 +16,54 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
+const RootLayout = () => (
+  <AuthProvider>
+    <Toaster />
+    <Outlet />
+  </AuthProvider>
+);
+
+const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: [
+      { path: "/auth", element: <Auth /> },
+      { path: "/", element: <Index /> },
+      {
+        path: "/create",
+        element: (
+          <ProtectedRoute>
+            <CreateArticle />
+          </ProtectedRoute>
+        ),
+      },
+      { path: "/article/:id", element: <ArticleView /> },
+      {
+        path: "/article/:id/edit",
+        element: (
+          <ProtectedRoute>
+            <EditArticle />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      { path: "/image", element: <ImageDisplay /> },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+]);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Toaster />
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<Index />} />
-            <Route
-              path="/create"
-              element={
-                <ProtectedRoute>
-                  <CreateArticle />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/article/:id" element={<ArticleView />} />
-            <Route
-              path="/article/:id/edit"
-              element={
-                <ProtectedRoute>
-                  <EditArticle />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/image" element={<ImageDisplay />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </TooltipProvider>
   </QueryClientProvider>
 );

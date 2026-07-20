@@ -1,11 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useNavigate, useBlocker } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +43,48 @@ const Profile = () => {
   const [localHideListArticles, setLocalHideListArticles] = useState(!preferences.show_list_articles);
   
   const navigate = useNavigate();
+  const bypassBlockerRef = useRef(false);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return (
+      displayName !== (profile?.display_name || "") ||
+      username !== (profile?.username || "") ||
+      localAutoMarkRead !== preferences.auto_mark_read ||
+      localHideListArticles !== !preferences.show_list_articles ||
+      newPassword !== "" ||
+      confirmPassword !== ""
+    );
+  }, [
+    displayName,
+    username,
+    profile?.display_name,
+    profile?.username,
+    localAutoMarkRead,
+    localHideListArticles,
+    preferences.auto_mark_read,
+    preferences.show_list_articles,
+    newPassword,
+    confirmPassword,
+  ]);
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !bypassBlockerRef.current &&
+      hasUnsavedChanges &&
+      currentLocation.pathname !== nextLocation.pathname
+  );
+
+  // Warn on tab close / refresh when there are unsaved edits
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   // Load current issue for admin dialog
   useEffect(() => {
@@ -52,14 +104,16 @@ const Profile = () => {
     }
   }, [profile]);
 
+  const leaveWithoutSaving = useCallback(() => {
+    bypassBlockerRef.current = true;
+    if (blocker.state === "blocked") {
+      blocker.proceed();
+    } else {
+      navigate("/");
+    }
+  }, [blocker, navigate]);
+
   const handleCancel = () => {
-    // Reset all local state to original values
-    setDisplayName(profile?.display_name || "");
-    setUsername(profile?.username || "");
-    setLocalAutoMarkRead(preferences.auto_mark_read);
-    setLocalHideListArticles(!preferences.show_list_articles);
-    setNewPassword("");
-    setConfirmPassword("");
     navigate("/");
   };
 
@@ -114,14 +168,12 @@ const Profile = () => {
     }
   };
 
-  const handleSaveAll = async () => {
+  const saveChanges = async (): Promise<boolean> => {
     setIsSubmitting(true);
     
     try {
-      // Track what was changed for appropriate feedback
       let changesMade = false;
 
-      // Save profile info only if changed
       const profileChanged = 
         displayName !== (profile?.display_name || "") ||
         username !== (profile?.username || "");
@@ -134,7 +186,6 @@ const Profile = () => {
         changesMade = true;
       }
 
-      // Save reading preferences only if changed
       const preferencesChanged = 
         localAutoMarkRead !== preferences.auto_mark_read ||
         localHideListArticles !== !preferences.show_list_articles;
@@ -147,18 +198,15 @@ const Profile = () => {
         changesMade = true;
       }
 
-      // Update password if changed
       if (newPassword || confirmPassword) {
         if (newPassword !== confirmPassword) {
           toast.error("Passwords do not match");
-          setIsSubmitting(false);
-          return;
+          return false;
         }
         
         if (newPassword.length < 6) {
           toast.error("Password must be at least 6 characters long");
-          setIsSubmitting(false);
-          return;
+          return false;
         }
         
         const { error } = await supabase.auth.updateUser({
@@ -167,8 +215,7 @@ const Profile = () => {
         
         if (error) {
           toast.error("Failed to update password: " + error.message);
-          setIsSubmitting(false);
-          return;
+          return false;
         }
         
         setNewPassword("");
@@ -176,18 +223,42 @@ const Profile = () => {
         changesMade = true;
       }
 
-      // Show appropriate feedback and navigate away
       if (changesMade) {
         toast.success("Changes saved successfully");
       } else {
         toast.info("No changes to save");
       }
-      navigate("/");
+      return true;
     } catch (error) {
       console.error("Error saving changes:", error);
       toast.error("Failed to save changes");
+      return false;
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveAll = async () => {
+    const saved = await saveChanges();
+    if (!saved) return;
+    bypassBlockerRef.current = true;
+    navigate("/");
+  };
+
+  const handleSaveAndLeave = async () => {
+    const saved = await saveChanges();
+    if (!saved) return;
+    bypassBlockerRef.current = true;
+    if (blocker.state === "blocked") {
+      blocker.proceed();
+    } else {
+      navigate("/");
+    }
+  };
+
+  const handleStay = () => {
+    if (blocker.state === "blocked") {
+      blocker.reset();
     }
   };
 
@@ -381,6 +452,51 @@ const Profile = () => {
           </Button>
         </div>
       </div>
+
+      <AlertDialog
+        open={blocker.state === "blocked"}
+        onOpenChange={(open) => {
+          if (!open) handleStay();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes on this page. Do you want to save them before leaving?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <AlertDialogCancel onClick={handleStay} disabled={isSubmitting}>
+              Keep editing
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={leaveWithoutSaving}
+              disabled={isSubmitting}
+            >
+              Don't save
+            </Button>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                void handleSaveAndLeave();
+              }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
