@@ -192,7 +192,8 @@ const Index = () => {
                 onKeywordClick={handleKeywordClick}
                 favorites={allFavorites}
                 onToggleFavorite={toggleFavorite}
-                showListArticles={preferences.show_list_articles}
+                // Guests always see list articles and never get a ToC toggle.
+                showListArticles={!isAuthenticated || preferences.show_list_articles}
                 onShowListArticlesChange={
                   isAuthenticated && !preferencesLoading
                     ? (checked) => {
