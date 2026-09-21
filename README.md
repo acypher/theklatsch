@@ -76,15 +76,20 @@ Production is hosted from InMotion cPanel at `/public_html`, with source code in
 
 The article media Upload button accepts JPEG, PNG, GIF, and WebP images up to
 5 MB, and MP4, WebM, Ogg, and MOV videos up to 50 MB. MP4 with H.264 video
-and AAC audio is recommended for broad browser compatibility. Files are stored
-in the existing `article-images` bucket and their URLs in the existing article
-media field. Article pages and cards show videos paused with native controls.
+and AAC audio is recommended for broad browser compatibility. Videos are stored in InMotion's
+`public_html/videos/` folder; images remain in Supabase's `article-images`
+bucket. Article pages and cards show videos paused with native controls.
 
-Before deploying this feature, apply
-`supabase/migrations/20260921000000_allow_article_videos.sql` to the production
-Supabase database. It extends any existing bucket MIME allowlist and raises any
-lower bucket size cap to 50 MB without changing access policies. The project's
-global Storage file-size limit must also permit 50 MB uploads.
+`public/api/upload-video.php` verifies the user's Supabase login, validates the
+file's actual MIME type and size, and saves it under a random filename. The
+production build generates its authentication configuration using the existing
+Supabase URL and publishable key. No service-role key is needed. PHP with cURL
+and Fileinfo must be enabled on InMotion. `public/api/.user.ini` sets a 50 MB
+upload limit with a 52 MB request limit.
+
+The deployment copies the video directory's protection rules but leaves uploaded
+videos alone. Do not enable a deployment option that wipes `public_html/`.
+No Supabase storage migration is needed for video uploads.
 
 Browser regression checks: `npx playwright install chromium`, then
 `npx playwright test`. These tests use the real upload/display components with

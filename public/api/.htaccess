@@ -1,0 +1,5 @@
+Options -Indexes
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+<FilesMatch "^(upload-config\.php|\.user\.ini)$">
+  Require all denied
+</FilesMatch>

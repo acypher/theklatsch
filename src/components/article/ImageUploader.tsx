@@ -39,32 +39,41 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
 
     try {
       setUploading(true);
-      const fileExt = ARTICLE_MEDIA_TYPES[file.type];
-      // Use a UUID-like filename to prevent path traversal attacks
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('article-images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          contentType: file.type,
-          upsert: false // Prevent overwrites of existing files
+      let publicUrl: string;
+      if (file.type.startsWith('video/')) {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) throw new Error('Please sign in again before uploading.');
+        const body = new FormData();
+        body.append('video', file);
+        const response = await fetch('/api/upload-video.php', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body,
         });
-
-      if (uploadError) {
-        throw uploadError;
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.url) {
+          throw new Error(result?.error || 'Video upload failed. Please try again.');
+        }
+        publicUrl = new URL(result.url, window.location.origin).href;
+      } else {
+        const fileExt = ARTICLE_MEDIA_TYPES[file.type];
+        const filePath = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('article-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            contentType: file.type,
+            upsert: false,
+          });
+        if (uploadError) throw uploadError;
+        publicUrl = supabase.storage.from('article-images').getPublicUrl(filePath).data.publicUrl;
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('article-images')
-        .getPublicUrl(filePath);
 
       onImageUpload(publicUrl);
       toast.success(`${file.type.startsWith('video/') ? 'Video' : 'Image'} uploaded successfully`);
     } catch (error) {
       console.error('Error uploading media:', error);
-      toast.error('Failed to upload image or video');
+      toast.error(error instanceof Error ? error.message : 'Failed to upload image or video');
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
