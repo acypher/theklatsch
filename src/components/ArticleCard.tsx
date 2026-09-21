@@ -12,7 +12,7 @@ import ArticleCardFooter from "./article/ArticleCardFooter";
 import ReadCheckbox from './article/ReadCheckbox';
 import FavoriteButton from './article/FavoriteButton';
 import { useAuth } from "@/contexts/AuthContext";
-import { isVideoUrl } from "@/lib/search";
+import { isArticleVideo } from "@/lib/articleMedia";
 import { useArticleOpens } from "@/hooks/useArticleOpens";
 import { useArticleListData } from "./article/ArticleListDataContext";
 import { getListCardMaxHeight } from "@/hooks/useContentsHeight";
@@ -117,6 +117,18 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
       <ReadCheckbox articleId={currentArticle.id} />
       <FavoriteButton articleId={currentArticle.id} />
 
+      {isArticleVideo(currentArticle.imageUrl) && (
+        <CardHeader className="p-0">
+          <ArticleCardHeader
+            articleId={currentArticle.id}
+            imageUrl={currentArticle.imageUrl}
+            title={currentArticle.title}
+            isGif={isGif}
+            getImageUrl={getImageUrl}
+          />
+        </CardHeader>
+      )}
+
       <Link 
         to={`/article/${currentArticle.id}`}
         className={`block group ${isListArticle ? 'flex-1 min-h-0 overflow-hidden' : ''}`}
@@ -125,15 +137,17 @@ const ArticleCard = ({ article, onKeywordClick }: ArticleCardProps) => {
         onClick={handleArticleClick}
       >
         <div className={`hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors rounded-lg ${isListArticle ? 'h-full overflow-hidden flex flex-col' : ''}`}>
-          <CardHeader className="p-0">
-            <ArticleCardHeader 
-              articleId={currentArticle.id}
-              imageUrl={currentArticle.imageUrl}
-              title={currentArticle.title}
-              isGif={isGif}
-              getImageUrl={getImageUrl}
-            />
-          </CardHeader>
+          {!isArticleVideo(currentArticle.imageUrl) && (
+            <CardHeader className="p-0">
+              <ArticleCardHeader
+                articleId={currentArticle.id}
+                imageUrl={currentArticle.imageUrl}
+                title={currentArticle.title}
+                isGif={isGif}
+                getImageUrl={getImageUrl}
+              />
+            </CardHeader>
+          )}
           <CardContent className={`pt-6 pb-0 flex flex-col ${isListArticle ? 'flex-1 min-h-0 overflow-hidden' : ''}`}>
             <div className={`line-clamp-2 mb-2 prose-sm prose ${currentArticle.private ? 'border-b-2 border-b-red-600 pb-1' : ''}`}>
               <ReactMarkdown 

@@ -1,3 +1,5 @@
+import ArticleVideo from "./ArticleVideo";
+import { isArticleVideo } from "@/lib/articleMedia";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import GifPlayer from "@/components/GifPlayer";
 
@@ -14,7 +16,9 @@ const ArticleCardHeader = ({ articleId, imageUrl, title, isGif, getImageUrl }: A
 
   return (
     <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
-      {isGif ? (
+      {isArticleVideo(resolvedUrl) ? (
+        <ArticleVideo src={resolvedUrl} title={title} />
+      ) : isGif ? (
         <GifPlayer
           src={resolvedUrl}
           alt={title}

@@ -5,13 +5,11 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { ARTICLE_MEDIA_TYPES, getArticleMediaError } from '@/lib/articleMedia';
 
 interface ImageUploaderProps {
   onImageUpload: (imageUrl: string) => void;
 }
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
   const [uploading, setUploading] = useState(false);
@@ -20,25 +18,9 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
   // Use useRef instead of useState for DOM references
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateFile = (file: File): boolean => {
-    // Check file size
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error(`File size exceeds 5MB limit`);
-      return false;
-    }
-
-    // Check file type
-    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      toast.error(`File type ${file.type} is not supported`);
-      return false;
-    }
-
-    return true;
-  };
-
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!isAuthenticated) {
-      toast.error("You must be logged in to upload images");
+      toast.error("You must be logged in to upload images or videos");
       return;
     }
     
@@ -46,7 +28,9 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
     if (!file) return;
 
     // Validate file before uploading
-    if (!validateFile(file)) {
+    const validationError = getArticleMediaError(file);
+    if (validationError) {
+      toast.error(validationError);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -55,7 +39,7 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
 
     try {
       setUploading(true);
-      const fileExt = file.name.split('.').pop();
+      const fileExt = ARTICLE_MEDIA_TYPES[file.type];
       // Use a UUID-like filename to prevent path traversal attacks
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${fileName}`;
@@ -64,6 +48,7 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
         .from('article-images')
         .upload(filePath, file, {
           cacheControl: '3600',
+          contentType: file.type,
           upsert: false // Prevent overwrites of existing files
         });
 
@@ -76,10 +61,10 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
         .getPublicUrl(filePath);
 
       onImageUpload(publicUrl);
-      toast.success('Image uploaded successfully');
+      toast.success(`${file.type.startsWith('video/') ? 'Video' : 'Image'} uploaded successfully`);
     } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error('Failed to upload image');
+      console.error('Error uploading media:', error);
+      toast.error('Failed to upload image or video');
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -101,7 +86,7 @@ const ImageUploader = ({ onImageUpload }: ImageUploaderProps) => {
         ref={fileInputRef}
         type="file"
         id="imageUpload"
-        accept={ALLOWED_FILE_TYPES.join(',')}
+        accept={Object.keys(ARTICLE_MEDIA_TYPES).join(',')}
         onChange={handleImageUpload}
         className="hidden"
       />

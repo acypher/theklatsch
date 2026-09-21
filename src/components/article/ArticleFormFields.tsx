@@ -133,7 +133,7 @@ export const ImageField = () => {
   const { control, setValue } = useFormContext<ArticleFormValues>();
   
   const handleImageUpload = (imageUrl: string) => {
-    setValue('imageUrl', imageUrl);
+    setValue('imageUrl', imageUrl, { shouldDirty: true, shouldValidate: true });
   };
   
   return (
@@ -144,7 +144,7 @@ export const ImageField = () => {
         <FieldWrapper 
           name="imageUrl" 
           label="Article Image or Video"
-          description="Provide a URL or upload an image or video"
+          description="Provide a URL or upload an image (up to 5MB) or video (up to 50MB). MP4 is recommended; playback depends on the browser and video codec."
         >
           <div className="flex space-x-4 items-center">
             <Input

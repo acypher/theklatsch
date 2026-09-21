@@ -1,3 +1,5 @@
+import ArticleVideo from "./ArticleVideo";
+import { isArticleVideo } from "@/lib/articleMedia";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { DEFAULT_IMAGE_URL } from "@/utils/defaultImage";
 import GifPlayer from "@/components/GifPlayer";
@@ -19,7 +21,9 @@ const ArticleImage = ({ imageUrl, sourceUrl, title, getImageUrl }: ArticleImageP
   
   return (
     <AspectRatio ratio={16 / 9} className="overflow-hidden bg-muted/20">
-      {isGif ? (
+      {isArticleVideo(resolvedUrl) ? (
+        <ArticleVideo src={resolvedUrl} title={title} />
+      ) : isGif ? (
         <GifPlayer
           src={resolvedUrl}
           alt={title}
