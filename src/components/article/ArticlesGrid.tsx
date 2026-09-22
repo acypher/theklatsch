@@ -58,7 +58,10 @@ const ArticlesGrid = ({
   onShowListArticlesChange,
 }: ArticlesGridProps) => {
   const articleRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const cancelArticleHighlight = useRef<(() => void) | null>(null);
   const { user } = useAuth();
+
+  useEffect(() => () => cancelArticleHighlight.current?.(), []);
 
   // Toggle read state without a per-card query: optimistically broadcast the
   // change (useReadArticles updates the shared set on this event) then persist.
@@ -100,6 +103,7 @@ const ArticlesGrid = ({
   }, [user, readArticles]);
 
   const scrollToArticle = (articleId: string) => {
+    cancelArticleHighlight.current?.();
     const articleElement = articleRefs.current.get(articleId);
 
     if (articleElement) {
@@ -110,10 +114,52 @@ const ArticlesGrid = ({
 
       const y = articleElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
-      window.scrollTo({
-        top: y,
-        behavior: 'smooth'
-      });
+      const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const targetY = Math.max(0, Math.min(y, maxY));
+
+      // Use the browser's completion event, rather than a brief pause in movement.
+      // An outline makes the border bolder without changing the card's layout.
+      let frame: number | undefined;
+      let animation: Animation | undefined;
+      const highlightOnArrival = () => {
+        const card = articleElement.querySelector<HTMLElement>('.article-card');
+        animation = card?.animate(
+          [
+            { outline: '3px solid hsl(var(--primary))', outlineOffset: '-1px' },
+            { outline: '3px solid hsl(var(--primary))', outlineOffset: '-1px' },
+          ],
+          { duration: 1000 }
+        );
+      };
+      cancelArticleHighlight.current = () => {
+        document.removeEventListener('scrollend', highlightOnArrival);
+        if (frame !== undefined) window.cancelAnimationFrame(frame);
+        animation?.cancel();
+      };
+
+      if (Math.abs(window.scrollY - targetY) < 1) {
+        // No movement is needed, so the browser won't emit scrollend.
+        highlightOnArrival();
+        return;
+      }
+
+      if ('onscrollend' in document) {
+        document.addEventListener('scrollend', highlightOnArrival, { once: true });
+      } else {
+        // Older browsers must reach the destination and stop before highlighting.
+        let previousY = window.scrollY;
+        let stableFrames = 0;
+        const waitForArrival = () => {
+          stableFrames = Math.abs(window.scrollY - targetY) < 1 && window.scrollY === previousY
+            ? stableFrames + 1 : 0;
+          previousY = window.scrollY;
+          if (stableFrames >= 3) highlightOnArrival();
+          else frame = window.requestAnimationFrame(waitForArrival);
+        };
+        frame = window.requestAnimationFrame(waitForArrival);
+      }
+
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
     }
   };
 
@@ -189,6 +235,7 @@ const ArticlesGrid = ({
           onKeywordClick={onKeywordClick}
           ref={(el) => {
             if (el) articleRefs.current.set(article.id, el);
+            else articleRefs.current.delete(article.id);
           }}
         />
       ))}

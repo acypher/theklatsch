@@ -42,7 +42,7 @@ const DraggableArticle = forwardRef<HTMLDivElement, DraggableArticleProps>(({
         isLoggedIn ? "cursor-grab active:cursor-grabbing" : ""
       } ${isDragging && draggedItemId === article.id ? "opacity-50" : "opacity-100"}`}
     >
-      <div className={`relative ${isLoggedIn ? "hover:ring-2 hover:ring-primary/30 rounded-lg" : ""}`}>
+      <div className="relative hover:ring-2 hover:ring-primary/30 rounded-lg">
         {isLoggedIn && (
           <div className="absolute top-2 left-2 bg-background/90 rounded-full p-1 shadow-sm">
             <GripVertical className="h-4 w-4 text-muted-foreground" />
